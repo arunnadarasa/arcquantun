@@ -74,9 +74,9 @@ export function ArchitecturePage() {
             <dl className="mt-4 grid gap-1.5 text-[0.68rem]">
               {[
                 ["chain id", String(ARC_CHAIN_ID)],
-                ["rpc", ARC_RPC],
+                ["rpc", ARC_RPC_URL],
                 ["explorer", ARC_EXPLORER],
-                ["usdc", USDC_ADDRESS],
+                ["usdc", ARC_USDC_ADDRESS],
               ].map(([k, v]) => (
                 <div key={k} className="num break-all text-muted-foreground">
                   {k}: <span className="text-foreground">{v}</span>
