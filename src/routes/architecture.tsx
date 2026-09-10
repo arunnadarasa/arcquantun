@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { Shell, Pill } from "@/components/shell";
+import { Reveal } from "@/components/motion";
 import { ARC_CHAIN_ID, ARC_RPC_URL, ARC_EXPLORER, ARC_USDC_ADDRESS } from "@/lib/arc-chain";
 
 export const Route = createFileRoute("/architecture")({
@@ -58,12 +59,15 @@ function ArchitecturePage() {
           mistake one stage later.
         </p>
 
-        <pre className="mt-8 overflow-x-auto glass-card rounded-lg p-5 text-[0.7rem] leading-relaxed text-muted-foreground">
-          {DIAGRAM}
-        </pre>
+        <Reveal>
+          <pre className="mt-8 overflow-x-auto glass-card rounded-lg p-5 text-[0.7rem] leading-relaxed text-muted-foreground">
+            {DIAGRAM}
+          </pre>
+        </Reveal>
 
         <div className="mt-10 grid gap-4 md:grid-cols-2">
-          <article className="glass-card rounded-lg p-5">
+          <Reveal className="h-full">
+          <article className="glass-card h-full rounded-lg p-5">
             <h2 className="text-base font-semibold">Payment rail</h2>
             <ul className="mt-3 space-y-2 text-xs leading-relaxed text-muted-foreground">
               <li>— Circle developer-controlled wallets, one per agent.</li>
@@ -84,8 +88,10 @@ function ArchitecturePage() {
               ))}
             </dl>
           </article>
+          </Reveal>
 
-          <article className="glass-card rounded-lg p-5">
+          <Reveal className="h-full" delay={80}>
+          <article className="glass-card h-full rounded-lg p-5">
             <h2 className="text-base font-semibold">Evidence rail</h2>
             <ul className="mt-3 space-y-2 text-xs leading-relaxed text-muted-foreground">
               <li>
@@ -100,8 +106,10 @@ function ArchitecturePage() {
               <li>— The receipt hash is anchored on-chain, so the record behind a payment is fixed.</li>
             </ul>
           </article>
+          </Reveal>
         </div>
 
+        <Reveal>
         <article className="mt-6 glass-card rounded-lg p-5">
           <div className="flex flex-wrap items-center gap-2">
             <h2 className="text-base font-semibold">What this is not</h2>
@@ -124,6 +132,7 @@ function ArchitecturePage() {
             <li>— Arc Testnet only, with test USDC.</li>
           </ul>
         </article>
+        </Reveal>
       </section>
     </Shell>
   );
