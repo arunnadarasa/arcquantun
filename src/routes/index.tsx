@@ -178,6 +178,7 @@ function Index() {
                 <div className="mt-4 flex flex-wrap gap-2">
                   <button
                     onClick={() => {
+                      console.log("[run click]", p.id);
                       setSelected(p.id);
                       setResult(null);
                       mutation.mutate(p.id);
