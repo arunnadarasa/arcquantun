@@ -1,9 +1,94 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
+import { useState } from "react";
+import { useServerFn } from "@tanstack/react-start";
 import { Shell, Pill } from "@/components/shell";
 import { Reveal } from "@/components/motion";
 import { pathways } from "@/data/pathways";
 import { getRun, RUN_COMMIT } from "@/data/runs";
-import { gradeReceipt, receiptHash } from "@/lib/receipts";
+import { gradeReceipt } from "@/lib/receipts";
+import { sealPathwayReceipt } from "@/lib/exchange.functions";
+import type { ReceiptSeal } from "@/data/seal-info";
+
+function SealPanel({ pathwayId }: { pathwayId: string }) {
+  const seal = useServerFn(sealPathwayReceipt);
+  const [state, setState] = useState<
+    | { status: "idle" }
+    | { status: "working" }
+    | { status: "done"; digest: string; seal: ReceiptSeal }
+    | { status: "error"; message: string }
+  >({ status: "idle" });
+
+  return (
+    <div className="mt-4 rounded border border-border bg-surface-2/40 p-3">
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <div className="text-[0.65rem] uppercase tracking-[0.14em] text-muted-foreground">
+          Post-quantum seal
+        </div>
+        {state.status === "done" ? (
+          <Pill tone={state.seal.verified ? "pass" : "fail"}>
+            {state.seal.verified ? "signature verified" : "verification failed"}
+          </Pill>
+        ) : null}
+      </div>
+      {state.status === "done" ? (
+        <div className="num mt-2 grid gap-1 text-[0.68rem] text-muted-foreground sm:grid-cols-2">
+          <span className="sm:col-span-2 break-all">
+            digest: <span className="text-foreground">{state.digest}</span>
+          </span>
+          <span>
+            scheme: <span className="text-foreground">{state.seal.scheme}</span>
+          </span>
+          <span>
+            standard: <span className="text-foreground">{state.seal.standard}</span>
+          </span>
+          <span>
+            public key: <span className="text-foreground">{state.seal.publicKeyFingerprint}</span>
+          </span>
+          <span>
+            signature: <span className="text-foreground">{state.seal.signatureFingerprint}</span>
+          </span>
+          <span>
+            signature bytes:{" "}
+            <span className="text-foreground">{state.seal.signatureBytes}</span>
+          </span>
+          <span>
+            key source: <span className="text-foreground">{state.seal.keySource}</span>
+          </span>
+        </div>
+      ) : (
+        <p className="mt-1.5 text-xs leading-relaxed text-muted-foreground">
+          Sign this receipt digest with SLH-DSA and verify it on the spot. The signature is a few
+          seconds of work, so it runs on request here and automatically on every live job.
+        </p>
+      )}
+      {state.status === "error" ? (
+        <p className="mt-1.5 text-xs text-fail">{state.message}</p>
+      ) : null}
+      <button
+        onClick={async () => {
+          setState({ status: "working" });
+          try {
+            const res = await seal({ data: { pathwayId } });
+            setState({ status: "done", digest: res.digest, seal: res.seal });
+          } catch (e) {
+            setState({
+              status: "error",
+              message: e instanceof Error ? e.message : "Sealing failed",
+            });
+          }
+        }}
+        disabled={state.status === "working"}
+        className="mt-2 rounded border border-border px-3 py-1.5 text-[0.68rem] uppercase tracking-[0.12em] text-foreground transition-colors hover:bg-secondary disabled:opacity-60"
+      >
+        {state.status === "working"
+          ? "Signing…"
+          : state.status === "done"
+            ? "Sign again"
+            : "Seal and verify"}
+      </button>
+    </div>
+  );
+}
 
 export const Route = createFileRoute("/evidence")({
   head: () => ({
@@ -44,6 +129,15 @@ function EvidencePage() {
           <span className="num text-foreground">{RUN_COMMIT}</span>. Emulator is labelled emulator.
           Nothing on this page ran on a QPU.
         </p>
+        <p className="mt-3 max-w-3xl text-xs leading-relaxed text-muted-foreground">
+          Each receipt digest is signed with SLH-DSA, a NIST-standardised post-quantum signature
+          scheme that Arc supports, and verified before anything is anchored or paid. The Arc
+          transaction carrying the anchor is still ECDSA-signed —{" "}
+          <Link to="/quantum-gap" className="text-accent underline underline-offset-2">
+            why that gap matters
+          </Link>
+          .
+        </p>
 
         <div className="mt-10 space-y-6">
           {pathways.map((p) => {
@@ -51,7 +145,7 @@ function EvidencePage() {
             if (!run) return null;
             const r = run.receipt;
             const { grade, reasons } = gradeReceipt(r);
-            const hash = receiptHash({ pathwayId: p.id, receipt: r, commit: r.commit });
+            
             return (
               <Reveal key={p.id}>
               <article id={p.id} className="scroll-mt-20 glass-card rounded-lg p-5">
@@ -162,11 +256,10 @@ function EvidencePage() {
                   </div>
                 </details>
 
+                <SealPanel pathwayId={p.id} />
+
                 <div className="mt-4 border-t border-border pt-3">
-                  <div className="num text-[0.68rem] break-all text-muted-foreground">
-                    receipt hash {hash}
-                  </div>
-                  <div className="mt-1 text-[0.68rem] text-muted-foreground">
+                  <div className="text-[0.68rem] text-muted-foreground">
                     grade reason: {reasons.join(" ")}
                   </div>
                 </div>

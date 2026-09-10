@@ -279,8 +279,14 @@ function RunPanel({ result }: { result: RunResult }) {
         </ol>
         <div className="border-t border-border px-5 py-4">
           <div className="num text-[0.68rem] break-all text-muted-foreground">
-            receipt hash {result.receiptHash}
+            receipt digest (SHA-256) {result.receiptHash}
           </div>
+          {result.seal ? (
+            <div className="num mt-1 text-[0.68rem] break-all text-muted-foreground">
+              sealed with {result.seal.scheme} · signature {result.seal.signatureFingerprint} ·{" "}
+              {result.seal.verified ? "verified" : "NOT verified"}
+            </div>
+          ) : null}
           <Link
             to="/ledger"
             className="mt-2 inline-block text-xs text-accent underline underline-offset-2"

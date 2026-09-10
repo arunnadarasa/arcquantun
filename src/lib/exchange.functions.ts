@@ -5,7 +5,8 @@ import { z } from "zod";
 import { agents, type AgentId } from "@/data/agents";
 import { getPathway } from "@/data/pathways";
 import { getRun } from "@/data/runs";
-import { gradeReceipt, isPayable, receiptHash } from "@/lib/receipts";
+import { gradeReceipt, isPayable, receiptDigest, receiptPayload } from "@/lib/receipts";
+import type { ReceiptSeal } from "@/data/seal-info";
 import { checkPolicy } from "@/lib/policy";
 import contractCfg from "@/data/contract.json";
 
@@ -15,6 +16,7 @@ export type StepKind =
   | "dequantization"
   | "quantum"
   | "receipt"
+  | "seal"
   | "anchor"
   | "settlement";
 
@@ -35,6 +37,7 @@ export interface RunResult {
   mode: "demo" | "live";
   steps: RunStep[];
   receiptHash: string;
+  seal: ReceiptSeal | null;
   grade: string;
   payable: boolean;
   totalPaidMinor: number;
@@ -133,7 +136,7 @@ export const runPathwayJob = createServerFn({ method: "POST" })
 
     // 5. Receipt grading.
     const graded = gradeReceipt(r);
-    const hash = receiptHash({ pathwayId: pathway.id, receipt: r, commit: r.commit });
+    const hash = await receiptDigest(receiptPayload(pathway.id, r));
     steps.push({
       kind: "receipt",
       title: `Receipt graded ${graded.grade}`,
@@ -148,9 +151,35 @@ export const runPathwayJob = createServerFn({ method: "POST" })
       },
     });
 
-    const payable = isPayable(graded.grade);
+    // 6. Post-quantum seal. A receipt that does not verify is not anchored and
+    // not paid — the same discipline as a failed grade.
+    let seal: ReceiptSeal | null = null;
+    if (isPayable(graded.grade)) {
+      const { sealDigest } = await import("@/lib/pq-seal.server");
+      seal = await sealDigest(hash);
+      steps.push({
+        kind: "seal",
+        title: seal.verified
+          ? `Receipt sealed with ${seal.scheme}`
+          : "Post-quantum seal failed verification",
+        detail: seal.verified
+          ? "The receipt digest is signed with a NIST-standardised post-quantum signature and verified before anything is anchored or paid. The Arc transaction below is still ECDSA-signed."
+          : "The signature did not verify against the published key, so this receipt is not anchored and not payable.",
+        ok: seal.verified,
+        meta: {
+          scheme: seal.scheme,
+          standard: seal.standard,
+          "public key": seal.publicKeyFingerprint,
+          signature: seal.signatureFingerprint,
+          "signature bytes": seal.signatureBytes,
+          "key source": seal.keySource,
+        },
+      });
+    }
 
-    // 6. Anchor the hash before payment clears.
+    const payable = isPayable(graded.grade) && seal !== null && seal.verified;
+
+    // 7. Anchor the sealed digest before payment clears.
     let anchorTx: string | null = null;
     if (payable) {
       if (live) {
@@ -198,7 +227,8 @@ export const runPathwayJob = createServerFn({ method: "POST" })
       steps.push({
         kind: "anchor",
         title: "Not anchored",
-        detail: "An unanchored receipt is not payable. The grade must be PASS first.",
+        detail:
+          "An unanchored receipt is not payable. The grade must be PASS and the post-quantum seal must verify first.",
         ok: false,
         agentId: "registry",
       });
@@ -267,6 +297,7 @@ export const runPathwayJob = createServerFn({ method: "POST" })
 
     return {
       pathwayId: pathway.id,
+      seal,
       simulated: !live,
       mode: live ? "live" : "demo",
       steps,
@@ -277,6 +308,19 @@ export const runPathwayJob = createServerFn({ method: "POST" })
       startedAt,
     };
   });
+
+/** Digest one committed receipt and seal it with SLH-DSA, on demand. */
+export const sealPathwayReceipt = createServerFn({ method: "POST" })
+  .inputValidator((d: unknown) => z.object({ pathwayId: z.string() }).parse(d))
+  .handler(async ({ data }): Promise<{ digest: string; seal: ReceiptSeal }> => {
+    const run = getRun(data.pathwayId);
+    if (!run) throw new Error(`Unknown pathway ${data.pathwayId}`);
+    const digest = await receiptDigest(receiptPayload(data.pathwayId, run.receipt));
+    const { sealDigest } = await import("@/lib/pq-seal.server");
+    return { digest, seal: await sealDigest(digest) };
+  });
+
+
 
 export const getExchangeStatus = createServerFn({ method: "GET" }).handler(async () => {
   const { preflight } = await import("@/lib/circle.server");

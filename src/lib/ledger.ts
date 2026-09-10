@@ -13,6 +13,10 @@ export interface LedgerEntry {
   simulated: boolean;
   grade: string;
   receiptHash: string;
+  /** Post-quantum seal carried alongside the anchor. */
+  sealScheme?: string | undefined;
+  sealSignature?: string | undefined;
+  sealVerified?: boolean | undefined;
 }
 
 const KEY = "cqx.ledger.v1";
@@ -44,6 +48,9 @@ export function recordRun(result: RunResult): LedgerEntry[] {
       simulated: result.simulated,
       grade: result.grade,
       receiptHash: result.receiptHash,
+      sealScheme: result.seal?.scheme,
+      sealSignature: result.seal?.signatureFingerprint,
+      sealVerified: result.seal?.verified,
     });
   }
   const existing = readLedger();

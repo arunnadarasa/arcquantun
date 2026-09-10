@@ -8,6 +8,8 @@ import type { ReactNode } from "react";
 import { SlideBullets, SlideCard, SlideCanvas, SlideFrame } from "@/components/slide";
 import { agents } from "@/data/agents";
 import { pathways } from "@/data/pathways";
+import { QUANTUM_GAP, GAP_REMAINING, TRACKER_READ_ON } from "@/data/quantum-gap";
+import { SEAL_SCHEME, SEAL_STANDARD } from "@/data/seal-info";
 
 export interface Slide {
   id: string;
@@ -25,6 +27,7 @@ const ORDER = `policy check
    -> dequantization gate      can a classical surrogate reproduce it?
    -> quantum leg              a measurement, or assessed-blocked
    -> receipt grading          PASS / GAP / STRUCTURAL / FAIL
+   -> post-quantum seal        SLH-DSA signature, verified on the spot
    -> anchor on Arc            written BEFORE money moves
    -> USDC settlement          only against a PASS receipt`;
 
@@ -312,6 +315,45 @@ export const deck: Slide[] = [
     ),
   },
   {
+    id: "quantum-gap",
+    label: "The quantum gap",
+    notes:
+      "Circle Research's own tracker says the gap between demonstrated logical qubits and the count needed to break ECDSA is closing. Arc already supports SLH-DSA, so we seal every receipt digest with it and verify before anchoring. The Arc transaction underneath is still ECDSA — we say so rather than claiming quantum-safe.",
+    render: (i, n) => (
+      <SlideFrame
+        index={i}
+        total={n}
+        kicker="Why the receipt is sealed"
+        title="The quantum gap is closing"
+      >
+        <div className="grid grid-cols-3 gap-[32px]">
+          <SlideCard>
+            <p className="slide-kicker text-accent">Logical qubits demonstrated</p>
+            <p className="num mt-[20px] text-[76px] leading-none">{QUANTUM_GAP.demonstrated}</p>
+          </SlideCard>
+          <SlideCard>
+            <p className="slide-kicker text-fail">Needed to break ECDSA</p>
+            <p className="num mt-[20px] text-[76px] leading-none">
+              {QUANTUM_GAP.ecdsaThreshold}
+            </p>
+          </SlideCard>
+          <SlideCard>
+            <p className="slide-kicker text-muted-foreground">Gap remaining</p>
+            <p className="num mt-[20px] text-[76px] leading-none">{GAP_REMAINING}</p>
+          </SlideCard>
+        </div>
+        <SlideBullets
+          items={[
+            `Circle Research Quantum Tracker, read ${TRACKER_READ_ON}. Circle is the source; no endorsement implied.`,
+            `Every receipt digest is signed with ${SEAL_SCHEME} (${SEAL_STANDARD}) and verified before it is anchored or paid.`,
+            "Arc supports SLH-DSA today; the Arc transaction carrying the anchor is still ECDSA-signed.",
+            "Post-quantum at the evidence layer, classical underneath — stated, not claimed away.",
+          ]}
+        />
+      </SlideFrame>
+    ),
+  },
+  {
     id: "close",
     label: "Close",
     notes:
@@ -323,7 +365,7 @@ export const deck: Slide[] = [
             "Two Circle keys and a deployed ReceiptAnchor turn every simulated envelope into a real Arc transaction.",
             "A live Quantinuum Nexus submission needs a token and a spend guard — the receipt rules do not change.",
             "Deployment boundary: attestation and capacity planning. Not a clinical system, not a triage tool.",
-            "Receipt signing is classical, so this record is not quantum-safe end to end. Logged as an open hazard.",
+            "Receipts are SLH-DSA sealed; the Arc anchor transaction is still ECDSA-signed, and that leg stays an open hazard.",
           ]}
         />
       </SlideFrame>
