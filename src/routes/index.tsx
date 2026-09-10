@@ -79,13 +79,15 @@ function Index() {
           </div>
           <dl className="mt-12 grid grid-cols-2 gap-6 md:grid-cols-4">
             {[
-              ["7", "pathways posted"],
-              ["4", "agents with wallets"],
-              ["2048", "shots per run"],
-              ["0", "advantage claims"],
+              [7, "pathways posted"],
+              [4, "agents with wallets"],
+              [2048, "shots per run"],
+              [0, "advantage claims"],
             ].map(([v, l]) => (
-              <div key={l}>
-                <dt className="num text-2xl font-medium text-primary">{v}</dt>
+              <div key={String(l)}>
+                <dt className="num text-2xl font-medium text-primary">
+                  <CountUp value={Number(v)} />
+                </dt>
                 <dd className="mt-1 text-xs uppercase tracking-[0.12em] text-muted-foreground">
                   {l}
                 </dd>
