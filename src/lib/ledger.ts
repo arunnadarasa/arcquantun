@@ -48,6 +48,9 @@ export function recordRun(result: RunResult): LedgerEntry[] {
       simulated: result.simulated,
       grade: result.grade,
       receiptHash: result.receiptHash,
+      sealScheme: result.seal?.scheme,
+      sealSignature: result.seal?.signatureFingerprint,
+      sealVerified: result.seal?.verified,
     });
   }
   const existing = readLedger();
