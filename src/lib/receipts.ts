@@ -104,23 +104,14 @@ export function gradeTone(grade: ReceiptGrade): string {
   }
 }
 
-/** Deterministic, dependency-free hash used for the on-chain anchor preview. */
-export function receiptHash(payload: unknown): string {
-  const s = JSON.stringify(payload);
-  // FNV-1a x 4 lanes, widened to 64 hex chars. Deterministic and replayable.
-  const lanes = [0x811c9dc5, 0x01000193, 0x9e3779b9, 0x85ebca6b];
-  const out: string[] = [];
-  for (let lane = 0; lane < 4; lane++) {
-    let h = (lanes[lane] ?? 0x811c9dc5) >>> 0;
-    for (let i = 0; i < s.length; i++) {
-      h ^= s.charCodeAt(i) + lane;
-      h = Math.imul(h, 0x01000193) >>> 0;
-    }
-    let g = h;
-    for (let k = 0; k < 2; k++) {
-      g = Math.imul(g ^ (g >>> 15), 0x2545f491) >>> 0;
-      out.push(g.toString(16).padStart(8, "0"));
-    }
-  }
-  return `0x${out.join("")}`;
+/** The exact bytes that get hashed, sealed and anchored. */
+export function receiptPayload(pathwayId: string, r: ReceiptEnvelope): unknown {
+  return { pathwayId, receipt: r, commit: r.commit };
+}
+
+/** SHA-256 digest of the receipt payload. This is what SLH-DSA signs. */
+export async function receiptDigest(payload: unknown): Promise<string> {
+  const bytes = new TextEncoder().encode(JSON.stringify(payload));
+  const d = await crypto.subtle.digest("SHA-256", bytes as unknown as ArrayBuffer);
+  return `0x${Array.from(new Uint8Array(d), (b) => b.toString(16).padStart(2, "0")).join("")}`;
 }

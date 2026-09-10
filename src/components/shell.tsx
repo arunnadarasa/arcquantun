@@ -8,6 +8,7 @@ const nav = [
   { to: "/agents", label: "Agents" },
   { to: "/ledger", label: "Settlements" },
   { to: "/evidence", label: "Evidence" },
+  { to: "/quantum-gap", label: "Quantum gap" },
   { to: "/architecture", label: "Architecture" },
   { to: "/deck", label: "Deck" },
 ];
@@ -74,8 +75,9 @@ export function Shell({ children }: { children: ReactNode }) {
             Ranking supports a clinician&rsquo;s review. Nothing here diagnoses, books or
             discharges a patient. Waiting-list framing is capacity, cost and patient experience —
             no efficacy or outcome claim is made. Every number is shown with its engine and shot
-            count. Receipt signing is classical, so this record is not quantum-safe end to end;
-            that is logged as an open hazard.
+            count. Receipt digests are sealed with SLH-DSA; the Arc transaction carrying the anchor
+            is still ECDSA-signed, so the chain is post-quantum at the evidence layer and classical
+            underneath. That remaining leg is logged as an open hazard.
           </p>
           <p className="mt-4">Arc Testnet · chain 5042002 · USDC is the gas token.</p>
         </div>

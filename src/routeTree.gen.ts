@@ -15,6 +15,7 @@ import { Route as ArchitectureRouteImport } from './routes/architecture'
 import { Route as DeckRouteImport } from './routes/deck'
 import { Route as EvidenceRouteImport } from './routes/evidence'
 import { Route as LedgerRouteImport } from './routes/ledger'
+import { Route as QuantumGapRouteImport } from './routes/quantum-gap'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -46,6 +47,11 @@ const LedgerRoute = LedgerRouteImport.update({
   path: '/ledger',
   getParentRoute: () => rootRouteImport,
 } as any)
+const QuantumGapRoute = QuantumGapRouteImport.update({
+  id: '/quantum-gap',
+  path: '/quantum-gap',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -54,6 +60,7 @@ export interface FileRoutesByFullPath {
   '/deck': typeof DeckRoute
   '/evidence': typeof EvidenceRoute
   '/ledger': typeof LedgerRoute
+  '/quantum-gap': typeof QuantumGapRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -62,6 +69,7 @@ export interface FileRoutesByTo {
   '/deck': typeof DeckRoute
   '/evidence': typeof EvidenceRoute
   '/ledger': typeof LedgerRoute
+  '/quantum-gap': typeof QuantumGapRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -71,13 +79,27 @@ export interface FileRoutesById {
   '/deck': typeof DeckRoute
   '/evidence': typeof EvidenceRoute
   '/ledger': typeof LedgerRoute
+  '/quantum-gap': typeof QuantumGapRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
-    '/' | '/agents' | '/architecture' | '/deck' | '/evidence' | '/ledger'
+    | '/'
+    | '/agents'
+    | '/architecture'
+    | '/deck'
+    | '/evidence'
+    | '/ledger'
+    | '/quantum-gap'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/agents' | '/architecture' | '/deck' | '/evidence' | '/ledger'
+  to:
+    | '/'
+    | '/agents'
+    | '/architecture'
+    | '/deck'
+    | '/evidence'
+    | '/ledger'
+    | '/quantum-gap'
   id:
     | '__root__'
     | '/'
@@ -86,6 +108,7 @@ export interface FileRouteTypes {
     | '/deck'
     | '/evidence'
     | '/ledger'
+    | '/quantum-gap'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -95,6 +118,7 @@ export interface RootRouteChildren {
   DeckRoute: typeof DeckRoute
   EvidenceRoute: typeof EvidenceRoute
   LedgerRoute: typeof LedgerRoute
+  QuantumGapRoute: typeof QuantumGapRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -141,6 +165,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LedgerRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/quantum-gap': {
+      id: '/quantum-gap'
+      path: '/quantum-gap'
+      fullPath: '/quantum-gap'
+      preLoaderRoute: typeof QuantumGapRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -151,6 +182,7 @@ const rootRouteChildren: RootRouteChildren = {
   DeckRoute: DeckRoute,
   EvidenceRoute: EvidenceRoute,
   LedgerRoute: LedgerRoute,
+  QuantumGapRoute: QuantumGapRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
