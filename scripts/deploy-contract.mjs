@@ -96,7 +96,7 @@ async function deploy({ abi, bytecode }) {
     constructorParameters: [],
     feeLevel: "MEDIUM",
   });
-  const contractId = created?.contract?.id;
+  const contractId = created?.contract?.id ?? created?.contractId;
   if (!contractId) throw new Error(`no contract id: ${JSON.stringify(created)}`);
   console.log(`deploy initiated: ${contractId}`);
 
