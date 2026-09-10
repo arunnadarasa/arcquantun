@@ -52,11 +52,8 @@ function EvidencePage() {
             const { grade, reasons } = gradeReceipt(r);
             const hash = receiptHash({ pathwayId: p.id, receipt: r, commit: r.commit });
             return (
-              <article
-                key={p.id}
-                id={p.id}
-                className="scroll-mt-20 glass-card rounded-lg p-5"
-              >
+              <Reveal key={p.id}>
+              <article id={p.id} className="scroll-mt-20 glass-card rounded-lg p-5">
                 <div className="flex flex-wrap items-center gap-2">
                   <h2 className="text-base font-semibold">{p.service}</h2>
                   <Pill tone={grade === "PASS" ? "pass" : grade === "FAIL" ? "fail" : "gap"}>
