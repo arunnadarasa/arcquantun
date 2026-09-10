@@ -365,7 +365,7 @@ export const deck: Slide[] = [
             "Two Circle keys and a deployed ReceiptAnchor turn every simulated envelope into a real Arc transaction.",
             "A live Quantinuum Nexus submission needs a token and a spend guard — the receipt rules do not change.",
             "Deployment boundary: attestation and capacity planning. Not a clinical system, not a triage tool.",
-            "Receipt signing is classical, so this record is not quantum-safe end to end. Logged as an open hazard.",
+            "Receipts are SLH-DSA sealed; the Arc anchor transaction is still ECDSA-signed, and that leg stays an open hazard.",
           ]}
         />
       </SlideFrame>
