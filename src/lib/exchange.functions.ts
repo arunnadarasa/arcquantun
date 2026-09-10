@@ -154,10 +154,12 @@ export const runPathwayJob = createServerFn({ method: "POST" })
 
     // 6. Post-quantum seal. A receipt that does not verify is not anchored and
     // not paid — the same discipline as a failed grade.
+    console.log("[runPathwayJob] seal start", pathway.id, hash);
     let seal: ReceiptSeal | null = null;
     if (isPayable(graded.grade)) {
       const { sealDigest } = await import("@/lib/pq-seal.server");
       seal = await sealDigest(hash);
+      console.log("[runPathwayJob] seal result", seal.verified, seal.scheme);
       steps.push({
         kind: "seal",
         title: seal.verified
