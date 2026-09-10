@@ -313,6 +313,45 @@ export const deck: Slide[] = [
     ),
   },
   {
+    id: "quantum-gap",
+    label: "The quantum gap",
+    notes:
+      "Circle Research's own tracker says the gap between demonstrated logical qubits and the count needed to break ECDSA is closing. Arc already supports SLH-DSA, so we seal every receipt digest with it and verify before anchoring. The Arc transaction underneath is still ECDSA — we say so rather than claiming quantum-safe.",
+    render: (i, n) => (
+      <SlideFrame
+        index={i}
+        total={n}
+        kicker="Why the receipt is sealed"
+        title="The quantum gap is closing"
+      >
+        <div className="grid grid-cols-3 gap-[32px]">
+          <SlideCard>
+            <p className="slide-kicker text-accent">Logical qubits demonstrated</p>
+            <p className="num mt-[20px] text-[76px] leading-none">{QUANTUM_GAP.demonstrated}</p>
+          </SlideCard>
+          <SlideCard>
+            <p className="slide-kicker text-fail">Needed to break ECDSA</p>
+            <p className="num mt-[20px] text-[76px] leading-none">
+              {QUANTUM_GAP.ecdsaThreshold}
+            </p>
+          </SlideCard>
+          <SlideCard>
+            <p className="slide-kicker text-muted-foreground">Gap remaining</p>
+            <p className="num mt-[20px] text-[76px] leading-none">{GAP_REMAINING}</p>
+          </SlideCard>
+        </div>
+        <SlideBullets
+          items={[
+            `Circle Research Quantum Tracker, read ${TRACKER_READ_ON}. Circle is the source; no endorsement implied.`,
+            `Every receipt digest is signed with ${SEAL_SCHEME} (${SEAL_STANDARD}) and verified before it is anchored or paid.`,
+            "Arc supports SLH-DSA today; the Arc transaction carrying the anchor is still ECDSA-signed.",
+            "Post-quantum at the evidence layer, classical underneath — stated, not claimed away.",
+          ]}
+        />
+      </SlideFrame>
+    ),
+  },
+  {
     id: "close",
     label: "Close",
     notes:
