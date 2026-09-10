@@ -101,6 +101,13 @@
   --sidebar-accent-foreground: oklch(0.95 0.006 250);
   --sidebar-border: oklch(0.32 0.022 250);
   --sidebar-ring: oklch(0.8 0.15 82);
+  --gradient-signal: linear-gradient(120deg, oklch(0.8 0.15 82), oklch(0.66 0.13 205));
+  --gradient-aurora:
+    radial-gradient(58% 58% at 18% 12%, oklch(0.8 0.15 82 / 30%), transparent 70%),
+    radial-gradient(52% 52% at 82% 8%, oklch(0.62 0.13 210 / 32%), transparent 70%),
+    radial-gradient(66% 58% at 58% 88%, oklch(0.72 0.15 155 / 18%), transparent 70%);
+  --glow-signal: 0 0 60px -14px oklch(0.8 0.15 82 / 45%);
+  --shadow-glass: 0 24px 60px -28px oklch(0.08 0.02 250 / 85%);
 }
 
 .dark {
@@ -140,4 +147,80 @@
 @utility num {
   font-family: var(--font-mono);
   font-variant-numeric: tabular-nums;
+}
+
+@keyframes aurora-drift {
+  0% {
+    transform: translate3d(-4%, -2%, 0) scale(1.05) rotate(0deg);
+  }
+  50% {
+    transform: translate3d(4%, 3%, 0) scale(1.14) rotate(7deg);
+  }
+  100% {
+    transform: translate3d(-4%, -2%, 0) scale(1.05) rotate(0deg);
+  }
+}
+
+@keyframes grid-pan {
+  0% {
+    background-position: 0 0;
+  }
+  100% {
+    background-position: 0 60px;
+  }
+}
+
+@utility aurora-field {
+  background-image: var(--gradient-aurora);
+  filter: blur(72px);
+  animation: aurora-drift 30s ease-in-out infinite;
+}
+
+@utility grid-veil {
+  background-image:
+    linear-gradient(to right, color-mix(in oklab, var(--foreground) 5%, transparent) 1px, transparent 1px),
+    linear-gradient(to bottom, color-mix(in oklab, var(--foreground) 5%, transparent) 1px, transparent 1px);
+  background-size: 60px 60px;
+  animation: grid-pan 22s linear infinite;
+}
+
+@utility glass-card {
+  background: color-mix(in oklab, var(--card) 72%, transparent);
+  border: 1px solid var(--border);
+  backdrop-filter: blur(18px) saturate(140%);
+  box-shadow: var(--shadow-glass);
+  transition:
+    transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1),
+    border-color 0.4s ease,
+    box-shadow 0.4s ease;
+  &:hover {
+    transform: translateY(-4px);
+    border-color: color-mix(in oklab, var(--primary) 45%, transparent);
+    box-shadow: var(--shadow-glass), var(--glow-signal);
+  }
+}
+
+@utility text-gradient {
+  background-image: var(--gradient-signal);
+  background-clip: text;
+  color: transparent;
+}
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+  html {
+    scroll-behavior: auto;
+  }
 }

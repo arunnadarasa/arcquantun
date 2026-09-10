@@ -4,6 +4,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { useMutation } from "@tanstack/react-query";
 import { ArrowRight, CircleDot, Loader2, ShieldCheck } from "lucide-react";
 import { Shell, Pill } from "@/components/shell";
+import { CountUp, Meter, Reveal } from "@/components/motion";
 import { pathways } from "@/data/pathways";
 import { getRun } from "@/data/runs";
 import { formatUsdc, txUrl } from "@/lib/arc-chain";
@@ -32,6 +33,18 @@ export const Route = createFileRoute("/")({
   }),
   component: Index,
 });
+
+// A bar is only drawn where the floor has a bounded scale it can honestly sit
+// against; open-ended counts get no bar rather than an invented ceiling.
+function floorScale(floor: { value: number; unit: string }): { value: number; max: number } | null {
+  if (floor.unit === "%") return { value: floor.value, max: 100 };
+  const outOf = /^of\s+(\d+(?:\.\d+)?)$/.exec(floor.unit.trim());
+  if (outOf) return { value: floor.value, max: Number(outOf[1]) };
+  if (floor.unit === "" && floor.value > 0 && floor.value <= 1) {
+    return { value: floor.value, max: 1 };
+  }
+  return null;
+}
 
 function Index() {
   const [selected, setSelected] = useState<string | null>(null);
@@ -79,13 +92,15 @@ function Index() {
           </div>
           <dl className="mt-12 grid grid-cols-2 gap-6 md:grid-cols-4">
             {[
-              ["7", "pathways posted"],
-              ["4", "agents with wallets"],
-              ["2048", "shots per run"],
-              ["0", "advantage claims"],
+              [7, "pathways posted"],
+              [4, "agents with wallets"],
+              [2048, "shots per run"],
+              [0, "advantage claims"],
             ].map(([v, l]) => (
-              <div key={l}>
-                <dt className="num text-2xl font-medium text-primary">{v}</dt>
+              <div key={String(l)}>
+                <dt className="num text-2xl font-medium text-primary">
+                  <CountUp value={Number(v)} />
+                </dt>
                 <dd className="mt-1 text-xs uppercase tracking-[0.12em] text-muted-foreground">
                   {l}
                 </dd>
@@ -103,16 +118,15 @@ function Index() {
         </p>
 
         <div className="mt-8 grid gap-4 md:grid-cols-2">
-          {pathways.map((p) => {
+          {pathways.map((p, i) => {
             const run = getRun(p.id);
             const grade = run ? gradeReceipt(run.receipt).grade : "STRUCTURAL";
             const active = selected === p.id;
+            const scale = floorScale(p.classicalFloor);
             return (
+              <Reveal key={p.id} delay={(i % 2) * 80} className="h-full">
               <article
-                key={p.id}
-                className={`rounded-lg border bg-card p-5 transition-colors ${
-                  active ? "border-primary" : "border-border hover:border-muted-foreground/40"
-                }`}
+                className={`glass-card h-full rounded-lg p-5 ${active ? "border-primary" : ""}`}
               >
                 <div className="flex flex-wrap items-center gap-2">
                   <Pill tone={p.status === "assessed-blocked" ? "gap" : "muted"}>
@@ -142,10 +156,23 @@ function Index() {
                       {p.classicalFloor.unit === "%" ? "%" : ` ${p.classicalFloor.unit}`}{" "}
                       {p.classicalFloor.metric}
                     </div>
+                    {scale ? (
+                      <div className="mt-2">
+                        <Meter value={scale.value} max={scale.max} delay={120} />
+                      </div>
+                    ) : null}
                   </div>
                   <div>
                     <div className="text-muted-foreground">Register</div>
                     <div className="num mt-1 text-foreground">{p.qubitsNeeded} qubits</div>
+                    <div className="mt-2">
+                      <Meter
+                        value={p.qubitsNeeded}
+                        max={32}
+                        tone={p.status === "assessed-blocked" ? "gap" : "signal"}
+                        delay={200}
+                      />
+                    </div>
                   </div>
                 </div>
                 <div className="mt-4 flex flex-wrap gap-2">
@@ -174,6 +201,7 @@ function Index() {
                   </Link>
                 </div>
               </article>
+              </Reveal>
             );
           })}
         </div>
@@ -195,7 +223,7 @@ function Index() {
 function RunPanel({ result }: { result: RunResult }) {
   return (
     <section className="mx-auto max-w-6xl px-4 pb-20">
-      <div className="rounded-lg border border-border bg-card">
+      <div className="glass-card rounded-lg">
         <div className="flex flex-wrap items-center gap-3 border-b border-border px-5 py-4">
           <h2 className="text-base font-semibold">Run ledger</h2>
           <Pill tone={result.grade === "PASS" ? "pass" : "gap"}>receipt {result.grade}</Pill>

@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { Shell, Pill } from "@/components/shell";
+import { Reveal } from "@/components/motion";
 import { formatUsdc, txUrl } from "@/lib/arc-chain";
 import { clearLedger, readLedger, type LedgerEntry } from "@/lib/ledger";
 import { getPathway } from "@/data/pathways";
@@ -49,7 +50,7 @@ function LedgerPage() {
           is a single place proving money moved. Amounts are USDC on Arc Testnet.
         </p>
 
-        <div className="mt-6 flex flex-wrap items-center gap-3 rounded border border-border bg-card px-4 py-3 text-xs">
+        <div className="mt-6 flex flex-wrap items-center gap-3 glass-card rounded px-4 py-3 text-xs">
           <span className="num text-primary">{formatUsdc(total)} USDC settled</span>
           <span className="num text-muted-foreground">{rows.length} entries</span>
           {rows.length > 0 ? (
@@ -72,7 +73,8 @@ function LedgerPage() {
           </p>
         ) : (
           <>
-            <ul className="mt-6 divide-y divide-border rounded-lg border border-border bg-card">
+            <Reveal>
+            <ul className="mt-6 divide-y divide-border glass-card rounded-lg">
               {slice.map((r) => (
                 <li key={r.id + r.at} className="px-4 py-3.5">
                   <div className="flex flex-wrap items-center gap-2">
@@ -100,6 +102,7 @@ function LedgerPage() {
                 </li>
               ))}
             </ul>
+            </Reveal>
             {pages > 1 ? (
               <div className="mt-4 flex flex-wrap gap-1.5">
                 {Array.from({ length: pages }).map((_, i) => (
