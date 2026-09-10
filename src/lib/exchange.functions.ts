@@ -197,10 +197,11 @@ export const runPathwayJob = createServerFn({ method: "POST" })
           anchorTx = res.txHash;
           steps.push({
             kind: "anchor",
-            title: "Receipt hash anchored on Arc",
+            title: res.txHash ? "Receipt hash anchored on Arc" : "Receipt hash anchored (pending)",
             detail: `Contract ${contractCfg.address} · state ${res.state}`,
             ok: true,
             txHash: res.txHash,
+            transferId: res.transferId,
             agentId: "registry",
           });
         } catch (e) {
