@@ -8,6 +8,8 @@ import type { ReactNode } from "react";
 import { SlideBullets, SlideCard, SlideCanvas, SlideFrame } from "@/components/slide";
 import { agents } from "@/data/agents";
 import { pathways } from "@/data/pathways";
+import { QUANTUM_GAP, GAP_REMAINING, TRACKER_READ_ON } from "@/data/quantum-gap";
+import { SEAL_SCHEME, SEAL_STANDARD } from "@/data/seal-info";
 
 export interface Slide {
   id: string;
