@@ -221,7 +221,7 @@ function Index() {
 function RunPanel({ result }: { result: RunResult }) {
   return (
     <section className="mx-auto max-w-6xl px-4 pb-20">
-      <div className="rounded-lg border border-border bg-card">
+      <div className="glass-card rounded-lg">
         <div className="flex flex-wrap items-center gap-3 border-b border-border px-5 py-4">
           <h2 className="text-base font-semibold">Run ledger</h2>
           <Pill tone={result.grade === "PASS" ? "pass" : "gap"}>receipt {result.grade}</Pill>

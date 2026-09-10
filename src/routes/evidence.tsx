@@ -55,7 +55,7 @@ function EvidencePage() {
               <article
                 key={p.id}
                 id={p.id}
-                className="scroll-mt-20 rounded-lg border border-border bg-card p-5"
+                className="scroll-mt-20 glass-card rounded-lg p-5"
               >
                 <div className="flex flex-wrap items-center gap-2">
                   <h2 className="text-base font-semibold">{p.service}</h2>

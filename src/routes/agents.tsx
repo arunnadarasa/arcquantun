@@ -42,7 +42,7 @@ function AgentsPage() {
           passes the policy gate before any transfer is submitted.
         </p>
 
-        <div className="mt-6 rounded border border-border bg-card p-4 text-xs">
+        <div className="mt-6 glass-card rounded p-4 text-xs">
           <div className="flex flex-wrap items-center gap-3">
             <Pill tone={data?.circleReady ? "pass" : "gap"}>
               {data?.circleReady ? "Circle keys present" : "demo mode"}
@@ -72,7 +72,7 @@ function AgentsPage() {
 
         <div className="mt-8 grid gap-4 md:grid-cols-2">
           {agents.map((a) => (
-            <article key={a.id} className="rounded-lg border border-border bg-card p-5">
+            <article key={a.id} className="glass-card rounded-lg p-5">
               <div className="flex items-center gap-2">
                 <h2 className="text-base font-semibold">{a.name}</h2>
                 <Pill tone={a.feeShare === 0 ? "signal" : "muted"}>
