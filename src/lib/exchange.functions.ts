@@ -256,6 +256,7 @@ export const runPathwayJob = createServerFn({ method: "POST" })
         continue;
       }
       if (live) {
+        console.log("[runPathwayJob] transfer start", a.id, amount);
         try {
           const { transferUsdc } = await import("@/lib/circle.server");
           const res = await transferUsdc({
@@ -263,6 +264,7 @@ export const runPathwayJob = createServerFn({ method: "POST" })
             toAddress: process.env[`CIRCLE_${a.id.toUpperCase()}_ADDRESS`] ?? "",
             amountUsdc: (amount / 1e6).toFixed(6),
           });
+          console.log("[runPathwayJob] transfer result", a.id, res.state, res.txHash);
           totalPaidMinor += amount;
           steps.push({
             kind: "settlement",
