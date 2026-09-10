@@ -49,23 +49,37 @@ export async function encryptEntitySecret(): Promise<string> {
 }
 
 async function post<T>(path: string, body: unknown): Promise<T> {
-  const res = await fetch(`${CIRCLE_BASE}${path}`, {
-    method: "POST",
-    headers: { Authorization: `Bearer ${apiKey()}`, "Content-Type": "application/json" },
-    body: JSON.stringify(body),
-  });
-  const text = await res.text();
-  if (!res.ok) throw new Error(`Circle ${path} failed ${res.status}: ${text.slice(0, 300)}`);
-  return JSON.parse(text) as T;
+  const ctrl = new AbortController();
+  const t = setTimeout(() => ctrl.abort(), 30_000);
+  try {
+    const res = await fetch(`${CIRCLE_BASE}${path}`, {
+      method: "POST",
+      headers: { Authorization: `Bearer ${apiKey()}`, "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+      signal: ctrl.signal,
+    });
+    const text = await res.text();
+    if (!res.ok) throw new Error(`Circle ${path} failed ${res.status}: ${text.slice(0, 300)}`);
+    return JSON.parse(text) as T;
+  } finally {
+    clearTimeout(t);
+  }
 }
 
 async function get<T>(path: string): Promise<T> {
-  const res = await fetch(`${CIRCLE_BASE}${path}`, {
-    headers: { Authorization: `Bearer ${apiKey()}` },
-  });
-  const text = await res.text();
-  if (!res.ok) throw new Error(`Circle ${path} failed ${res.status}: ${text.slice(0, 300)}`);
-  return JSON.parse(text) as T;
+  const ctrl = new AbortController();
+  const t = setTimeout(() => ctrl.abort(), 30_000);
+  try {
+    const res = await fetch(`${CIRCLE_BASE}${path}`, {
+      headers: { Authorization: `Bearer ${apiKey()}` },
+      signal: ctrl.signal,
+    });
+    const text = await res.text();
+    if (!res.ok) throw new Error(`Circle ${path} failed ${res.status}: ${text.slice(0, 300)}`);
+    return JSON.parse(text) as T;
+  } finally {
+    clearTimeout(t);
+  }
 }
 
 export async function readWalletBalance(
@@ -91,7 +105,7 @@ const isHash = (v: unknown): v is string => typeof v === "string" && /^0x[a-f0-9
 
 async function pollTransaction(
   txId: string,
-  attempts = 12,
+  attempts = 0,
 ): Promise<{ txHash: string | null; state: string }> {
   for (let i = 0; i < attempts; i++) {
     await new Promise((r) => setTimeout(r, 2000));

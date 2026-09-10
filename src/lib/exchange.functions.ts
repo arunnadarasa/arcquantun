@@ -27,6 +27,7 @@ export interface RunStep {
   ok: boolean;
   meta?: Record<string, string | number | null>;
   txHash?: string | null;
+  transferId?: string;
   agentId?: AgentId;
   amountMinor?: number;
 }
@@ -196,10 +197,11 @@ export const runPathwayJob = createServerFn({ method: "POST" })
           anchorTx = res.txHash;
           steps.push({
             kind: "anchor",
-            title: "Receipt hash anchored on Arc",
+            title: res.txHash ? "Receipt hash anchored on Arc" : "Receipt hash anchored (pending)",
             detail: `Contract ${contractCfg.address} · state ${res.state}`,
             ok: true,
             txHash: res.txHash,
+            transferId: res.transferId,
             agentId: "registry",
           });
         } catch (e) {
@@ -251,6 +253,7 @@ export const runPathwayJob = createServerFn({ method: "POST" })
         continue;
       }
       if (live) {
+        
         try {
           const { transferUsdc } = await import("@/lib/circle.server");
           const res = await transferUsdc({
@@ -258,13 +261,15 @@ export const runPathwayJob = createServerFn({ method: "POST" })
             toAddress: process.env[`CIRCLE_${a.id.toUpperCase()}_ADDRESS`] ?? "",
             amountUsdc: (amount / 1e6).toFixed(6),
           });
+          console.log("[runPathwayJob] transfer result", a.id, res.state, res.txHash);
           totalPaidMinor += amount;
           steps.push({
             kind: "settlement",
-            title: `Paid ${a.name}`,
+            title: res.txHash ? `Paid ${a.name}` : `Paid ${a.name} (pending)`,
             detail: `USDC settled on Arc Testnet · state ${res.state}`,
             ok: true,
             txHash: res.txHash,
+            transferId: res.transferId,
             agentId: a.id,
             amountMinor: amount,
           });

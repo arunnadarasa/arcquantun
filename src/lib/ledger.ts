@@ -36,7 +36,7 @@ export function recordRun(result: RunResult): LedgerEntry[] {
   const rows: LedgerEntry[] = [];
   for (const s of result.steps) {
     if (s.kind !== "settlement" && s.kind !== "anchor") continue;
-    if (!s.txHash) continue;
+    if (!s.txHash && !s.transferId) continue;
     rows.push({
       id: `${result.receiptHash}:${s.kind}:${s.agentId ?? "n/a"}`,
       at: result.startedAt,
@@ -44,7 +44,7 @@ export function recordRun(result: RunResult): LedgerEntry[] {
       agentId: s.agentId ?? "registry",
       label: s.kind === "anchor" ? "Receipt anchored" : s.title,
       amountMinor: s.amountMinor ?? 0,
-      txHash: s.txHash,
+      txHash: s.txHash ?? s.transferId ?? null,
       simulated: result.simulated,
       grade: result.grade,
       receiptHash: result.receiptHash,
