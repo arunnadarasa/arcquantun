@@ -105,7 +105,7 @@ const isHash = (v: unknown): v is string => typeof v === "string" && /^0x[a-f0-9
 
 async function pollTransaction(
   txId: string,
-  attempts = 12,
+  attempts = 0,
 ): Promise<{ txHash: string | null; state: string }> {
   for (let i = 0; i < attempts; i++) {
     await new Promise((r) => setTimeout(r, 2000));
