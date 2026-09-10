@@ -47,7 +47,7 @@ Registry Agent -> anchor receipt hash on Arc (ReceiptAnchor.sol)
    v
 Settlement -> USDC to each agent, only against a PASS receipt`;
 
-export function ArchitecturePage() {
+function ArchitecturePage() {
   return (
     <Shell>
       <section className="mx-auto max-w-6xl px-4 py-14">
