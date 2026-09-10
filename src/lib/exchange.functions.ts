@@ -186,6 +186,7 @@ export const runPathwayJob = createServerFn({ method: "POST" })
     let anchorTx: string | null = null;
     if (payable) {
       if (live) {
+        console.log("[runPathwayJob] anchor start", contractCfg.address);
         try {
           const { anchorReceipt } = await import("@/lib/circle.server");
           const res = await anchorReceipt({
@@ -196,6 +197,7 @@ export const runPathwayJob = createServerFn({ method: "POST" })
             engine: r.engine,
             shots: r.shots ?? 0,
           });
+          console.log("[runPathwayJob] anchor result", res.state, res.txHash);
           anchorTx = res.txHash;
           steps.push({
             kind: "anchor",
