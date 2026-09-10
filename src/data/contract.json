@@ -4,7 +4,7 @@
   "address": "0xd924f134e69f678e09bd31394f975b3cdbd2f52f",
   "chainId": 5042002,
   "explorer": "https://testnet.arcscan.app",
-  "verified": false,
+  "verified": true,
   "solc": "0.8.24",
   "abi": [
     {
