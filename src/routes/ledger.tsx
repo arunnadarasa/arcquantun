@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { Shell, Pill } from "@/components/shell";
+import { Reveal } from "@/components/motion";
 import { formatUsdc, txUrl } from "@/lib/arc-chain";
 import { clearLedger, readLedger, type LedgerEntry } from "@/lib/ledger";
 import { getPathway } from "@/data/pathways";
@@ -72,6 +73,7 @@ function LedgerPage() {
           </p>
         ) : (
           <>
+            <Reveal>
             <ul className="mt-6 divide-y divide-border glass-card rounded-lg">
               {slice.map((r) => (
                 <li key={r.id + r.at} className="px-4 py-3.5">
@@ -100,6 +102,7 @@ function LedgerPage() {
                 </li>
               ))}
             </ul>
+            </Reveal>
             {pages > 1 ? (
               <div className="mt-4 flex flex-wrap gap-1.5">
                 {Array.from({ length: pages }).map((_, i) => (
