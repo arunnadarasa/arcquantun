@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { Shell, Pill } from "@/components/shell";
+import { Reveal } from "@/components/motion";
 import { pathways } from "@/data/pathways";
 import { getRun, RUN_COMMIT } from "@/data/runs";
 import { gradeReceipt, receiptHash } from "@/lib/receipts";
