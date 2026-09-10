@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { Shell, Pill } from "@/components/shell";
+import { Reveal } from "@/components/motion";
 import { agents } from "@/data/agents";
 import { formatUsdc, ARC_FAUCET } from "@/lib/arc-chain";
 import { getExchangeStatus } from "@/lib/exchange.functions";
@@ -98,6 +99,7 @@ function AgentsPage() {
                 </div>
               </dl>
             </article>
+            </Reveal>
           ))}
         </div>
       </section>
