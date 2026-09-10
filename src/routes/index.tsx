@@ -144,10 +144,23 @@ function Index() {
                       {p.classicalFloor.unit === "%" ? "%" : ` ${p.classicalFloor.unit}`}{" "}
                       {p.classicalFloor.metric}
                     </div>
+                    {scale ? (
+                      <div className="mt-2">
+                        <Meter value={scale.value} max={scale.max} delay={120} />
+                      </div>
+                    ) : null}
                   </div>
                   <div>
                     <div className="text-muted-foreground">Register</div>
                     <div className="num mt-1 text-foreground">{p.qubitsNeeded} qubits</div>
+                    <div className="mt-2">
+                      <Meter
+                        value={p.qubitsNeeded}
+                        max={32}
+                        tone={p.status === "assessed-blocked" ? "gap" : "signal"}
+                        delay={200}
+                      />
+                    </div>
                   </div>
                 </div>
                 <div className="mt-4 flex flex-wrap gap-2">
