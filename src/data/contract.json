@@ -1,0 +1,51 @@
+{
+  "name": "ReceiptAnchor",
+  "deployed": false,
+  "address": null,
+  "chainId": 5042002,
+  "explorer": "https://testnet.arcscan.app",
+  "deployTx": null,
+  "verified": false,
+  "solc": "0.8.24",
+  "abi": [
+    {
+      "type": "event",
+      "name": "Anchored",
+      "inputs": [
+        { "name": "author", "type": "address", "indexed": true },
+        { "name": "receiptHash", "type": "bytes32", "indexed": true },
+        { "name": "signalId", "type": "string", "indexed": false },
+        { "name": "engine", "type": "string", "indexed": false },
+        { "name": "shots", "type": "uint32", "indexed": false },
+        { "name": "at", "type": "uint256", "indexed": false }
+      ],
+      "anonymous": false
+    },
+    {
+      "type": "function",
+      "name": "anchor",
+      "stateMutability": "nonpayable",
+      "inputs": [
+        { "name": "receiptHash", "type": "bytes32" },
+        { "name": "signalId", "type": "string" },
+        { "name": "engine", "type": "string" },
+        { "name": "shots", "type": "uint32" }
+      ],
+      "outputs": []
+    },
+    {
+      "type": "function",
+      "name": "total",
+      "stateMutability": "view",
+      "inputs": [],
+      "outputs": [{ "name": "", "type": "uint256" }]
+    },
+    {
+      "type": "function",
+      "name": "anchoredAt",
+      "stateMutability": "view",
+      "inputs": [{ "name": "", "type": "bytes32" }],
+      "outputs": [{ "name": "", "type": "uint256" }]
+    }
+  ]
+}

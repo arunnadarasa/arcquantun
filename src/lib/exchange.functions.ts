@@ -1,0 +1,291 @@
+// Server functions for the exchange. Every one boots with zero secrets and
+// returns a realistic envelope flagged simulated: true when Circle is absent.
+import { createServerFn } from "@tanstack/react-start";
+import { z } from "zod";
+import { agents, type AgentId } from "@/data/agents";
+import { getPathway } from "@/data/pathways";
+import { getRun } from "@/data/runs";
+import { gradeReceipt, isPayable, receiptHash } from "@/lib/receipts";
+import { checkPolicy } from "@/lib/policy";
+import contractCfg from "@/data/contract.json";
+
+export type StepKind =
+  | "policy"
+  | "classical"
+  | "dequantization"
+  | "quantum"
+  | "receipt"
+  | "anchor"
+  | "settlement";
+
+export interface RunStep {
+  kind: StepKind;
+  title: string;
+  detail: string;
+  ok: boolean;
+  meta?: Record<string, string | number | null>;
+  txHash?: string | null;
+  agentId?: AgentId;
+  amountMinor?: number;
+}
+
+export interface RunResult {
+  pathwayId: string;
+  simulated: boolean;
+  mode: "demo" | "live";
+  steps: RunStep[];
+  receiptHash: string;
+  grade: string;
+  payable: boolean;
+  totalPaidMinor: number;
+  startedAt: string;
+}
+
+function pseudoTx(seed: string): string {
+  let h = 0x811c9dc5;
+  const out: string[] = [];
+  for (let lane = 0; lane < 8; lane++) {
+    for (let i = 0; i < seed.length; i++) {
+      h ^= seed.charCodeAt(i) + lane;
+      h = Math.imul(h, 0x01000193) >>> 0;
+    }
+    out.push((h >>> 0).toString(16).padStart(8, "0"));
+  }
+  return `0x${out.join("")}`;
+}
+
+export const runPathwayJob = createServerFn({ method: "POST" })
+  .inputValidator((d: unknown) => z.object({ pathwayId: z.string() }).parse(d))
+  .handler(async ({ data }): Promise<RunResult> => {
+    const pathway = getPathway(data.pathwayId);
+    const run = getRun(data.pathwayId);
+    if (!pathway || !run) throw new Error(`Unknown pathway ${data.pathwayId}`);
+
+    const { circleConfigured } = await import("@/lib/circle.server");
+    const live = circleConfigured() && contractCfg.deployed === true;
+    const steps: RunStep[] = [];
+    const startedAt = new Date().toISOString();
+
+    // 1. Policy gate, before any money moves.
+    for (const a of agents) {
+      if (a.feeShare === 0) continue;
+      const amount = Math.round(pathway.budgetMinor * a.feeShare);
+      const check = checkPolicy(a.id, amount, 0);
+      steps.push({
+        kind: "policy",
+        title: `Policy check — ${a.name}`,
+        detail: check.reason,
+        ok: check.allowed,
+        agentId: a.id,
+        amountMinor: amount,
+        meta: {
+          "per-job ceiling": check.maxTicketMinor,
+          "24h cap": check.dailyCapMinor,
+        },
+      });
+    }
+
+    // 2. Classical floor, recorded first.
+    steps.push({
+      kind: "classical",
+      title: "Classical floor recorded",
+      detail: `${run.classical.method} — ${run.classical.metric} ${run.classical.value}`,
+      ok: true,
+      agentId: "baseline",
+      meta: { runtime_ms: run.classical.runtimeMs },
+    });
+
+    // 3. Dequantization gate.
+    steps.push({
+      kind: "dequantization",
+      title: run.dequantization.reproduced
+        ? "Dequantization gate — classical surrogate reproduces the result"
+        : "Dequantization gate — surrogate does not reproduce the result",
+      detail: run.dequantization.note,
+      ok: true,
+      agentId: "baseline",
+      meta: { surrogate: run.dequantization.surrogate },
+    });
+
+    // 4. Quantum leg.
+    const r = run.receipt;
+    steps.push({
+      kind: "quantum",
+      title:
+        r.mechanism === "BLOCKED"
+          ? "Quantum leg assessed-blocked"
+          : `Quantum leg complete — ${r.device}`,
+      detail:
+        r.mechanism === "BLOCKED"
+          ? (r.blockedReason ?? "No execution lane available.")
+          : `${r.engine} (${r.backendQualifier}), ${r.shots} shots, seed ${r.seed}.`,
+      ok: r.mechanism !== "FAIL",
+      agentId: "nexus",
+      meta: {
+        engine: r.engine,
+        qualifier: r.backendQualifier,
+        shots: r.shots,
+        seed: r.seed,
+        job_id: r.jobId,
+        billed_hqc: r.billedHqc,
+      },
+    });
+
+    // 5. Receipt grading.
+    const graded = gradeReceipt(r);
+    const hash = receiptHash({ pathwayId: pathway.id, receipt: r, commit: r.commit });
+    steps.push({
+      kind: "receipt",
+      title: `Receipt graded ${graded.grade}`,
+      detail: graded.reasons.join(" "),
+      ok: graded.grade === "PASS",
+      meta: {
+        mechanism: r.mechanism,
+        performance: r.performance,
+        envelope: r.envelope,
+        measured: r.measured,
+        bell_anticorrelated: r.bellAnticorrelated,
+      },
+    });
+
+    const payable = isPayable(graded.grade);
+
+    // 6. Anchor the hash before payment clears.
+    let anchorTx: string | null = null;
+    if (payable) {
+      if (live) {
+        try {
+          const { anchorReceipt } = await import("@/lib/circle.server");
+          const res = await anchorReceipt({
+            walletId: process.env["CIRCLE_REGISTRY_WALLET_ID"] ?? "",
+            contractAddress: String(contractCfg.address),
+            receiptHash: hash,
+            signalId: pathway.id,
+            engine: r.engine,
+            shots: r.shots ?? 0,
+          });
+          anchorTx = res.txHash;
+          steps.push({
+            kind: "anchor",
+            title: "Receipt hash anchored on Arc",
+            detail: `Contract ${contractCfg.address} · state ${res.state}`,
+            ok: true,
+            txHash: res.txHash,
+            agentId: "registry",
+          });
+        } catch (e) {
+          steps.push({
+            kind: "anchor",
+            title: "Anchoring failed",
+            detail: e instanceof Error ? e.message : "Unknown anchoring error",
+            ok: false,
+            agentId: "registry",
+          });
+        }
+      } else {
+        anchorTx = pseudoTx(`anchor:${hash}`);
+        steps.push({
+          kind: "anchor",
+          title: "Receipt hash anchored (demo mode)",
+          detail:
+            "Simulated envelope. Add the Circle keys and deploy the anchoring contract to write this to Arc Testnet for real.",
+          ok: true,
+          txHash: anchorTx,
+          agentId: "registry",
+        });
+      }
+    } else {
+      steps.push({
+        kind: "anchor",
+        title: "Not anchored",
+        detail: "An unanchored receipt is not payable. The grade must be PASS first.",
+        ok: false,
+        agentId: "registry",
+      });
+    }
+
+    // 7. Settlement. Losing is still paid work; a GAP receipt is not.
+    let totalPaidMinor = 0;
+    for (const a of agents) {
+      if (a.feeShare === 0) continue;
+      const amount = Math.round(pathway.budgetMinor * a.feeShare);
+      if (!payable) {
+        steps.push({
+          kind: "settlement",
+          title: `No payment — ${a.name}`,
+          detail: `Receipt graded ${graded.grade}. The Trust Agent releases funds only against a PASS receipt.`,
+          ok: false,
+          agentId: a.id,
+          amountMinor: 0,
+        });
+        continue;
+      }
+      if (live) {
+        try {
+          const { transferUsdc } = await import("@/lib/circle.server");
+          const res = await transferUsdc({
+            walletId: process.env["CIRCLE_TRUST_WALLET_ID"] ?? "",
+            toAddress: process.env[`CIRCLE_${a.id.toUpperCase()}_ADDRESS`] ?? "",
+            amountUsdc: (amount / 1e6).toFixed(6),
+          });
+          totalPaidMinor += amount;
+          steps.push({
+            kind: "settlement",
+            title: `Paid ${a.name}`,
+            detail: `USDC settled on Arc Testnet · state ${res.state}`,
+            ok: true,
+            txHash: res.txHash,
+            agentId: a.id,
+            amountMinor: amount,
+          });
+        } catch (e) {
+          steps.push({
+            kind: "settlement",
+            title: `Payment failed — ${a.name}`,
+            detail: e instanceof Error ? e.message : "Unknown transfer error",
+            ok: false,
+            agentId: a.id,
+            amountMinor: 0,
+          });
+        }
+      } else {
+        totalPaidMinor += amount;
+        steps.push({
+          kind: "settlement",
+          title: `Paid ${a.name} (demo mode)`,
+          detail:
+            a.id === "nexus" && r.performance === "LOSS"
+              ? "Paid for the run even though the quantum method lost. The record says it lost."
+              : "Simulated USDC settlement on Arc Testnet.",
+          ok: true,
+          txHash: pseudoTx(`pay:${hash}:${a.id}`),
+          agentId: a.id,
+          amountMinor: amount,
+        });
+      }
+    }
+
+    return {
+      pathwayId: pathway.id,
+      simulated: !live,
+      mode: live ? "live" : "demo",
+      steps,
+      receiptHash: hash,
+      grade: graded.grade,
+      payable,
+      totalPaidMinor,
+      startedAt,
+    };
+  });
+
+export const getExchangeStatus = createServerFn({ method: "GET" }).handler(async () => {
+  const { preflight } = await import("@/lib/circle.server");
+  const pf = preflight();
+  return {
+    circleReady: pf.ok,
+    hints: pf.hints,
+    contractDeployed: contractCfg.deployed === true,
+    contractAddress: contractCfg.address as string | null,
+    chainId: contractCfg.chainId,
+  };
+});
