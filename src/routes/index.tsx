@@ -189,6 +189,7 @@ function Index() {
                   </Link>
                 </div>
               </article>
+              </Reveal>
             );
           })}
         </div>
