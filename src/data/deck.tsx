@@ -25,6 +25,7 @@ const ORDER = `policy check
    -> dequantization gate      can a classical surrogate reproduce it?
    -> quantum leg              a measurement, or assessed-blocked
    -> receipt grading          PASS / GAP / STRUCTURAL / FAIL
+   -> post-quantum seal        SLH-DSA signature, verified on the spot
    -> anchor on Arc            written BEFORE money moves
    -> USDC settlement          only against a PASS receipt`;
 
