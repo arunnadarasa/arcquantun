@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { Shell, Pill } from "@/components/shell";
-import { ARC_CHAIN_ID, ARC_RPC, ARC_EXPLORER, USDC_ADDRESS } from "@/lib/arc-chain";
+import { ARC_CHAIN_ID, ARC_RPC_URL, ARC_EXPLORER, ARC_USDC_ADDRESS } from "@/lib/arc-chain";
 
 export const Route = createFileRoute("/architecture")({
   head: () => ({
