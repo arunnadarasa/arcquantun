@@ -111,7 +111,7 @@ export function receiptHash(payload: unknown): string {
   const lanes = [0x811c9dc5, 0x01000193, 0x9e3779b9, 0x85ebca6b];
   const out: string[] = [];
   for (let lane = 0; lane < 4; lane++) {
-    let h = lanes[lane] >>> 0;
+    let h = (lanes[lane] ?? 0x811c9dc5) >>> 0;
     for (let i = 0; i < s.length; i++) {
       h ^= s.charCodeAt(i) + lane;
       h = Math.imul(h, 0x01000193) >>> 0;
