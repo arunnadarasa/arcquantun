@@ -34,6 +34,16 @@ export const Route = createFileRoute("/")({
   component: Index,
 });
 
+// A bar is only drawn where the floor has a bounded scale it can honestly sit
+// against; open-ended counts get no bar rather than an invented ceiling.
+function floorScale(floor: { value: number; unit: string }): { value: number; max: number } | null {
+  if (floor.unit === "%") return { value: floor.value, max: 100 };
+  if (floor.unit === "AUROC" || (floor.value <= 1 && floor.value > 0)) {
+    return { value: floor.value, max: 1 };
+  }
+  return null;
+}
+
 function Index() {
   const [selected, setSelected] = useState<string | null>(null);
   const runFn = useServerFn(runPathwayJob);
