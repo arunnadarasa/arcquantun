@@ -38,7 +38,9 @@ export const Route = createFileRoute("/")({
 // against; open-ended counts get no bar rather than an invented ceiling.
 function floorScale(floor: { value: number; unit: string }): { value: number; max: number } | null {
   if (floor.unit === "%") return { value: floor.value, max: 100 };
-  if (floor.unit === "AUROC" || (floor.value <= 1 && floor.value > 0)) {
+  const outOf = /^of\s+(\d+(?:\.\d+)?)$/.exec(floor.unit.trim());
+  if (outOf) return { value: floor.value, max: Number(outOf[1]) };
+  if (floor.unit === "" && floor.value > 0 && floor.value <= 1) {
     return { value: floor.value, max: 1 };
   }
   return null;
