@@ -265,10 +265,11 @@ export const runPathwayJob = createServerFn({ method: "POST" })
           totalPaidMinor += amount;
           steps.push({
             kind: "settlement",
-            title: `Paid ${a.name}`,
+            title: res.txHash ? `Paid ${a.name}` : `Paid ${a.name} (pending)`,
             detail: `USDC settled on Arc Testnet · state ${res.state}`,
             ok: true,
             txHash: res.txHash,
+            transferId: res.transferId,
             agentId: a.id,
             amountMinor: amount,
           });
