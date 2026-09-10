@@ -61,7 +61,6 @@ function pseudoTx(seed: string): string {
 export const runPathwayJob = createServerFn({ method: "POST" })
   .inputValidator((d: unknown) => z.object({ pathwayId: z.string() }).parse(d))
   .handler(async ({ data }): Promise<RunResult> => {
-    console.log("[runPathwayJob] received", data.pathwayId);
     const pathway = getPathway(data.pathwayId);
     const run = getRun(data.pathwayId);
     if (!pathway || !run) throw new Error(`Unknown pathway ${data.pathwayId}`);
@@ -155,12 +154,10 @@ export const runPathwayJob = createServerFn({ method: "POST" })
 
     // 6. Post-quantum seal. A receipt that does not verify is not anchored and
     // not paid — the same discipline as a failed grade.
-    console.log("[runPathwayJob] seal start", pathway.id, hash);
     let seal: ReceiptSeal | null = null;
     if (isPayable(graded.grade)) {
       const { sealDigest } = await import("@/lib/pq-seal.server");
       seal = await sealDigest(hash);
-      console.log("[runPathwayJob] seal result", seal.verified, seal.scheme);
       steps.push({
         kind: "seal",
         title: seal.verified
@@ -187,7 +184,6 @@ export const runPathwayJob = createServerFn({ method: "POST" })
     let anchorTx: string | null = null;
     if (payable) {
       if (live) {
-        console.log("[runPathwayJob] anchor start", contractCfg.address);
         try {
           const { anchorReceipt } = await import("@/lib/circle.server");
           const res = await anchorReceipt({
@@ -198,7 +194,6 @@ export const runPathwayJob = createServerFn({ method: "POST" })
             engine: r.engine,
             shots: r.shots ?? 0,
           });
-          console.log("[runPathwayJob] anchor result", res.state, res.txHash);
           anchorTx = res.txHash;
           steps.push({
             kind: "anchor",
