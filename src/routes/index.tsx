@@ -178,7 +178,6 @@ function Index() {
                 <div className="mt-4 flex flex-wrap gap-2">
                   <button
                     onClick={() => {
-                      console.log("[run click]", p.id);
                       setSelected(p.id);
                       setResult(null);
                       mutation.mutate(p.id);
@@ -273,6 +272,15 @@ function RunPanel({ result }: { result: RunResult }) {
                   className="num mt-2 inline-block text-[0.68rem] text-accent underline underline-offset-2"
                 >
                   {s.txHash.slice(0, 18)}… on Arcscan
+                </a>
+              ) : s.transferId ? (
+                <a
+                  href={`https://console.circle.com/wallets/transactions/${s.transferId}`}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="num mt-2 inline-block text-[0.68rem] text-muted-foreground underline underline-offset-2"
+                >
+                  {s.transferId.slice(0, 18)}… pending on Circle
                 </a>
               ) : null}
             </li>
