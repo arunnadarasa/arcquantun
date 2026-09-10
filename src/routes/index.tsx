@@ -106,16 +106,15 @@ function Index() {
         </p>
 
         <div className="mt-8 grid gap-4 md:grid-cols-2">
-          {pathways.map((p) => {
+          {pathways.map((p, i) => {
             const run = getRun(p.id);
             const grade = run ? gradeReceipt(run.receipt).grade : "STRUCTURAL";
             const active = selected === p.id;
+            const scale = floorScale(p.classicalFloor);
             return (
+              <Reveal key={p.id} delay={(i % 2) * 80} className="h-full">
               <article
-                key={p.id}
-                className={`rounded-lg border bg-card p-5 transition-colors ${
-                  active ? "border-primary" : "border-border hover:border-muted-foreground/40"
-                }`}
+                className={`glass-card h-full rounded-lg p-5 ${active ? "border-primary" : ""}`}
               >
                 <div className="flex flex-wrap items-center gap-2">
                   <Pill tone={p.status === "assessed-blocked" ? "gap" : "muted"}>
