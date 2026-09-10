@@ -60,6 +60,7 @@ function pseudoTx(seed: string): string {
 export const runPathwayJob = createServerFn({ method: "POST" })
   .inputValidator((d: unknown) => z.object({ pathwayId: z.string() }).parse(d))
   .handler(async ({ data }): Promise<RunResult> => {
+    console.log("[runPathwayJob] received", data.pathwayId);
     const pathway = getPathway(data.pathwayId);
     const run = getRun(data.pathwayId);
     if (!pathway || !run) throw new Error(`Unknown pathway ${data.pathwayId}`);
