@@ -14,9 +14,9 @@ export interface LedgerEntry {
   grade: string;
   receiptHash: string;
   /** Post-quantum seal carried alongside the anchor. */
-  sealScheme?: string;
-  sealSignature?: string;
-  sealVerified?: boolean;
+  sealScheme?: string | undefined;
+  sealSignature?: string | undefined;
+  sealVerified?: boolean | undefined;
 }
 
 const KEY = "cqx.ledger.v1";
