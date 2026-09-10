@@ -63,14 +63,19 @@ async function call(path, payload) {
   return JSON.parse(text).data;
 }
 
-const set = await call("/developer/walletSets", { name: "Clinical Quantum Exchange" });
-const walletSetId = set?.walletSet?.id;
-if (!walletSetId) throw new Error(`no wallet set id: ${JSON.stringify(set)}`);
+// Reuse an existing set when one was already created (WALLET_SET_ID=...).
+let walletSetId = (process.env.WALLET_SET_ID ?? "").trim();
+if (!walletSetId) {
+  const set = await call("/developer/walletSets", { name: "Clinical Quantum Exchange" });
+  walletSetId = set?.walletSet?.id;
+  if (!walletSetId) throw new Error(`no wallet set id: ${JSON.stringify(set)}`);
+}
 console.log(`wallet set: ${walletSetId}`);
 
+// `blockchains` must be unique; `count` is what multiplies the wallets.
 const created = await call("/developer/wallets", {
   walletSetId,
-  blockchains: Array(AGENTS.length).fill(BLOCKCHAIN),
+  blockchains: [BLOCKCHAIN],
   accountType: "EOA",
   count: AGENTS.length,
 });
