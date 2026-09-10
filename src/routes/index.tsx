@@ -139,7 +139,8 @@ function Index() {
                     <div className="text-muted-foreground">Classical floor</div>
                     <div className="num mt-1 text-foreground">
                       {p.classicalFloor.value}
-                      {p.classicalFloor.unit} {p.classicalFloor.metric}
+                      {p.classicalFloor.unit === "%" ? "%" : ` ${p.classicalFloor.unit}`}{" "}
+                      {p.classicalFloor.metric}
                     </div>
                   </div>
                   <div>

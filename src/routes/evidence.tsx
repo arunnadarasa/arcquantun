@@ -100,7 +100,8 @@ function EvidencePage() {
                     </div>
                     <div className="num mt-1 text-[0.68rem] text-muted-foreground">
                       floor {run.classical.value}
-                      {p.classicalFloor.unit} {run.classical.metric} · {run.classical.method}
+                      {p.classicalFloor.unit === "%" ? "%" : ` ${p.classicalFloor.unit}`}{" "}
+                      {run.classical.metric} · {run.classical.method}
                     </div>
                   </div>
                 </div>
