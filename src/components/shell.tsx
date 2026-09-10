@@ -9,6 +9,7 @@ const nav = [
   { to: "/ledger", label: "Settlements" },
   { to: "/evidence", label: "Evidence" },
   { to: "/architecture", label: "Architecture" },
+  { to: "/deck", label: "Deck" },
 ];
 
 export function Shell({ children }: { children: ReactNode }) {

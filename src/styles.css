@@ -224,3 +224,86 @@
     scroll-behavior: auto;
   }
 }
+
+/*
+ * Deck typography. Slides render at a fixed 1920x1080 and are scaled to fit,
+ * so ordinary app type sizes are unreadable when projected or recorded.
+ * Semantic classes only — Tailwind text-* utilities stay for app chrome.
+ */
+.slide-content {
+  width: 1920px;
+  height: 1080px;
+  overflow: hidden;
+  position: relative;
+
+  --slide-title-lg: 104px;
+  --slide-title: 88px;
+  --slide-subtitle: 52px;
+  --slide-body-lg: 40px;
+  --slide-body: 32px;
+  --slide-caption: 24px;
+  --slide-kicker: 22px;
+  --slide-chrome: 20px;
+}
+
+.slide-title-lg {
+  font-family: var(--font-display);
+  font-size: var(--slide-title-lg);
+  line-height: 1;
+  letter-spacing: -0.05em;
+}
+.slide-title {
+  font-family: var(--font-display);
+  font-size: var(--slide-title);
+  line-height: 1.05;
+  letter-spacing: -0.04em;
+}
+.slide-subtitle {
+  font-size: var(--slide-subtitle);
+  line-height: 1.15;
+  letter-spacing: -0.025em;
+}
+.slide-body-lg {
+  font-size: var(--slide-body-lg);
+  line-height: 1.22;
+}
+.slide-body {
+  font-size: var(--slide-body);
+  line-height: 1.28;
+}
+.slide-caption {
+  font-size: var(--slide-caption);
+  line-height: 1.25;
+}
+.slide-kicker {
+  font-family: var(--font-mono);
+  font-size: var(--slide-kicker);
+  line-height: 1.1;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+.slide-chrome,
+.slide-badge,
+.slide-page {
+  font-family: var(--font-mono);
+  font-size: var(--slide-chrome);
+  line-height: 1.15;
+}
+.slide-badge,
+.slide-page {
+  white-space: nowrap;
+}
+
+@media print {
+  @page {
+    size: 1920px 1080px landscape;
+    margin: 0;
+  }
+  .print-hide {
+    display: none !important;
+  }
+  .print-slide {
+    page-break-after: always;
+    break-after: page;
+  }
+}
