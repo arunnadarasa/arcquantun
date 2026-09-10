@@ -1,51 +1,145 @@
 {
   "name": "ReceiptAnchor",
-  "deployed": false,
-  "address": null,
+  "deployed": true,
+  "address": "0xd924f134e69f678e09bd31394f975b3cdbd2f52f",
   "chainId": 5042002,
   "explorer": "https://testnet.arcscan.app",
-  "deployTx": null,
   "verified": false,
   "solc": "0.8.24",
   "abi": [
     {
-      "type": "event",
-      "name": "Anchored",
-      "inputs": [
-        { "name": "author", "type": "address", "indexed": true },
-        { "name": "receiptHash", "type": "bytes32", "indexed": true },
-        { "name": "signalId", "type": "string", "indexed": false },
-        { "name": "engine", "type": "string", "indexed": false },
-        { "name": "shots", "type": "uint32", "indexed": false },
-        { "name": "at", "type": "uint256", "indexed": false }
-      ],
-      "anonymous": false
-    },
-    {
-      "type": "function",
-      "name": "anchor",
-      "stateMutability": "nonpayable",
-      "inputs": [
-        { "name": "receiptHash", "type": "bytes32" },
-        { "name": "signalId", "type": "string" },
-        { "name": "engine", "type": "string" },
-        { "name": "shots", "type": "uint32" }
-      ],
-      "outputs": []
-    },
-    {
-      "type": "function",
-      "name": "total",
-      "stateMutability": "view",
       "inputs": [],
-      "outputs": [{ "name": "", "type": "uint256" }]
+      "name": "AlreadyAnchored",
+      "type": "error"
     },
     {
-      "type": "function",
+      "inputs": [],
+      "name": "EmptyEngine",
+      "type": "error"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "author",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "internalType": "bytes32",
+          "name": "receiptHash",
+          "type": "bytes32"
+        },
+        {
+          "indexed": false,
+          "internalType": "string",
+          "name": "signalId",
+          "type": "string"
+        },
+        {
+          "indexed": false,
+          "internalType": "string",
+          "name": "engine",
+          "type": "string"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint32",
+          "name": "shots",
+          "type": "uint32"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "at",
+          "type": "uint256"
+        }
+      ],
+      "name": "Anchored",
+      "type": "event"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "receiptHash",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "string",
+          "name": "signalId",
+          "type": "string"
+        },
+        {
+          "internalType": "string",
+          "name": "engine",
+          "type": "string"
+        },
+        {
+          "internalType": "uint32",
+          "name": "shots",
+          "type": "uint32"
+        }
+      ],
+      "name": "anchor",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "",
+          "type": "bytes32"
+        }
+      ],
       "name": "anchoredAt",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
       "stateMutability": "view",
-      "inputs": [{ "name": "", "type": "bytes32" }],
-      "outputs": [{ "name": "", "type": "uint256" }]
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "receiptHash",
+          "type": "bytes32"
+        }
+      ],
+      "name": "isAnchored",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "total",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
     }
-  ]
+  ],
+  "contractId": "01a08a37-9ecd-7ca3-9abe-e3e309e0ea9a",
+  "bytecode": "0x608060405234801561000f575f80fd5b5061030e8061001d5f395ff3fe608060405234801561000f575f80fd5b506004361061004a575f3560e01c80632ddbd13a1461004e5780634f0b58011461006a5780639591a6101461009b578063f207ee19146100ba575b5f80fd5b61005760015481565b6040519081526020015b60405180910390f35b61008b610078366004610184565b5f90815260208190526040902054151590565b6040519015158152602001610061565b6100576100a9366004610184565b5f6020819052908152604090205481565b6100cd6100c83660046101e0565b6100cf565b005b5f86815260208190526040902054156100fb5760405163a0094ce360e01b815260040160405180910390fd5b5f82900361011c5760405163482407f360e11b815260040160405180910390fd5b5f8681526020819052604090819020429081905560018054810190559051879133917f84b799bc3884095beb3007878925d69e2eeb4bc5009705bf75cdb18b3ac0ff2d91610174918a918a918a918a918a9190610296565b60405180910390a3505050505050565b5f60208284031215610194575f80fd5b5035919050565b5f8083601f8401126101ab575f80fd5b50813567ffffffffffffffff8111156101c2575f80fd5b6020830191508360208285010111156101d9575f80fd5b9250929050565b5f805f805f80608087890312156101f5575f80fd5b86359550602087013567ffffffffffffffff80821115610213575f80fd5b61021f8a838b0161019b565b90975095506040890135915080821115610237575f80fd5b5061024489828a0161019b565b909450925050606087013563ffffffff81168114610260575f80fd5b809150509295509295509295565b81835281816020850137505f828201602090810191909152601f909101601f19169091010190565b608081525f6102a960808301888a61026e565b82810360208401526102bc81878961026e565b63ffffffff95909516604084015250506060015294935050505056fea26469706673582212209383392a56f987b0835780cee1f925c9d58c8e32221631e2bdeaff07f273208a64736f6c63430008180033"
 }
