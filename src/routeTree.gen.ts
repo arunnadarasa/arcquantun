@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AgentsRouteImport } from './routes/agents'
+import { Route as ArchitectureRouteImport } from './routes/architecture'
 import { Route as EvidenceRouteImport } from './routes/evidence'
 import { Route as LedgerRouteImport } from './routes/ledger'
 
@@ -22,6 +23,11 @@ const IndexRoute = IndexRouteImport.update({
 const AgentsRoute = AgentsRouteImport.update({
   id: '/agents',
   path: '/agents',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ArchitectureRoute = ArchitectureRouteImport.update({
+  id: '/architecture',
+  path: '/architecture',
   getParentRoute: () => rootRouteImport,
 } as any)
 const EvidenceRoute = EvidenceRouteImport.update({
@@ -38,12 +44,14 @@ const LedgerRoute = LedgerRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/agents': typeof AgentsRoute
+  '/architecture': typeof ArchitectureRoute
   '/evidence': typeof EvidenceRoute
   '/ledger': typeof LedgerRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/agents': typeof AgentsRoute
+  '/architecture': typeof ArchitectureRoute
   '/evidence': typeof EvidenceRoute
   '/ledger': typeof LedgerRoute
 }
@@ -51,20 +59,22 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/agents': typeof AgentsRoute
+  '/architecture': typeof ArchitectureRoute
   '/evidence': typeof EvidenceRoute
   '/ledger': typeof LedgerRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/agents' | '/evidence' | '/ledger'
+  fullPaths: '/' | '/agents' | '/architecture' | '/evidence' | '/ledger'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/agents' | '/evidence' | '/ledger'
-  id: '__root__' | '/' | '/agents' | '/evidence' | '/ledger'
+  to: '/' | '/agents' | '/architecture' | '/evidence' | '/ledger'
+  id: '__root__' | '/' | '/agents' | '/architecture' | '/evidence' | '/ledger'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AgentsRoute: typeof AgentsRoute
+  ArchitectureRoute: typeof ArchitectureRoute
   EvidenceRoute: typeof EvidenceRoute
   LedgerRoute: typeof LedgerRoute
 }
@@ -83,6 +93,13 @@ declare module '@tanstack/react-router' {
       path: '/agents'
       fullPath: '/agents'
       preLoaderRoute: typeof AgentsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/architecture': {
+      id: '/architecture'
+      path: '/architecture'
+      fullPath: '/architecture'
+      preLoaderRoute: typeof ArchitectureRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/evidence': {
@@ -105,6 +122,7 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AgentsRoute: AgentsRoute,
+  ArchitectureRoute: ArchitectureRoute,
   EvidenceRoute: EvidenceRoute,
   LedgerRoute: LedgerRoute,
 }
