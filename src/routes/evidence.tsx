@@ -170,6 +170,7 @@ function EvidencePage() {
                   </div>
                 </div>
               </article>
+              </Reveal>
             );
           })}
         </div>
