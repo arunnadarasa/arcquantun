@@ -27,6 +27,7 @@ export interface RunStep {
   ok: boolean;
   meta?: Record<string, string | number | null>;
   txHash?: string | null;
+  transferId?: string;
   agentId?: AgentId;
   amountMinor?: number;
 }
