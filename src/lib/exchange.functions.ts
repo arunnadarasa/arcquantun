@@ -253,7 +253,7 @@ export const runPathwayJob = createServerFn({ method: "POST" })
         continue;
       }
       if (live) {
-        console.log("[runPathwayJob] transfer start", a.id, amount);
+        
         try {
           const { transferUsdc } = await import("@/lib/circle.server");
           const res = await transferUsdc({
