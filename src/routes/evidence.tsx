@@ -8,6 +8,7 @@ import { getRun, RUN_COMMIT } from "@/data/runs";
 import { gradeReceipt } from "@/lib/receipts";
 import { sealPathwayReceipt } from "@/lib/exchange.functions";
 import type { ReceiptSeal } from "@/data/seal-info";
+import { CHAT_IS_NOT_EVIDENCE } from "@/data/operations";
 
 function SealPanel({ pathwayId }: { pathwayId: string }) {
   const seal = useServerFn(sealPathwayReceipt);
