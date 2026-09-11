@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { Shell, Pill } from "@/components/shell";
 import { Reveal } from "@/components/motion";
 import { ARC_CHAIN_ID, ARC_RPC_URL, ARC_EXPLORER, ARC_USDC_ADDRESS } from "@/lib/arc-chain";
+import { OPERATING_LESSONS } from "@/data/operations";
 
 export const Route = createFileRoute("/architecture")({
   head: () => ({
@@ -46,7 +47,13 @@ Receipt grading -> PASS / GAP / STRUCTURAL / FAIL
 Registry Agent -> anchor receipt hash on Arc (ReceiptAnchor.sol)
    |
    v
-Settlement -> USDC to each agent, only against a PASS receipt`;
+Settlement -> USDC to each agent, only against a PASS receipt
+
+   [ control channel — chat / schedule ] --- sits BESIDE this path,
+                                             never inside it: it can
+                                             start a job and read a
+                                             receipt back, and nothing
+                                             it says becomes evidence`;
 
 function ArchitecturePage() {
   return (
