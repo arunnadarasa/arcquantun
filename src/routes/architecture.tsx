@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { Shell, Pill } from "@/components/shell";
 import { Reveal } from "@/components/motion";
 import { ARC_CHAIN_ID, ARC_RPC_URL, ARC_EXPLORER, ARC_USDC_ADDRESS } from "@/lib/arc-chain";
+import { OPERATING_LESSONS } from "@/data/operations";
 
 export const Route = createFileRoute("/architecture")({
   head: () => ({
@@ -46,7 +47,13 @@ Receipt grading -> PASS / GAP / STRUCTURAL / FAIL
 Registry Agent -> anchor receipt hash on Arc (ReceiptAnchor.sol)
    |
    v
-Settlement -> USDC to each agent, only against a PASS receipt`;
+Settlement -> USDC to each agent, only against a PASS receipt
+
+   [ control channel — chat / schedule ] --- sits BESIDE this path,
+                                             never inside it: it can
+                                             start a job and read a
+                                             receipt back, and nothing
+                                             it says becomes evidence`;
 
 function ArchitecturePage() {
   return (
@@ -108,6 +115,28 @@ function ArchitecturePage() {
           </article>
           </Reveal>
         </div>
+
+        <Reveal>
+          <section className="mt-10">
+            <div className="flex flex-wrap items-center gap-2">
+              <h2 className="text-lg font-semibold">How the agents are actually operated</h2>
+              <Pill tone="signal">operating model</Pill>
+            </div>
+            <p className="mt-2 max-w-3xl text-sm leading-relaxed text-muted-foreground">
+              The diagram is the pipeline. This is the discipline that kept it honest while it was
+              being built — a scheduled agent with a searchable memory, driven from a phone, with
+              the chat channel deliberately kept outside the evidence path.
+            </p>
+            <div className="mt-5 grid gap-4 md:grid-cols-2">
+              {OPERATING_LESSONS.map((l) => (
+                <article key={l.title} className="glass-card h-full rounded-lg p-5">
+                  <h3 className="text-sm font-semibold">{l.title}</h3>
+                  <p className="mt-2 text-xs leading-relaxed text-muted-foreground">{l.body}</p>
+                </article>
+              ))}
+            </div>
+          </section>
+        </Reveal>
 
         <Reveal>
         <article className="mt-6 glass-card rounded-lg p-5">

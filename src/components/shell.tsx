@@ -2,6 +2,7 @@ import { Link, useRouterState } from "@tanstack/react-router";
 import { useState, type ReactNode } from "react";
 import { Menu, X } from "lucide-react";
 import { AuroraBackground } from "@/components/aurora-background";
+import { CHAT_FOOTER_CLAUSE } from "@/data/operations";
 
 const nav = [
   { to: "/", label: "Exchange" },
@@ -77,7 +78,7 @@ export function Shell({ children }: { children: ReactNode }) {
             no efficacy or outcome claim is made. Every number is shown with its engine and shot
             count. Receipt digests are sealed with SLH-DSA; the Arc transaction carrying the anchor
             is still ECDSA-signed, so the chain is post-quantum at the evidence layer and classical
-            underneath. That remaining leg is logged as an open hazard.
+            underneath. That remaining leg is logged as an open hazard. {CHAT_FOOTER_CLAUSE}
           </p>
           <p className="mt-4">Arc Testnet · chain 5042002 · USDC is the gas token.</p>
         </div>

@@ -10,6 +10,7 @@ import { agents } from "@/data/agents";
 import { pathways } from "@/data/pathways";
 import { QUANTUM_GAP, GAP_REMAINING, TRACKER_READ_ON } from "@/data/quantum-gap";
 import { SEAL_SCHEME, SEAL_STANDARD } from "@/data/seal-info";
+import { OPERATING_LESSONS } from "@/data/operations";
 
 export interface Slide {
   id: string;
@@ -350,6 +351,22 @@ export const deck: Slide[] = [
             "Post-quantum at the evidence layer, classical underneath — stated, not claimed away.",
           ]}
         />
+      </SlideFrame>
+    ),
+  },
+  {
+    id: "operating-model",
+    label: "Operating model",
+    notes:
+      "This was built by a scheduled agent with a searchable memory, driven from a phone. Four roles kept separate, a daily cadence rather than sprints, and the chat channel deliberately kept outside the evidence path — it can start a job and read a receipt back, and nothing it says becomes evidence.",
+    render: (i, n) => (
+      <SlideFrame
+        index={i}
+        total={n}
+        kicker="How this was actually run"
+        title="The chat channel is not the evidence layer"
+      >
+        <SlideBullets items={OPERATING_LESSONS.map((l) => `${l.title} — ${l.body}`)} />
       </SlideFrame>
     ),
   },
