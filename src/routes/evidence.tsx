@@ -140,6 +140,20 @@ function EvidencePage() {
           .
         </p>
 
+        <Reveal>
+          <article className="mt-8 glass-card rounded-lg p-5">
+            <div className="flex flex-wrap items-center gap-2">
+              <h2 className="text-base font-semibold">Chat is not the evidence layer</h2>
+              <Pill tone="gap">operating rule</Pill>
+            </div>
+            <ul className="mt-3 space-y-2 text-xs leading-relaxed text-muted-foreground">
+              {CHAT_IS_NOT_EVIDENCE.map((c) => (
+                <li key={c}>— {c}</li>
+              ))}
+            </ul>
+          </article>
+        </Reveal>
+
         <div className="mt-10 space-y-6">
           {pathways.map((p) => {
             const run = getRun(p.id);
