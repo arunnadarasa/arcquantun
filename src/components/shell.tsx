@@ -2,6 +2,7 @@ import { Link, useRouterState } from "@tanstack/react-router";
 import { useState, type ReactNode } from "react";
 import { Menu, X } from "lucide-react";
 import { AuroraBackground } from "@/components/aurora-background";
+import { CHAT_FOOTER_CLAUSE } from "@/data/operations";
 
 const nav = [
   { to: "/", label: "Exchange" },

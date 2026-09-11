@@ -354,6 +354,22 @@ export const deck: Slide[] = [
     ),
   },
   {
+    id: "operating-model",
+    label: "Operating model",
+    notes:
+      "This was built by a scheduled agent with a searchable memory, driven from a phone. Four roles kept separate, a daily cadence rather than sprints, and the chat channel deliberately kept outside the evidence path — it can start a job and read a receipt back, and nothing it says becomes evidence.",
+    render: (i, n) => (
+      <SlideFrame
+        index={i}
+        total={n}
+        kicker="How this was actually run"
+        title="The chat channel is not the evidence layer"
+      >
+        <SlideBullets items={OPERATING_LESSONS.map((l) => `${l.title} — ${l.body}`)} />
+      </SlideFrame>
+    ),
+  },
+  {
     id: "close",
     label: "Close",
     notes:
