@@ -18,7 +18,6 @@ import { Route as HumanRouteImport } from './routes/human'
 import { Route as IdentityRouteImport } from './routes/identity'
 import { Route as LedgerRouteImport } from './routes/ledger'
 import { Route as QuantumGapRouteImport } from './routes/quantum-gap'
-import { Route as ApiPublicCircleDebugRouteImport } from './routes/api/public/circle-debug'
 import { Route as ApiPublicIdkitRpSignatureRouteImport } from './routes/api/public/idkit/rp-signature'
 import { Route as ApiPublicIdkitVerifyRouteImport } from './routes/api/public/idkit/verify'
 
@@ -67,11 +66,6 @@ const QuantumGapRoute = QuantumGapRouteImport.update({
   path: '/quantum-gap',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ApiPublicCircleDebugRoute = ApiPublicCircleDebugRouteImport.update({
-  id: '/api/public/circle-debug',
-  path: '/api/public/circle-debug',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const ApiPublicIdkitRpSignatureRoute =
   ApiPublicIdkitRpSignatureRouteImport.update({
     id: '/api/public/idkit/rp-signature',
@@ -94,7 +88,6 @@ export interface FileRoutesByFullPath {
   '/identity': typeof IdentityRoute
   '/ledger': typeof LedgerRoute
   '/quantum-gap': typeof QuantumGapRoute
-  '/api/public/circle-debug': typeof ApiPublicCircleDebugRoute
   '/api/public/idkit/rp-signature': typeof ApiPublicIdkitRpSignatureRoute
   '/api/public/idkit/verify': typeof ApiPublicIdkitVerifyRoute
 }
@@ -108,7 +101,6 @@ export interface FileRoutesByTo {
   '/identity': typeof IdentityRoute
   '/ledger': typeof LedgerRoute
   '/quantum-gap': typeof QuantumGapRoute
-  '/api/public/circle-debug': typeof ApiPublicCircleDebugRoute
   '/api/public/idkit/rp-signature': typeof ApiPublicIdkitRpSignatureRoute
   '/api/public/idkit/verify': typeof ApiPublicIdkitVerifyRoute
 }
@@ -123,7 +115,6 @@ export interface FileRoutesById {
   '/identity': typeof IdentityRoute
   '/ledger': typeof LedgerRoute
   '/quantum-gap': typeof QuantumGapRoute
-  '/api/public/circle-debug': typeof ApiPublicCircleDebugRoute
   '/api/public/idkit/rp-signature': typeof ApiPublicIdkitRpSignatureRoute
   '/api/public/idkit/verify': typeof ApiPublicIdkitVerifyRoute
 }
@@ -139,7 +130,6 @@ export interface FileRouteTypes {
     | '/identity'
     | '/ledger'
     | '/quantum-gap'
-    | '/api/public/circle-debug'
     | '/api/public/idkit/rp-signature'
     | '/api/public/idkit/verify'
   fileRoutesByTo: FileRoutesByTo
@@ -153,7 +143,6 @@ export interface FileRouteTypes {
     | '/identity'
     | '/ledger'
     | '/quantum-gap'
-    | '/api/public/circle-debug'
     | '/api/public/idkit/rp-signature'
     | '/api/public/idkit/verify'
   id:
@@ -167,7 +156,6 @@ export interface FileRouteTypes {
     | '/identity'
     | '/ledger'
     | '/quantum-gap'
-    | '/api/public/circle-debug'
     | '/api/public/idkit/rp-signature'
     | '/api/public/idkit/verify'
   fileRoutesById: FileRoutesById
@@ -182,7 +170,6 @@ export interface RootRouteChildren {
   IdentityRoute: typeof IdentityRoute
   LedgerRoute: typeof LedgerRoute
   QuantumGapRoute: typeof QuantumGapRoute
-  ApiPublicCircleDebugRoute: typeof ApiPublicCircleDebugRoute
   ApiPublicIdkitRpSignatureRoute: typeof ApiPublicIdkitRpSignatureRoute
   ApiPublicIdkitVerifyRoute: typeof ApiPublicIdkitVerifyRoute
 }
@@ -252,13 +239,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof QuantumGapRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/public/circle-debug': {
-      id: '/api/public/circle-debug'
-      path: '/api/public/circle-debug'
-      fullPath: '/api/public/circle-debug'
-      preLoaderRoute: typeof ApiPublicCircleDebugRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/api/public/idkit/rp-signature': {
       id: '/api/public/idkit/rp-signature'
       path: '/api/public/idkit/rp-signature'
@@ -286,7 +266,6 @@ const rootRouteChildren: RootRouteChildren = {
   IdentityRoute: IdentityRoute,
   LedgerRoute: LedgerRoute,
   QuantumGapRoute: QuantumGapRoute,
-  ApiPublicCircleDebugRoute: ApiPublicCircleDebugRoute,
   ApiPublicIdkitRpSignatureRoute: ApiPublicIdkitRpSignatureRoute,
   ApiPublicIdkitVerifyRoute: ApiPublicIdkitVerifyRoute,
 }
