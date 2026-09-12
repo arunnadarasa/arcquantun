@@ -3,7 +3,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { agents, type AgentId } from "@/data/agents";
-import { getPathway } from "@/data/pathways";
+import { getPathway, poweredFloor } from "@/data/pathways";
 import { getRun } from "@/data/runs";
 import { gradeReceipt, isPayable, receiptDigest, receiptPayload } from "@/lib/receipts";
 import type { ReceiptSeal } from "@/data/seal-info";
