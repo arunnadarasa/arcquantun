@@ -11,6 +11,7 @@ import {
   receiptDigest,
   receiptPayload,
   type PayeeIdentity,
+  type HumanAuthorityRecord,
 } from "@/lib/receipts";
 import { INTENT_FOR_AGENT } from "@/lib/ens-namespace";
 import type { ReceiptSeal } from "@/data/seal-info";
@@ -20,6 +21,7 @@ import contractCfg from "@/data/contract.json";
 export type StepKind =
   | "policy"
   | "identity"
+  | "human"
   | "classical"
   | "fitness"
   | "dequantization"
