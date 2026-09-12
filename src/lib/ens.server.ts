@@ -173,10 +173,17 @@ export async function checkAgentIdentity(
   let attestationPresent = false;
 
   if (ensConfigured() && ensNamespace.registered) {
+    // ENSIP-25 keys are bracketed per agent on the parent name; a dedicated
+    // subname may also carry the plain keys. Read both and take whichever answers.
+    const parent = ensNamespace.parent;
     const [actorText, intentsText, attText] = await Promise.all([
-      readText(rec.name, "arc:actor"),
-      readText(rec.name, "agent:intents"),
-      readText(rec.name, attKey),
+      readText(parent, `arc:actor[${rec.agentId}]`).then(
+        (v) => v ?? readText(rec.name, "arc:actor"),
+      ),
+      readText(parent, `agent:intents[${rec.agentId}]`).then(
+        (v) => v ?? readText(rec.name, "agent:intents"),
+      ),
+      readText(parent, attKey).then((v) => v ?? readText(rec.name, attKey)),
     ]);
     if (actorText || intentsText || attText) {
       source = "onchain";
