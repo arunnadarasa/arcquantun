@@ -90,17 +90,50 @@ export const runPathwayJob = createServerFn({ method: "POST" })
       });
     }
 
-    // 2. Classical floor, recorded first.
+    // 2. Classical floor, recorded first — and drawn from the POWERED family,
+    // never from a single unpowered baseline.
+    const powered = poweredFloor(pathway);
     steps.push({
       kind: "classical",
       title: "Classical floor recorded",
       detail: `${run.classical.method} — ${run.classical.metric} ${run.classical.value}`,
       ok: true,
       agentId: "baseline",
-      meta: { runtime_ms: run.classical.runtimeMs },
+      meta: {
+        runtime_ms: run.classical.runtimeMs,
+        family_members: pathway.classicalFloor.family.length,
+        powered_best: powered ? `${powered.method} ${powered.value}` : null,
+      },
     });
 
-    // 3. Dequantization gate.
+    // 3. Cohort fitness, before any quantum budget is released. If the best a
+    // classical oracle can do at large sample size sits under the bar, the
+    // signal is weak rather than the data scarce, and nothing is spent.
+    if (pathway.ceiling) {
+      steps.push({
+        kind: "fitness",
+        title: "Cohort fitness gate — unfit, no quantum budget released",
+        detail: pathway.ceiling.note,
+        ok: false,
+        agentId: "baseline",
+        meta: {
+          bar: pathway.ceiling.bar,
+          classical_ceiling: pathway.ceiling.oracle,
+          oracle_records: pathway.ceiling.oracleN,
+        },
+      });
+    } else {
+      steps.push({
+        kind: "fitness",
+        title: "Cohort fitness gate — passed",
+        detail:
+          "A classical ceiling sweep over growing sample sizes clears the bar, so the cohort carries enough signal to be worth a quantum receipt.",
+        ok: true,
+        agentId: "baseline",
+      });
+    }
+
+    // 4. Dequantization gate.
     steps.push({
       kind: "dequantization",
       title: run.dequantization.reproduced
