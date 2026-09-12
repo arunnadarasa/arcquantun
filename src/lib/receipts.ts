@@ -11,8 +11,37 @@
 export const ENVELOPE_SCHEMA = "qas/envelope/0.1";
 
 export type MechanismVerdict = "PASS" | "FAIL" | "BLOCKED";
-export type PerformanceVerdict = "WIN" | "LOSS" | "TIE" | "NOT-RUN";
+/**
+ * UNPOWERED-FLOOR: the comparison was made against a single unpowered baseline.
+ * Beating a straw man is not a win, so this verdict can never read WIN.
+ */
+export type PerformanceVerdict = "WIN" | "LOSS" | "TIE" | "NOT-RUN" | "UNPOWERED-FLOOR";
 export type ReceiptGrade = "PASS" | "GAP" | "STRUCTURAL" | "FAIL";
+
+/**
+ * Noisy-tier bands, committed before the run. A result that lands outside sI is
+ * published with its diagnosis and pays nothing. It is never re-run to chase a seal.
+ */
+export type NoiseBand = "sI-PASS" | "sII-DEGRADED" | "sIII-FAIL";
+
+export const NOISE_BANDS: { band: NoiseBand; meaning: string }[] = [
+  { band: "sI-PASS", meaning: "Inside the pre-committed tolerance at every probe." },
+  {
+    band: "sII-DEGRADED",
+    meaning: "The signal's direction survives the noise; its magnitude does not.",
+  },
+  { band: "sIII-FAIL", meaning: "Outside the degraded bar at one or more probes." },
+];
+
+/** A pre-registration and the amendments committed before the compute they govern. */
+export interface PreRegistration {
+  /** Document or commit the bars were fixed in, before any compute. */
+  ref: string;
+  /** The bars themselves, in the words they were committed in. */
+  bars: string;
+  /** Each amendment, committed before the run it governs. Tools get fixed; targets do not move. */
+  amendments: string[];
+}
 
 export interface ReceiptEnvelope {
   schema: string;
@@ -29,6 +58,12 @@ export interface ReceiptEnvelope {
   measured: number | null;
   mechanism: MechanismVerdict;
   performance: PerformanceVerdict;
+  /** NOISELESS-SIM or NOISY-EMUL. Never a QPU tier unless a QPU actually ran. */
+  noiseTier?: "NOISELESS-SIM" | "NOISY-EMUL" | "not-run";
+  /** The committed band this run landed in, where a noisy tier applies. */
+  band?: NoiseBand | null;
+  /** The bars and the amendment chain, so a reader can see they were set first. */
+  preRegistration?: PreRegistration | null;
   /** Bell control: anti-correlated fraction on a |Phi+> pair in the same job. */
   bellAnticorrelated: number | null;
   jobId: string | null;
