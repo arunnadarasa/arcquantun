@@ -75,7 +75,9 @@ function IdentityPage() {
             { k: "Attested to", v: ensNamespace.attestationRegistry.caip2 },
             {
               k: "Namespace state",
-              v: ensNamespace.registered ? "registered on ENSv2" : "committed, not yet registered",
+              v: ensNamespace.registered
+                ? "registered on the ENSv2 beta registrar"
+                : "committed, not yet registered",
             },
           ].map((c) => (
             <Reveal key={c.k} className="glass-card rounded-lg p-4">
