@@ -52,3 +52,8 @@ a USDC settlement, in a fixed order that cannot be reordered to flatter a result
 - Never pay an unnamed address: resolve the payee's ENS name, require it to point at the exact Arc address being paid, and require its record to permit this leg's intent
 - Never treat an ENSIP-25 attestation as evidence of good behaviour, or a Sepolia-to-Arc pointer as a bridge
 - Never present a committed namespace entry as a live on-chain read; label the source on every surface
+- Never release a budget on no one's authority: require a World ID credential bound to this exact pathway, and hash its nullifier into the receipt digest before sealing
+- Never keep anything about that human beyond the nullifier hash — no image, biometric, name, email, phone or wallet reaches this app
+- Never let a Selfie Check stand for identity, professional registration, competence or clinical authority; it is an authorisation and abuse-prevention signal only
+- Never present a simulated credential as a verified human; label it simulated on every surface while the sandbox entitlement is pending
+- Never claim an AgentBook registration that has not returned an entry; a missing agent is shown as missing
