@@ -123,6 +123,15 @@ function Index() {
           classical floor was recorded first, in every case.
         </p>
 
+        <div className="mt-6">
+          <WorldIdGate
+            pathwayId={selected ?? pathways[0]!.id}
+            authority={authority}
+            onAuthorised={setAuthority}
+            onCleared={() => setAuthority(null)}
+          />
+        </div>
+
         <div className="mt-8 grid gap-4 md:grid-cols-2">
           {pathways.map((p, i) => {
             const run = getRun(p.id);
