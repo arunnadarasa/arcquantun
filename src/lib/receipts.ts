@@ -163,9 +163,27 @@ export function gradeTone(grade: ReceiptGrade): string {
   }
 }
 
+/**
+ * Who a leg is paid to, as a name rather than a hex string. Carried into the
+ * hashed payload so the anchored digest commits to the identity claim too.
+ */
+export interface PayeeIdentity {
+  agentId: string;
+  ensName: string;
+  payeeArcAddress: string | null;
+  intent: string;
+  state: string;
+  source: string;
+  checkedAt: string;
+}
+
 /** The exact bytes that get hashed, sealed and anchored. */
-export function receiptPayload(pathwayId: string, r: ReceiptEnvelope): unknown {
-  return { pathwayId, receipt: r, commit: r.commit };
+export function receiptPayload(
+  pathwayId: string,
+  r: ReceiptEnvelope,
+  identity?: PayeeIdentity[],
+): unknown {
+  return { pathwayId, receipt: r, commit: r.commit, identity: identity ?? null };
 }
 
 /** SHA-256 digest of the receipt payload. This is what SLH-DSA signs. */
