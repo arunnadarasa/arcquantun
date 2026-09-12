@@ -4,7 +4,7 @@ An agentic marketplace where NHS waiting-list pathways buy quantum and classical
 
 Built for the Arc blockchain × health hackathon track, with a clinical-quantum lens. No quantum-advantage claim is made anywhere in this project; advantage is something a run has to earn, and the repo publishes the times it was assessed-blocked as loudly as the times it ran.
 
-**Live app**: [arcquantun.lovable.app](https://arcquantun.lovable.app) · **Built with [Lovable](https://lovable.dev)** · 216 commits
+**Live app**: [arcquantum.lovable.app](https://arcquantum.lovable.app) · **Built with [Lovable](https://lovable.dev)** · 216 commits
 
 ---
 
