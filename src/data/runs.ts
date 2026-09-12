@@ -440,6 +440,99 @@ export const runs: RunRecord[] = [
       note: "Submission contract only. No credentials, no job id, no result implied by this block.",
     },
   },
+  {
+    pathwayId: "rare-subgroup",
+    classical: {
+      method: "Powered classical family: balanced linear, SMOTE + RBF, tuned RBF",
+      metric: "Minority recall",
+      value: 0.76,
+      runtimeMs: 4100,
+    },
+    dequantization: {
+      surrogate: "Not reached",
+      reproduced: false,
+      note: "The gate was never reached. The cohort-fitness sweep stopped the lane first: a 20,000-record classical oracle ceiling of 0.40 recall sits below the 0.80 bar and below the balanced floor at 320 records, so the signal is weak rather than the data scarce.",
+    },
+    receipt: env({
+      claims: [
+        "No quantum measurement exists for this pathway. The cohort failed its fitness sweep before any budget was released.",
+        "An earlier train-side result on this cohort was measured against an unpowered plain linear baseline and is withdrawn as a performance claim.",
+      ],
+      engine: "Quantinuum Nexus",
+      backendQualifier: "not-run",
+      shots: null,
+      seed: null,
+      commit: RUN_COMMIT,
+      noiseTier: "not-run",
+      band: null,
+      preRegistration: PRE_REG["rare-subgroup"],
+      measured: null,
+      mechanism: "BLOCKED",
+      performance: "UNPOWERED-FLOOR",
+      bellAnticorrelated: null,
+      jobId: null,
+      device: null,
+      estimatedHqc: null,
+      billedHqc: null,
+      blockedReason:
+        "Cohort unfit. Classical ceiling 0.40 minority recall at 20,000 records against a 0.80 bar; no method — quantum, plain, balanced, resampled or tuned — reaches it at any size tried. No quantum budget released.",
+    }),
+    spec: {
+      builder: "pytket",
+      device: "H2-Emulator",
+      configClass: "QuantinuumConfig",
+      shots: 8192,
+      seed: 20260911,
+      nQubits: 11,
+      verification:
+        "Would need a cohort whose classical ceiling clears the bar. The fitness sweep failed, so the contract was never submitted.",
+      note: "Submission contract only, withheld by the fitness gate. Recorded so the refusal is legible rather than absent.",
+    },
+  },
+];
+
+/**
+ * Two committed emulator runs kept as worked examples of the banding rule — one
+ * held, one failed. Both are published; neither was re-run to chase a seal.
+ */
+export interface ReferenceRun {
+  id: string;
+  title: string;
+  band: "sI-PASS" | "sIII-FAIL";
+  tier: string;
+  jobId: string;
+  construction: string;
+  measurement: string;
+  reading: string;
+}
+
+export const REFERENCE_RUNS: ReferenceRun[] = [
+  {
+    id: "parity-sampler",
+    title: "Parity-coded cohort sampler held under emulator noise",
+    band: "sI-PASS",
+    tier: "NOISY-EMUL · H2-Emulator",
+    jobId: "514510f1-1083-4ead-ba58-895bb5f44032",
+    construction:
+      "Seven data qubits plus an [8,7,2] parity-check ancilla, 8,192 shots, post-selected on a zero syndrome.",
+    measurement:
+      "4.8% of raw shots were error-detected and discarded. The kept cohort matched the target distribution to a Jensen-Shannon divergence of 0.0024, with a maximum per-atom deviation of 0.0034 against a 4σ band of 0.0453.",
+    reading:
+      "The error-detection construction works at the noisy tier. This is emulator evidence, not a QPU claim, and it says nothing about advantage.",
+  },
+  {
+    id: "moment-estimator",
+    title: "Coherence-sensitive estimator failed its own pre-committed bar",
+    band: "sIII-FAIL",
+    tier: "NOISY-EMUL · H2-Emulator",
+    jobId: "304b0eb8-9f94-4f40-b7d3-80151217746a",
+    construction:
+      "A 17-qubit Hadamard-test moment estimator with no error-detection lane available — a parity measurement would collapse the interference the estimator needs.",
+    measurement:
+      "Noise suppressed the moment by about 33% at both committed probe angles. One probe landed at 0.260 deviation against a 0.250 degraded bar, so the receipt reads sIII-FAIL. The sign survived; the magnitude did not.",
+    reading:
+      "A measured honest negative. It is published at full size with its diagnosis, it pays nothing, and the bar was not moved to rescue it.",
+  },
 ];
 
 export function getRun(pathwayId: string): RunRecord | undefined {
