@@ -1,0 +1,40 @@
+{
+  "schema": "nexus-live/1",
+  "account": "Arun Nadarasa",
+  "device": "H2-Emulator",
+  "backendQualifier": "emulator",
+  "engine": "Quantinuum Nexus H2-Emulator",
+  "executedAt": "2026-09-12T16:48:37.207484+00:00",
+  "smokeTest": {
+    "bitOrderProbe": {
+      "jobId": "4ff985a9-15ab-413b-83c2-db9835d094d1",
+      "top": [
+        1,
+        0
+      ],
+      "ok": true
+    },
+    "bell": {
+      "jobId": "f8ad8c10-4df7-4653-a414-7eedbdd5fa86",
+      "shots": 128,
+      "antiCorrelated": 0.007812,
+      "envelope": 0.25,
+      "verdict": "PASS",
+      "billedHqc": 0.0
+    }
+  },
+  "ledger": [
+    {
+      "label": "xprobe-2q",
+      "jobId": "4ff985a9-15ab-413b-83c2-db9835d094d1",
+      "estimatedHqc": 1.0,
+      "billedHqc": 0.0
+    },
+    {
+      "label": "bell-control",
+      "jobId": "f8ad8c10-4df7-4653-a414-7eedbdd5fa86",
+      "estimatedHqc": 2.0,
+      "billedHqc": 0.0
+    }
+  ]
+}
