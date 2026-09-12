@@ -5,13 +5,21 @@ import { z } from "zod";
 import { agents, type AgentId } from "@/data/agents";
 import { getPathway, poweredFloor } from "@/data/pathways";
 import { getRun } from "@/data/runs";
-import { gradeReceipt, isPayable, receiptDigest, receiptPayload } from "@/lib/receipts";
+import {
+  gradeReceipt,
+  isPayable,
+  receiptDigest,
+  receiptPayload,
+  type PayeeIdentity,
+} from "@/lib/receipts";
+import { INTENT_FOR_AGENT } from "@/lib/ens-namespace";
 import type { ReceiptSeal } from "@/data/seal-info";
 import { checkPolicy } from "@/lib/policy";
 import contractCfg from "@/data/contract.json";
 
 export type StepKind =
   | "policy"
+  | "identity"
   | "classical"
   | "fitness"
   | "dequantization"
@@ -31,6 +39,8 @@ export interface RunStep {
   transferId?: string;
   agentId?: AgentId;
   amountMinor?: number;
+  /** The ENS name this leg is paid to, where one is bound. */
+  ensName?: string;
 }
 
 export interface RunResult {
@@ -90,7 +100,44 @@ export const runPathwayJob = createServerFn({ method: "POST" })
       });
     }
 
-    // 2. Classical floor, recorded first — and drawn from the POWERED family,
+    // 2. Identity gate. A verifiable money rail paying an unnamed hex string is
+    // only half a receipt. Each payee is resolved through ENS: the name must
+    // point at the exact Arc address about to be paid, and must permit this
+    // leg's intent. A mismatch blocks payment outright.
+    const { checkAgentIdentity } = await import("@/lib/ens.server");
+    const identity: PayeeIdentity[] = [];
+    let identityOk = true;
+    for (const a of agents) {
+      if (a.feeShare === 0) continue;
+      const chk = await checkAgentIdentity(a.id, INTENT_FOR_AGENT[a.id]);
+      if (!chk.ok) identityOk = false;
+      identity.push({
+        agentId: chk.agentId,
+        ensName: chk.ensName,
+        payeeArcAddress: chk.payeeArcAddress,
+        intent: chk.intent,
+        state: chk.state,
+        source: chk.source,
+        checkedAt: chk.checkedAt,
+      });
+      steps.push({
+        kind: "identity",
+        title: `Identity gate — ${chk.ensName}`,
+        detail: chk.reason,
+        ok: chk.ok,
+        agentId: a.id,
+        ensName: chk.ensName,
+        meta: {
+          intent: chk.intent,
+          state: chk.state,
+          source: chk.source,
+          "arc actor": chk.payeeArcAddress,
+          attestation: chk.attestation.present ? "ENSIP-25 present" : "none found",
+        },
+      });
+    }
+
+    // 3. Classical floor, recorded first — and drawn from the POWERED family,
     // never from a single unpowered baseline.
     const powered = poweredFloor(pathway);
     steps.push({
@@ -171,7 +218,7 @@ export const runPathwayJob = createServerFn({ method: "POST" })
 
     // 5. Receipt grading.
     const graded = gradeReceipt(r);
-    const hash = await receiptDigest(receiptPayload(pathway.id, r));
+    const hash = await receiptDigest(receiptPayload(pathway.id, r, identity));
     steps.push({
       kind: "receipt",
       title: `Receipt graded ${graded.grade}`,
@@ -212,7 +259,7 @@ export const runPathwayJob = createServerFn({ method: "POST" })
       });
     }
 
-    const payable = isPayable(graded.grade) && seal !== null && seal.verified;
+    const payable = isPayable(graded.grade) && seal !== null && seal.verified && identityOk;
 
     // 7. Anchor the sealed digest before payment clears.
     let anchorTx: string | null = null;
@@ -275,11 +322,14 @@ export const runPathwayJob = createServerFn({ method: "POST" })
     for (const a of agents) {
       if (a.feeShare === 0) continue;
       const amount = Math.round(pathway.budgetMinor * a.feeShare);
+      const payeeName = identity.find((i) => i.agentId === a.id)?.ensName;
       if (!payable) {
         steps.push({
           kind: "settlement",
           title: `No payment — ${a.name}`,
-          detail: `Receipt graded ${graded.grade}. The Trust Agent releases funds only against a PASS receipt.`,
+          detail: identityOk
+            ? `Receipt graded ${graded.grade}. The Trust Agent releases funds only against a PASS receipt.`
+            : "The identity gate refused this payee. A name that does not resolve to the address on the receipt is not paid.",
           ok: false,
           agentId: a.id,
           amountMinor: 0,
@@ -306,6 +356,7 @@ export const runPathwayJob = createServerFn({ method: "POST" })
             transferId: res.transferId,
             agentId: a.id,
             amountMinor: amount,
+            ...(payeeName ? { ensName: payeeName } : {}),
           });
         } catch (e) {
           steps.push({
@@ -330,6 +381,7 @@ export const runPathwayJob = createServerFn({ method: "POST" })
           txHash: pseudoTx(`pay:${hash}:${a.id}`),
           agentId: a.id,
           amountMinor: amount,
+          ...(payeeName ? { ensName: payeeName } : {}),
         });
       }
     }

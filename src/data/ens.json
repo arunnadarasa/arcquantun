@@ -1,0 +1,62 @@
+{
+  "parent": "clinicalquantum.eth",
+  "network": "sepolia",
+  "chainId": 11155111,
+  "registered": false,
+  "registeredAt": null,
+  "tokenId": null,
+  "registerTx": null,
+  "contracts": {
+    "ethRegistrar": "0xa88553F454b77203B0D036A05c894d555EAAa2Cc",
+    "registry": "0xBDC85dD5b15D7ecb354cd7cb6f2c50b4f2c4F0E2",
+    "universalResolver": "0xeEeEEEeE14D718C2B47D9923Deab1335E144EeEe",
+    "permissionedResolverImpl": "0x9EAe5C2730a7dD16BDD1DeE6421a1B91e3B0365e",
+    "rentPriceOracle": "0x8914b66260EB8C4fff795650c3AE8Cd335958987",
+    "paymentToken": "0x768F42455A2D082E23ceeF7d51e5787C82d67a39"
+  },
+  "attestationRegistry": {
+    "caip2": "eip155:5042002",
+    "chainId": 5042002,
+    "address": "0xd924f134e69f678e09bd31394f975b3cdbd2f52f",
+    "note": "The ReceiptAnchor contract on Arc Testnet is the registry the ENSIP-25 agent-registration record points back at."
+  },
+  "maxAttestationAgeDays": 30,
+  "agents": [
+    {
+      "id": "trust",
+      "label": "Trust Agent",
+      "name": "trust.clinicalquantum.eth",
+      "agentId": "cqx-trust-1",
+      "arcActor": "0x5904e3bd7c43896964768757de0b490bf82f9d4f",
+      "intents": ["release-budget", "settle"],
+      "records": { "setAt": null, "tx": null }
+    },
+    {
+      "id": "baseline",
+      "label": "Baseline Agent",
+      "name": "baseline.clinicalquantum.eth",
+      "agentId": "cqx-baseline-1",
+      "arcActor": null,
+      "intents": ["classical-floor", "dequantization", "cohort-fitness"],
+      "records": { "setAt": null, "tx": null }
+    },
+    {
+      "id": "nexus",
+      "label": "Nexus Agent",
+      "name": "nexus.clinicalquantum.eth",
+      "agentId": "cqx-nexus-1",
+      "arcActor": null,
+      "intents": ["quantum-submit"],
+      "records": { "setAt": null, "tx": null }
+    },
+    {
+      "id": "registry",
+      "label": "Registry Agent",
+      "name": "registry.clinicalquantum.eth",
+      "agentId": "cqx-registry-1",
+      "arcActor": null,
+      "intents": ["anchor"],
+      "records": { "setAt": null, "tx": null }
+    }
+  ]
+}

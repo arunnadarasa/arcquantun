@@ -7,6 +7,8 @@ export interface LedgerEntry {
   at: string;
   pathwayId: string;
   agentId: string;
+  /** The ENS name this leg was paid to, where one is bound. */
+  ensName?: string | undefined;
   label: string;
   amountMinor: number;
   txHash: string | null;
@@ -42,6 +44,7 @@ export function recordRun(result: RunResult): LedgerEntry[] {
       at: result.startedAt,
       pathwayId: result.pathwayId,
       agentId: s.agentId ?? "registry",
+      ensName: s.ensName,
       label: s.kind === "anchor" ? "Receipt anchored" : s.title,
       amountMinor: s.amountMinor ?? 0,
       txHash: s.txHash ?? s.transferId ?? null,

@@ -7,6 +7,7 @@ import { CHAT_FOOTER_CLAUSE } from "@/data/operations";
 const nav = [
   { to: "/", label: "Exchange" },
   { to: "/agents", label: "Agents" },
+  { to: "/identity", label: "Identity" },
   { to: "/ledger", label: "Settlements" },
   { to: "/evidence", label: "Evidence" },
   { to: "/quantum-gap", label: "Quantum gap" },
