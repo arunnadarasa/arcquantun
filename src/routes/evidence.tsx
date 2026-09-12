@@ -154,6 +154,56 @@ function EvidencePage() {
           </article>
         </Reveal>
 
+        <Reveal>
+          <article className="mt-6 glass-card rounded-lg p-5">
+            <div className="flex flex-wrap items-center gap-2">
+              <h2 className="text-base font-semibold">Noisy-tier bands, committed first</h2>
+              <Pill tone="signal">grading rule</Pill>
+            </div>
+            <p className="mt-2 text-xs leading-relaxed text-muted-foreground">
+              A noiseless simulation says whether the construction is sound. A noisy emulator says
+              whether it survives. The bands below are fixed before the run, so a result cannot be
+              re-banded after the fact, and a run that lands outside its band is published rather
+              than repeated.
+            </p>
+            <ul className="mt-3 space-y-2 text-xs leading-relaxed text-muted-foreground">
+              {NOISE_BANDS.map((b) => (
+                <li key={b.band} className="flex flex-wrap items-center gap-2">
+                  <Pill
+                    tone={
+                      b.band === "sI-PASS" ? "pass" : b.band === "sIII-FAIL" ? "fail" : "gap"
+                    }
+                  >
+                    {b.band}
+                  </Pill>
+                  <span>{b.meaning}</span>
+                </li>
+              ))}
+            </ul>
+            <div className="mt-5 grid gap-4 md:grid-cols-2">
+              {REFERENCE_RUNS.map((ref) => (
+                <div key={ref.id} className="rounded border border-border bg-surface-2/40 p-4">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <Pill tone={ref.band === "sI-PASS" ? "pass" : "fail"}>{ref.band}</Pill>
+                    <span className="num text-[0.65rem] text-muted-foreground">{ref.tier}</span>
+                  </div>
+                  <h3 className="mt-2 text-sm font-semibold">{ref.title}</h3>
+                  <p className="mt-2 text-xs leading-relaxed text-muted-foreground">
+                    {ref.construction}
+                  </p>
+                  <p className="mt-2 text-xs leading-relaxed text-muted-foreground">
+                    {ref.measurement}
+                  </p>
+                  <p className="mt-2 text-xs leading-relaxed">{ref.reading}</p>
+                  <div className="num mt-2 break-all text-[0.65rem] text-muted-foreground">
+                    job id: <span className="text-foreground">{ref.jobId}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </article>
+        </Reveal>
+
         <div className="mt-10 space-y-6">
           {pathways.map((p) => {
             const run = getRun(p.id);
