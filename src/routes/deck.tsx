@@ -29,7 +29,7 @@ export const Route = createFileRoute("/deck")({
       {
         name: "description",
         content:
-          "The eleven-slide submission deck: agents paid in USDC on Arc for clinical assessment work, gated on a receipt a stranger can re-check.",
+          "The submission deck: agents paid in USDC on Arc for clinical assessment work, gated on a receipt a stranger can re-check.",
       },
       { property: "og:title", content: "Deck — Clinical Quantum Exchange" },
       {
