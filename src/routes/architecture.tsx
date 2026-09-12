@@ -32,8 +32,13 @@ const DIAGRAM = `Trust Agent (budget holder)
 Policy gate  -- per-job ceiling + 24h cap, checked before any transfer
    |
    v
-Baseline Agent  -> classical floor recorded FIRST
-   |
+Baseline Agent  -> classical FAMILY recorded FIRST (plain, balanced,
+   |                resampled, tuned) -- the bar is the best POWERED
+   |                member, never the weakest
+   v
+Cohort fitness gate -> does a large classical oracle clear the bar at all?
+   |                   if not, the signal is weak, not the data scarce:
+   |                   unfit-cohort, nothing is spent
    v
 Dequantization gate -> can a classical surrogate reproduce it?
    |
@@ -42,6 +47,8 @@ Nexus Agent -> emulator run (or assessed-blocked with the limit named)
    |
    v
 Receipt grading -> PASS / GAP / STRUCTURAL / FAIL
+   |               noisy tier also bands it: sI-PASS / sII-DEGRADED /
+   |               sIII-FAIL, against bars pre-registered before compute
    |
    v
 Registry Agent -> anchor receipt hash on Arc (ReceiptAnchor.sol)
@@ -111,10 +118,52 @@ function ArchitecturePage() {
                 a silent gap.
               </li>
               <li>— The receipt hash is anchored on-chain, so the record behind a payment is fixed.</li>
+              <li>
+                — The bars are pre-registered before compute, with every amendment listed. An
+                amendment fixes the tool; it never moves the target.
+              </li>
+              <li>
+                — A result outside its committed band is published with its diagnosis and pays
+                nothing. It is not re-run until it seals.
+              </li>
             </ul>
           </article>
           </Reveal>
         </div>
+
+        <Reveal>
+          <article className="mt-6 glass-card rounded-lg p-5">
+            <div className="flex flex-wrap items-center gap-2">
+              <h2 className="text-base font-semibold">What stops a false win</h2>
+              <Pill tone="signal">gates added after being caught out</Pill>
+            </div>
+            <div className="mt-4 grid gap-4 md:grid-cols-2">
+              {[
+                {
+                  t: "The floor is a family, not a number",
+                  b: "An early kernel result looked like a win because it was measured against a plain linear baseline nobody had tuned. Balanced, resampled and tuned members now run too, and the bar is the best of them. A comparison against an unpowered member reads UNPOWERED-FLOOR and is never payable.",
+                },
+                {
+                  t: "Cohort fitness before spend",
+                  b: "Before a budget is released, a classical ceiling sweep asks whether the subgroup can be separated at all. One cohort topped out at 0.40 minority recall against a 0.80 bar even with a 20,000-record oracle — weak signal, not scarce data. It is marked unfit-cohort and no quantum work was bought.",
+                },
+                {
+                  t: "Two tiers, said apart",
+                  b: "A noiseless simulation proves the construction; a noisy emulator proves survival. Emulator results carry NOISY-EMUL, and neither tier is ever written up as a physical QPU result.",
+                },
+                {
+                  t: "Negatives are kept at full size",
+                  b: "A 17-qubit estimator lost about a third of its signal to decoherence and missed its own degraded bar. It stays published as sIII-FAIL with the diagnosis attached, because a stack that only shows its wins cannot be checked.",
+                },
+              ].map((c) => (
+                <div key={c.t} className="rounded border border-border bg-surface-2/40 p-4">
+                  <h3 className="text-sm font-semibold">{c.t}</h3>
+                  <p className="mt-2 text-xs leading-relaxed text-muted-foreground">{c.b}</p>
+                </div>
+              ))}
+            </div>
+          </article>
+        </Reveal>
 
         <Reveal>
           <section className="mt-10">

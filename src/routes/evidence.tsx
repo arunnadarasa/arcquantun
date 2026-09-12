@@ -3,9 +3,9 @@ import { useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { Shell, Pill } from "@/components/shell";
 import { Reveal } from "@/components/motion";
-import { pathways } from "@/data/pathways";
-import { getRun, RUN_COMMIT } from "@/data/runs";
-import { gradeReceipt } from "@/lib/receipts";
+import { pathways, poweredFloor } from "@/data/pathways";
+import { getRun, REFERENCE_RUNS, RUN_COMMIT } from "@/data/runs";
+import { gradeReceipt, NOISE_BANDS } from "@/lib/receipts";
 import { sealPathwayReceipt } from "@/lib/exchange.functions";
 import type { ReceiptSeal } from "@/data/seal-info";
 import { CHAT_IS_NOT_EVIDENCE } from "@/data/operations";
@@ -154,6 +154,56 @@ function EvidencePage() {
           </article>
         </Reveal>
 
+        <Reveal>
+          <article className="mt-6 glass-card rounded-lg p-5">
+            <div className="flex flex-wrap items-center gap-2">
+              <h2 className="text-base font-semibold">Noisy-tier bands, committed first</h2>
+              <Pill tone="signal">grading rule</Pill>
+            </div>
+            <p className="mt-2 text-xs leading-relaxed text-muted-foreground">
+              A noiseless simulation says whether the construction is sound. A noisy emulator says
+              whether it survives. The bands below are fixed before the run, so a result cannot be
+              re-banded after the fact, and a run that lands outside its band is published rather
+              than repeated.
+            </p>
+            <ul className="mt-3 space-y-2 text-xs leading-relaxed text-muted-foreground">
+              {NOISE_BANDS.map((b) => (
+                <li key={b.band} className="flex flex-wrap items-center gap-2">
+                  <Pill
+                    tone={
+                      b.band === "sI-PASS" ? "pass" : b.band === "sIII-FAIL" ? "fail" : "gap"
+                    }
+                  >
+                    {b.band}
+                  </Pill>
+                  <span>{b.meaning}</span>
+                </li>
+              ))}
+            </ul>
+            <div className="mt-5 grid gap-4 md:grid-cols-2">
+              {REFERENCE_RUNS.map((ref) => (
+                <div key={ref.id} className="rounded border border-border bg-surface-2/40 p-4">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <Pill tone={ref.band === "sI-PASS" ? "pass" : "fail"}>{ref.band}</Pill>
+                    <span className="num text-[0.65rem] text-muted-foreground">{ref.tier}</span>
+                  </div>
+                  <h3 className="mt-2 text-sm font-semibold">{ref.title}</h3>
+                  <p className="mt-2 text-xs leading-relaxed text-muted-foreground">
+                    {ref.construction}
+                  </p>
+                  <p className="mt-2 text-xs leading-relaxed text-muted-foreground">
+                    {ref.measurement}
+                  </p>
+                  <p className="mt-2 text-xs leading-relaxed">{ref.reading}</p>
+                  <div className="num mt-2 break-all text-[0.65rem] text-muted-foreground">
+                    job id: <span className="text-foreground">{ref.jobId}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </article>
+        </Reveal>
+
         <div className="mt-10 space-y-6">
           {pathways.map((p) => {
             const run = getRun(p.id);
@@ -210,6 +260,21 @@ function EvidencePage() {
                       {p.classicalFloor.unit === "%" ? "%" : ` ${p.classicalFloor.unit}`}{" "}
                       {run.classical.metric} · {run.classical.method}
                     </div>
+                    <ul className="mt-2 space-y-1 text-[0.65rem]">
+                      {p.classicalFloor.family.map((m) => {
+                        const best = poweredFloor(p);
+                        return (
+                          <li key={m.method} className="num text-muted-foreground">
+                            <span className={m.powered ? "text-foreground" : "text-gap"}>
+                              {m.value}
+                            </span>{" "}
+                            {m.method}
+                            {!m.powered ? " — unpowered, not a bar" : ""}
+                            {best && best.method === m.method ? " — the bar" : ""}
+                          </li>
+                        );
+                      })}
+                    </ul>
                   </div>
                 </div>
 
@@ -244,12 +309,68 @@ function EvidencePage() {
                   ))}
                 </div>
 
+                {p.ceiling ? (
+                  <div className="mt-4 rounded border border-gap/40 bg-gap/10 p-3">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <div className="text-[0.65rem] uppercase tracking-[0.14em] text-muted-foreground">
+                        Cohort fitness gate
+                      </div>
+                      <Pill tone="gap">unfit-cohort</Pill>
+                    </div>
+                    <p className="mt-1.5 text-xs leading-relaxed">{p.ceiling.note}</p>
+                    <div className="num mt-2 text-[0.65rem] text-muted-foreground">
+                      bar {p.ceiling.bar} · classical ceiling{" "}
+                      <span className="text-foreground">{p.ceiling.oracle}</span> at{" "}
+                      <span className="text-foreground">
+                        {p.ceiling.oracleN.toLocaleString()}
+                      </span>{" "}
+                      records
+                    </div>
+                  </div>
+                ) : null}
+
                 <div className="mt-4 rounded border border-border bg-surface-2/40 p-3">
                   <div className="text-[0.65rem] uppercase tracking-[0.14em] text-muted-foreground">
                     Dequantization gate
                   </div>
                   <p className="mt-1.5 text-xs leading-relaxed">{run.dequantization.note}</p>
                 </div>
+
+                {r.preRegistration ? (
+                  <div className="mt-4 rounded border border-border bg-surface-2/40 p-3">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <div className="text-[0.65rem] uppercase tracking-[0.14em] text-muted-foreground">
+                        Pre-registration
+                      </div>
+                      {r.band ? (
+                        <Pill
+                          tone={
+                            r.band === "sI-PASS"
+                              ? "pass"
+                              : r.band === "sIII-FAIL"
+                                ? "fail"
+                                : "gap"
+                          }
+                        >
+                          {r.band}
+                        </Pill>
+                      ) : null}
+                      {r.noiseTier ? <Pill tone="muted">{r.noiseTier}</Pill> : null}
+                    </div>
+                    <p className="mt-1.5 text-xs leading-relaxed">{r.preRegistration.bars}</p>
+                    <div className="num mt-2 break-all text-[0.65rem] text-muted-foreground">
+                      ref: <span className="text-foreground">{r.preRegistration.ref}</span>
+                    </div>
+                    <ul className="mt-2 space-y-1 text-[0.65rem] leading-relaxed text-muted-foreground">
+                      {r.preRegistration.amendments.map((a) => (
+                        <li key={a}>— {a}</li>
+                      ))}
+                    </ul>
+                    <p className="mt-2 text-[0.65rem] text-muted-foreground">
+                      Amendments fix the tool, never the target.
+                    </p>
+                  </div>
+                ) : null}
 
                 <details className="group mt-4">
                   <summary className="cursor-pointer text-xs text-accent underline underline-offset-2">

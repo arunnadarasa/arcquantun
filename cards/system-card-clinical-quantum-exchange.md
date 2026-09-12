@@ -42,7 +42,7 @@ evidence.
 
 ## Evaluation Quad
 - **Evaluation Agent:** deterministic run orchestration plus human review of every published sentence
-- **Evaluation Tasks:** seven pathways end to end, plus receipt-grading unit behaviour for PASS, GAP, STRUCTURAL and FAIL
+- **Evaluation Tasks:** eight pathways end to end, plus receipt-grading unit behaviour for PASS, GAP, STRUCTURAL and FAIL
 - **Evaluation Metrics:** step order preserved; grade correctness against the committed envelope; anchor precedes settlement; totals in the ledger reconcile with the per-agent fee shares
 - **Evaluation Results:** six lanes settle with PASS receipts; the endoscopy lane returns `assessed-blocked`, grades GAP, and pays nothing; no lane has settled without a prior anchor step
 

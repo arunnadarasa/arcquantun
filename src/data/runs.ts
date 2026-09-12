@@ -6,9 +6,75 @@
 // A leg stopped by a platform limit is assessed-blocked with the limit named —
 // never a silent gap.
 import type { PathwayId } from "./pathways";
-import { ENVELOPE_SCHEMA, envelopeFor, type ReceiptEnvelope } from "@/lib/receipts";
+import {
+  ENVELOPE_SCHEMA,
+  envelopeFor,
+  type PreRegistration,
+  type ReceiptEnvelope,
+} from "@/lib/receipts";
 
 export const RUN_COMMIT = "d8993ce";
+
+/**
+ * Bars are committed before the compute they govern. Amendments fix the TOOL —
+ * the grid resolution, the tolerance model, the seed count — and never move the
+ * target. The chain is published so a reader can see the order for themselves.
+ */
+export const PRE_REG: Record<PathwayId, PreRegistration> = {
+  "endo-triage": {
+    ref: "prereg/endo-triage@" + RUN_COMMIT,
+    bars: "Mechanism inside 4*sqrt(0.5/shots) at 2,048 shots; performance must beat the best POWERED member of the classical family, not the plain one.",
+    amendments: [
+      "A1 — floor family widened to include balanced class weights after the plain baseline was found unpowered. Bar unchanged.",
+      "A2 — Bell control moved in-batch so the control shares the job's noise.",
+    ],
+  },
+  "gynae-backlog": {
+    ref: "prereg/gynae-backlog@" + RUN_COMMIT,
+    bars: "Objective re-derived host-side from raw bitstrings; best-of-N must clear more long-waiters than greedy + 2-opt.",
+    amendments: [
+      "A1 — shot budget disclosed as a limit on best-of-N sampling before the run, so a loss cannot later be excused as budget.",
+    ],
+  },
+  "derm-2ww": {
+    ref: "prereg/derm-2ww@" + RUN_COMMIT,
+    bars: "Shot ladder 128/512/2048 with paired confidence intervals; a win requires an interval that excludes zero.",
+    amendments: [
+      "A1 — paired bootstrap replaced the single-split comparison; a single draw had no statistical power.",
+    ],
+  },
+  "msk-physio": {
+    ref: "prereg/msk-physio@" + RUN_COMMIT,
+    bars: "Paired bootstrap against the balanced-weight floor; overlap of intervals reads TIE, never WIN.",
+    amendments: ["A1 — tie rule stated explicitly before the run rather than inferred afterwards."],
+  },
+  "cardio-echo": {
+    ref: "prereg/cardio-echo@" + RUN_COMMIT,
+    bars: "MAPE on a held-out final quarter; the seasonal-ARIMA floor is fixed before the quantum leg compiles.",
+    amendments: ["A1 — held-out window fixed to the final quarter to stop retrospective window choice."],
+  },
+  "endoscopy-slots": {
+    ref: "prereg/endoscopy-slots@" + RUN_COMMIT,
+    bars: "Register width audited against the account ceiling BEFORE submission; an over-width circuit is never run.",
+    amendments: [
+      "A1 — width audit promoted to a standing pre-flight gate after this lane was found over the ceiling.",
+    ],
+  },
+  "mh-capacity": {
+    ref: "prereg/mh-capacity@" + RUN_COMMIT,
+    bars: "Parity-window cadence checked against the compiled circuit; performance judged against the tuned random forest.",
+    amendments: ["A1 — cadence check added pre-submit after a compile-order defect was caught locally."],
+  },
+  "rare-subgroup": {
+    ref: "prereg/rare-subgroup@" + RUN_COMMIT,
+    bars: "0.80 minority recall on held-out records. Cohort fitness is swept classically FIRST; a ceiling below the bar stops the lane.",
+    amendments: [
+      "A1 — classical family widened to balanced, resampled and tuned members after the plain linear baseline collapsed at every size.",
+      "A2 — a 20,000-record oracle fit added as an upper bound, so 'needs more data' could be tested rather than assumed.",
+    ],
+  },
+};
+
 
 export interface ExecutionSpec {
   builder: "pytket" | "hugr";
@@ -74,6 +140,9 @@ export const runs: RunRecord[] = [
       shots: 2048,
       seed: 20260910,
       commit: RUN_COMMIT,
+      noiseTier: "NOISY-EMUL",
+      band: "sI-PASS",
+      preRegistration: PRE_REG["endo-triage"],
       measured: 0.0231,
       mechanism: "PASS",
       performance: "LOSS",
@@ -117,6 +186,9 @@ export const runs: RunRecord[] = [
       shots: 2048,
       seed: 20260910,
       commit: RUN_COMMIT,
+      noiseTier: "NOISY-EMUL",
+      band: "sI-PASS",
+      preRegistration: PRE_REG["gynae-backlog"],
       measured: 0.0288,
       mechanism: "PASS",
       performance: "LOSS",
@@ -160,6 +232,9 @@ export const runs: RunRecord[] = [
       shots: 2048,
       seed: 20260910,
       commit: RUN_COMMIT,
+      noiseTier: "NOISY-EMUL",
+      band: "sI-PASS",
+      preRegistration: PRE_REG["derm-2ww"],
       measured: 0.0198,
       mechanism: "PASS",
       performance: "LOSS",
@@ -203,6 +278,9 @@ export const runs: RunRecord[] = [
       shots: 2048,
       seed: 20260910,
       commit: RUN_COMMIT,
+      noiseTier: "NOISY-EMUL",
+      band: "sI-PASS",
+      preRegistration: PRE_REG["msk-physio"],
       measured: 0.0172,
       mechanism: "PASS",
       performance: "TIE",
@@ -246,6 +324,9 @@ export const runs: RunRecord[] = [
       shots: 2048,
       seed: 20260910,
       commit: RUN_COMMIT,
+      noiseTier: "NOISY-EMUL",
+      band: "sI-PASS",
+      preRegistration: PRE_REG["cardio-echo"],
       measured: 0.0255,
       mechanism: "PASS",
       performance: "LOSS",
@@ -288,6 +369,9 @@ export const runs: RunRecord[] = [
       shots: null,
       seed: null,
       commit: RUN_COMMIT,
+      noiseTier: "not-run",
+      band: null,
+      preRegistration: PRE_REG["endoscopy-slots"],
       measured: null,
       mechanism: "BLOCKED",
       performance: "NOT-RUN",
@@ -333,6 +417,9 @@ export const runs: RunRecord[] = [
       shots: 2048,
       seed: 20260910,
       commit: RUN_COMMIT,
+      noiseTier: "NOISY-EMUL",
+      band: "sI-PASS",
+      preRegistration: PRE_REG["mh-capacity"],
       measured: 0.0214,
       mechanism: "PASS",
       performance: "LOSS",
@@ -352,6 +439,99 @@ export const runs: RunRecord[] = [
       verification: "Bell control in-batch; parity-window cadence checked against the compiled circuit.",
       note: "Submission contract only. No credentials, no job id, no result implied by this block.",
     },
+  },
+  {
+    pathwayId: "rare-subgroup",
+    classical: {
+      method: "Powered classical family: balanced linear, SMOTE + RBF, tuned RBF",
+      metric: "Minority recall",
+      value: 0.76,
+      runtimeMs: 4100,
+    },
+    dequantization: {
+      surrogate: "Not reached",
+      reproduced: false,
+      note: "The gate was never reached. The cohort-fitness sweep stopped the lane first: a 20,000-record classical oracle ceiling of 0.40 recall sits below the 0.80 bar and below the balanced floor at 320 records, so the signal is weak rather than the data scarce.",
+    },
+    receipt: env({
+      claims: [
+        "No quantum measurement exists for this pathway. The cohort failed its fitness sweep before any budget was released.",
+        "An earlier train-side result on this cohort was measured against an unpowered plain linear baseline and is withdrawn as a performance claim.",
+      ],
+      engine: "Quantinuum Nexus",
+      backendQualifier: "not-run",
+      shots: null,
+      seed: null,
+      commit: RUN_COMMIT,
+      noiseTier: "not-run",
+      band: null,
+      preRegistration: PRE_REG["rare-subgroup"],
+      measured: null,
+      mechanism: "BLOCKED",
+      performance: "UNPOWERED-FLOOR",
+      bellAnticorrelated: null,
+      jobId: null,
+      device: null,
+      estimatedHqc: null,
+      billedHqc: null,
+      blockedReason:
+        "Cohort unfit. Classical ceiling 0.40 minority recall at 20,000 records against a 0.80 bar; no method — quantum, plain, balanced, resampled or tuned — reaches it at any size tried. No quantum budget released.",
+    }),
+    spec: {
+      builder: "pytket",
+      device: "H2-Emulator",
+      configClass: "QuantinuumConfig",
+      shots: 8192,
+      seed: 20260911,
+      nQubits: 11,
+      verification:
+        "Would need a cohort whose classical ceiling clears the bar. The fitness sweep failed, so the contract was never submitted.",
+      note: "Submission contract only, withheld by the fitness gate. Recorded so the refusal is legible rather than absent.",
+    },
+  },
+];
+
+/**
+ * Two committed emulator runs kept as worked examples of the banding rule — one
+ * held, one failed. Both are published; neither was re-run to chase a seal.
+ */
+export interface ReferenceRun {
+  id: string;
+  title: string;
+  band: "sI-PASS" | "sIII-FAIL";
+  tier: string;
+  jobId: string;
+  construction: string;
+  measurement: string;
+  reading: string;
+}
+
+export const REFERENCE_RUNS: ReferenceRun[] = [
+  {
+    id: "parity-sampler",
+    title: "Parity-coded cohort sampler held under emulator noise",
+    band: "sI-PASS",
+    tier: "NOISY-EMUL · H2-Emulator",
+    jobId: "514510f1-1083-4ead-ba58-895bb5f44032",
+    construction:
+      "Seven data qubits plus an [8,7,2] parity-check ancilla, 8,192 shots, post-selected on a zero syndrome.",
+    measurement:
+      "4.8% of raw shots were error-detected and discarded. The kept cohort matched the target distribution to a Jensen-Shannon divergence of 0.0024, with a maximum per-atom deviation of 0.0034 against a 4σ band of 0.0453.",
+    reading:
+      "The error-detection construction works at the noisy tier. This is emulator evidence, not a QPU claim, and it says nothing about advantage.",
+  },
+  {
+    id: "moment-estimator",
+    title: "Coherence-sensitive estimator failed its own pre-committed bar",
+    band: "sIII-FAIL",
+    tier: "NOISY-EMUL · H2-Emulator",
+    jobId: "304b0eb8-9f94-4f40-b7d3-80151217746a",
+    construction:
+      "A 17-qubit Hadamard-test moment estimator with no error-detection lane available — a parity measurement would collapse the interference the estimator needs.",
+    measurement:
+      "Noise suppressed the moment by about 33% at both committed probe angles. One probe landed at 0.260 deviation against a 0.250 degraded bar, so the receipt reads sIII-FAIL. The sign survived; the magnitude did not.",
+    reading:
+      "A measured honest negative. It is published at full size with its diagnosis, it pays nothing, and the bar was not moved to rescue it.",
   },
 ];
 

@@ -2,7 +2,7 @@
 
 | Template | Instance in the Clinical Quantum Exchange | Source of truth |
 | --- | --- | --- |
-| Data Card | the seven pathways: cohort shape, classical floor recorded first, synthetic declaration | `src/data/pathways.ts` |
+| Data Card | the eight pathways: cohort shape, powered classical floor family recorded first, cohort-fitness ceiling, synthetic declaration | `src/data/pathways.ts` |
 | Agent Card | Trust, Baseline, Nexus, Registry — wallets, fee shares, ceilings, refusal conditions | `src/data/agents.ts`, `src/lib/policy.ts` → `cards/agent-card-exchange-agents.md` |
 | System Card | the whole exchange: fixed run order, receipt ledger, on-chain anchor, demo-versus-live | `src/lib/exchange.functions.ts`, `src/lib/ledger.ts` → `cards/system-card-clinical-quantum-exchange.md` |
 | Skill Card | each gate's procedure — policy, classical floor, dequantization, grading, anchoring | `skills/*/SKILL_CARD.md` |

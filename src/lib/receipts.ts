@@ -11,8 +11,37 @@
 export const ENVELOPE_SCHEMA = "qas/envelope/0.1";
 
 export type MechanismVerdict = "PASS" | "FAIL" | "BLOCKED";
-export type PerformanceVerdict = "WIN" | "LOSS" | "TIE" | "NOT-RUN";
+/**
+ * UNPOWERED-FLOOR: the comparison was made against a single unpowered baseline.
+ * Beating a straw man is not a win, so this verdict can never read WIN.
+ */
+export type PerformanceVerdict = "WIN" | "LOSS" | "TIE" | "NOT-RUN" | "UNPOWERED-FLOOR";
 export type ReceiptGrade = "PASS" | "GAP" | "STRUCTURAL" | "FAIL";
+
+/**
+ * Noisy-tier bands, committed before the run. A result that lands outside sI is
+ * published with its diagnosis and pays nothing. It is never re-run to chase a seal.
+ */
+export type NoiseBand = "sI-PASS" | "sII-DEGRADED" | "sIII-FAIL";
+
+export const NOISE_BANDS: { band: NoiseBand; meaning: string }[] = [
+  { band: "sI-PASS", meaning: "Inside the pre-committed tolerance at every probe." },
+  {
+    band: "sII-DEGRADED",
+    meaning: "The signal's direction survives the noise; its magnitude does not.",
+  },
+  { band: "sIII-FAIL", meaning: "Outside the degraded bar at one or more probes." },
+];
+
+/** A pre-registration and the amendments committed before the compute they govern. */
+export interface PreRegistration {
+  /** Document or commit the bars were fixed in, before any compute. */
+  ref: string;
+  /** The bars themselves, in the words they were committed in. */
+  bars: string;
+  /** Each amendment, committed before the run it governs. Tools get fixed; targets do not move. */
+  amendments: string[];
+}
 
 export interface ReceiptEnvelope {
   schema: string;
@@ -29,6 +58,12 @@ export interface ReceiptEnvelope {
   measured: number | null;
   mechanism: MechanismVerdict;
   performance: PerformanceVerdict;
+  /** NOISELESS-SIM or NOISY-EMUL. Never a QPU tier unless a QPU actually ran. */
+  noiseTier?: "NOISELESS-SIM" | "NOISY-EMUL" | "not-run";
+  /** The committed band this run landed in, where a noisy tier applies. */
+  band?: NoiseBand | null;
+  /** The bars and the amendment chain, so a reader can see they were set first. */
+  preRegistration?: PreRegistration | null;
   /** Bell control: anti-correlated fraction on a |Phi+> pair in the same job. */
   bellAnticorrelated: number | null;
   jobId: string | null;
@@ -63,6 +98,30 @@ export function gradeReceipt(r: ReceiptEnvelope): {
   if (!r.engine) reasons.push("Engine missing.");
   if (r.commit === null) reasons.push("Source commit missing.");
   if (r.claims.length === 0) reasons.push("No falsifiable claim recorded.");
+  if (r.preRegistration === null || r.preRegistration === undefined) {
+    reasons.push("No pre-registration attached — the bars cannot be shown to predate the run.");
+  }
+
+  // A band outside sI is a kept negative. It is published, and it is not payable.
+  if (r.band === "sIII-FAIL") {
+    reasons.push(
+      "Noisy-tier band sIII-FAIL: the measurement fell outside its own pre-committed bar. Kept as a negative, paid nothing, not re-run.",
+    );
+    return { grade: "FAIL", reasons };
+  }
+  if (r.band === "sII-DEGRADED") {
+    reasons.push(
+      "Noisy-tier band sII-DEGRADED: direction survives, magnitude does not. Not a claim, so not payable.",
+    );
+  }
+
+  // A win against a single unpowered baseline is not a win.
+  if (r.performance === "UNPOWERED-FLOOR") {
+    reasons.push(
+      "Comparison was made against one unpowered baseline. The powered classical family was never measured, so no performance claim stands.",
+    );
+  }
+
 
   // A FAIL is an envelope that is present and contradicted.
   if (r.shots !== null && r.measured !== null && r.envelope !== null) {

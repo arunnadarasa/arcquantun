@@ -5,7 +5,7 @@ import { useMutation } from "@tanstack/react-query";
 import { ArrowRight, CircleDot, Loader2, ShieldCheck } from "lucide-react";
 import { Shell, Pill } from "@/components/shell";
 import { CountUp, Meter, Reveal } from "@/components/motion";
-import { pathways } from "@/data/pathways";
+import { pathways, poweredFloor } from "@/data/pathways";
 import { getRun } from "@/data/runs";
 import { formatUsdc, txUrl } from "@/lib/arc-chain";
 import { gradeReceipt } from "@/lib/receipts";
@@ -123,15 +123,14 @@ function Index() {
             const grade = run ? gradeReceipt(run.receipt).grade : "STRUCTURAL";
             const active = selected === p.id;
             const scale = floorScale(p.classicalFloor);
+            const powered = poweredFloor(p);
             return (
               <Reveal key={p.id} delay={(i % 2) * 80} className="h-full">
               <article
                 className={`glass-card h-full rounded-lg p-5 ${active ? "border-primary" : ""}`}
               >
                 <div className="flex flex-wrap items-center gap-2">
-                  <Pill tone={p.status === "assessed-blocked" ? "gap" : "muted"}>
-                    {p.status === "assessed-blocked" ? "assessed-blocked" : "assessed"}
-                  </Pill>
+                  <Pill tone={p.status === "assessed" ? "muted" : "gap"}>{p.status}</Pill>
                   <Pill
                     tone={grade === "PASS" ? "pass" : grade === "FAIL" ? "fail" : "gap"}
                   >
@@ -161,6 +160,10 @@ function Index() {
                         <Meter value={scale.value} max={scale.max} delay={120} />
                       </div>
                     ) : null}
+                    <div className="mt-2 text-[0.65rem] leading-relaxed text-muted-foreground">
+                      best of {p.classicalFloor.family.length} classical methods
+                      {powered ? ` · ${powered.method}` : ""}
+                    </div>
                   </div>
                   <div>
                     <div className="text-muted-foreground">Register</div>
@@ -169,12 +172,22 @@ function Index() {
                       <Meter
                         value={p.qubitsNeeded}
                         max={32}
-                        tone={p.status === "assessed-blocked" ? "gap" : "signal"}
+                        tone={p.status === "assessed" ? "signal" : "gap"}
                         delay={200}
                       />
                     </div>
                   </div>
                 </div>
+                {p.ceiling ? (
+                  <p className="mt-3 rounded border border-gap/40 bg-gap/10 p-3 text-[0.7rem] leading-relaxed text-muted-foreground">
+                    <span className="text-gap">Cohort unfit.</span> Classical ceiling{" "}
+                    <span className="num text-foreground">{p.ceiling.oracle}</span> at{" "}
+                    <span className="num text-foreground">
+                      {p.ceiling.oracleN.toLocaleString()}
+                    </span>{" "}
+                    records against a bar of {p.ceiling.bar}. No quantum budget released.
+                  </p>
+                ) : null}
                 <div className="mt-4 flex flex-wrap gap-2">
                   <button
                     onClick={() => {
