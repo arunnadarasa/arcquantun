@@ -19,6 +19,8 @@ export interface LedgerEntry {
   sealScheme?: string | undefined;
   sealSignature?: string | undefined;
   sealVerified?: boolean | undefined;
+  /** Nullifier of the human who authorised the release. Not an identifier of a person. */
+  authorisedBy?: string | undefined;
 }
 
 const KEY = "cqx.ledger.v1";
@@ -54,6 +56,7 @@ export function recordRun(result: RunResult): LedgerEntry[] {
       sealScheme: result.seal?.scheme,
       sealSignature: result.seal?.signatureFingerprint,
       sealVerified: result.seal?.verified,
+      authorisedBy: result.authorisedBy ?? undefined,
     });
   }
   const existing = readLedger();
