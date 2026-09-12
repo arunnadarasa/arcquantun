@@ -37,6 +37,12 @@ Identity gate -> ENS (Sepolia): does the payee's name resolve to the exact
    |             this leg's intent? ENSIP-25 attestation binds the two.
    |             A mismatch blocks the settlement outright.
    v
+Human authority -> World ID: one unique human authorised THIS pathway's
+   |               budget release. Only a nullifier hash is kept -- no image,
+   |               name or biometric reaches this app. It is hashed into the
+   |               receipt digest, so the seal covers who authorised the spend.
+   |               No human, no settlement: the run still publishes in full.
+   v
 Baseline Agent  -> classical FAMILY recorded FIRST (plain, balanced,
    |                resampled, tuned) -- the bar is the best POWERED
    |                member, never the weakest
