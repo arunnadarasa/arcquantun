@@ -123,6 +123,7 @@ function Index() {
             const grade = run ? gradeReceipt(run.receipt).grade : "STRUCTURAL";
             const active = selected === p.id;
             const scale = floorScale(p.classicalFloor);
+            const powered = poweredFloor(p);
             return (
               <Reveal key={p.id} delay={(i % 2) * 80} className="h-full">
               <article
