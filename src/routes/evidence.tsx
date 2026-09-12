@@ -309,12 +309,68 @@ function EvidencePage() {
                   ))}
                 </div>
 
+                {p.ceiling ? (
+                  <div className="mt-4 rounded border border-gap/40 bg-gap/10 p-3">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <div className="text-[0.65rem] uppercase tracking-[0.14em] text-muted-foreground">
+                        Cohort fitness gate
+                      </div>
+                      <Pill tone="gap">unfit-cohort</Pill>
+                    </div>
+                    <p className="mt-1.5 text-xs leading-relaxed">{p.ceiling.note}</p>
+                    <div className="num mt-2 text-[0.65rem] text-muted-foreground">
+                      bar {p.ceiling.bar} · classical ceiling{" "}
+                      <span className="text-foreground">{p.ceiling.oracle}</span> at{" "}
+                      <span className="text-foreground">
+                        {p.ceiling.oracleN.toLocaleString()}
+                      </span>{" "}
+                      records
+                    </div>
+                  </div>
+                ) : null}
+
                 <div className="mt-4 rounded border border-border bg-surface-2/40 p-3">
                   <div className="text-[0.65rem] uppercase tracking-[0.14em] text-muted-foreground">
                     Dequantization gate
                   </div>
                   <p className="mt-1.5 text-xs leading-relaxed">{run.dequantization.note}</p>
                 </div>
+
+                {r.preRegistration ? (
+                  <div className="mt-4 rounded border border-border bg-surface-2/40 p-3">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <div className="text-[0.65rem] uppercase tracking-[0.14em] text-muted-foreground">
+                        Pre-registration
+                      </div>
+                      {r.band ? (
+                        <Pill
+                          tone={
+                            r.band === "sI-PASS"
+                              ? "pass"
+                              : r.band === "sIII-FAIL"
+                                ? "fail"
+                                : "gap"
+                          }
+                        >
+                          {r.band}
+                        </Pill>
+                      ) : null}
+                      {r.noiseTier ? <Pill tone="muted">{r.noiseTier}</Pill> : null}
+                    </div>
+                    <p className="mt-1.5 text-xs leading-relaxed">{r.preRegistration.bars}</p>
+                    <div className="num mt-2 break-all text-[0.65rem] text-muted-foreground">
+                      ref: <span className="text-foreground">{r.preRegistration.ref}</span>
+                    </div>
+                    <ul className="mt-2 space-y-1 text-[0.65rem] leading-relaxed text-muted-foreground">
+                      {r.preRegistration.amendments.map((a) => (
+                        <li key={a}>— {a}</li>
+                      ))}
+                    </ul>
+                    <p className="mt-2 text-[0.65rem] text-muted-foreground">
+                      Amendments fix the tool, never the target.
+                    </p>
+                  </div>
+                ) : null}
 
                 <details className="group mt-4">
                   <summary className="cursor-pointer text-xs text-accent underline underline-offset-2">
