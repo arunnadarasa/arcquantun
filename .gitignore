@@ -30,3 +30,7 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Vendored python deps (Nexus lane)
+.pydeps/
+_cache_nexus/
