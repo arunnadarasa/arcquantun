@@ -5,6 +5,7 @@ import { Reveal } from "@/components/motion";
 import { formatUsdc, txUrl } from "@/lib/arc-chain";
 import { clearLedger, readLedger, type LedgerEntry } from "@/lib/ledger";
 import { getPathway } from "@/data/pathways";
+import { shortNullifier } from "@/lib/world";
 
 const PAGE = 10;
 
