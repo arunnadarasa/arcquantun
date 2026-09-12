@@ -218,7 +218,7 @@ export const runPathwayJob = createServerFn({ method: "POST" })
 
     // 5. Receipt grading.
     const graded = gradeReceipt(r);
-    const hash = await receiptDigest(receiptPayload(pathway.id, r));
+    const hash = await receiptDigest(receiptPayload(pathway.id, r, identity));
     steps.push({
       kind: "receipt",
       title: `Receipt graded ${graded.grade}`,
@@ -259,7 +259,7 @@ export const runPathwayJob = createServerFn({ method: "POST" })
       });
     }
 
-    const payable = isPayable(graded.grade) && seal !== null && seal.verified;
+    const payable = isPayable(graded.grade) && seal !== null && seal.verified && identityOk;
 
     // 7. Anchor the sealed digest before payment clears.
     let anchorTx: string | null = null;
@@ -326,7 +326,9 @@ export const runPathwayJob = createServerFn({ method: "POST" })
         steps.push({
           kind: "settlement",
           title: `No payment — ${a.name}`,
-          detail: `Receipt graded ${graded.grade}. The Trust Agent releases funds only against a PASS receipt.`,
+          detail: identityOk
+            ? `Receipt graded ${graded.grade}. The Trust Agent releases funds only against a PASS receipt.`
+            : "The identity gate refused this payee. A name that does not resolve to the address on the receipt is not paid.",
           ok: false,
           agentId: a.id,
           amountMinor: 0,
