@@ -155,6 +155,37 @@ export const runPathwayJob = createServerFn({ method: "POST" })
       });
     }
 
+    // 2b. Human authority. The identity gate says which agent is being paid; it
+    // cannot say who authorised the spend. World ID answers that, and answers it
+    // once per human: the nullifier is stable for this action, so a second
+    // release by the same person is visibly the same person. Nothing about who
+    // they are is carried — only the hash, and it is hashed into the receipt.
+    const authority: HumanAuthorityRecord | null = data.authority ?? null;
+    const humanOk = authority !== null && authority.signal === pathway.id;
+    steps.push({
+      kind: "human",
+      title: humanOk
+        ? authority.simulated
+          ? "Human authority — simulated credential accepted"
+          : "Human authority — unique human verified"
+        : "Human authority — budget release unauthorised",
+      detail: humanOk
+        ? authority.simulated
+          ? "A deterministic stand-in credential, used while the World sandbox entitlement is pending. It is recorded as simulated everywhere it appears and claims no verified human."
+          : "A World ID credential proves one unique human authorised this release, bound to this pathway. Only the nullifier hash is kept — no image, name or biometric reaches this app."
+        : authority === null
+          ? "No human authorised this release. The run still executes and publishes at full size; it settles nothing."
+          : "The authorisation was bound to a different pathway, so it does not cover this budget.",
+      ok: humanOk,
+      meta: {
+        nullifier: authority?.nullifierHash ?? null,
+        credential: authority?.credential ?? null,
+        level: authority?.verificationLevel ?? null,
+        action: authority?.action ?? null,
+        simulated: authority ? String(authority.simulated) : "n/a",
+      },
+    });
+
     // 3. Classical floor, recorded first — and drawn from the POWERED family,
     // never from a single unpowered baseline.
     const powered = poweredFloor(pathway);
