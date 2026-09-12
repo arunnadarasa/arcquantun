@@ -17,6 +17,8 @@ import { Route as EvidenceRouteImport } from './routes/evidence'
 import { Route as IdentityRouteImport } from './routes/identity'
 import { Route as LedgerRouteImport } from './routes/ledger'
 import { Route as QuantumGapRouteImport } from './routes/quantum-gap'
+import { Route as ApiPublicIdkitRpSignatureRouteImport } from './routes/api/public/idkit/rp-signature'
+import { Route as ApiPublicIdkitVerifyRouteImport } from './routes/api/public/idkit/verify'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -58,6 +60,17 @@ const QuantumGapRoute = QuantumGapRouteImport.update({
   path: '/quantum-gap',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicIdkitRpSignatureRoute =
+  ApiPublicIdkitRpSignatureRouteImport.update({
+    id: '/api/public/idkit/rp-signature',
+    path: '/api/public/idkit/rp-signature',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiPublicIdkitVerifyRoute = ApiPublicIdkitVerifyRouteImport.update({
+  id: '/api/public/idkit/verify',
+  path: '/api/public/idkit/verify',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -68,6 +81,8 @@ export interface FileRoutesByFullPath {
   '/identity': typeof IdentityRoute
   '/ledger': typeof LedgerRoute
   '/quantum-gap': typeof QuantumGapRoute
+  '/api/public/idkit/rp-signature': typeof ApiPublicIdkitRpSignatureRoute
+  '/api/public/idkit/verify': typeof ApiPublicIdkitVerifyRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -78,6 +93,8 @@ export interface FileRoutesByTo {
   '/identity': typeof IdentityRoute
   '/ledger': typeof LedgerRoute
   '/quantum-gap': typeof QuantumGapRoute
+  '/api/public/idkit/rp-signature': typeof ApiPublicIdkitRpSignatureRoute
+  '/api/public/idkit/verify': typeof ApiPublicIdkitVerifyRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -89,6 +106,8 @@ export interface FileRoutesById {
   '/identity': typeof IdentityRoute
   '/ledger': typeof LedgerRoute
   '/quantum-gap': typeof QuantumGapRoute
+  '/api/public/idkit/rp-signature': typeof ApiPublicIdkitRpSignatureRoute
+  '/api/public/idkit/verify': typeof ApiPublicIdkitVerifyRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -101,6 +120,8 @@ export interface FileRouteTypes {
     | '/identity'
     | '/ledger'
     | '/quantum-gap'
+    | '/api/public/idkit/rp-signature'
+    | '/api/public/idkit/verify'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -111,6 +132,8 @@ export interface FileRouteTypes {
     | '/identity'
     | '/ledger'
     | '/quantum-gap'
+    | '/api/public/idkit/rp-signature'
+    | '/api/public/idkit/verify'
   id:
     | '__root__'
     | '/'
@@ -121,6 +144,8 @@ export interface FileRouteTypes {
     | '/identity'
     | '/ledger'
     | '/quantum-gap'
+    | '/api/public/idkit/rp-signature'
+    | '/api/public/idkit/verify'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -132,6 +157,8 @@ export interface RootRouteChildren {
   IdentityRoute: typeof IdentityRoute
   LedgerRoute: typeof LedgerRoute
   QuantumGapRoute: typeof QuantumGapRoute
+  ApiPublicIdkitRpSignatureRoute: typeof ApiPublicIdkitRpSignatureRoute
+  ApiPublicIdkitVerifyRoute: typeof ApiPublicIdkitVerifyRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -192,6 +219,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof QuantumGapRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/idkit/rp-signature': {
+      id: '/api/public/idkit/rp-signature'
+      path: '/api/public/idkit/rp-signature'
+      fullPath: '/api/public/idkit/rp-signature'
+      preLoaderRoute: typeof ApiPublicIdkitRpSignatureRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/idkit/verify': {
+      id: '/api/public/idkit/verify'
+      path: '/api/public/idkit/verify'
+      fullPath: '/api/public/idkit/verify'
+      preLoaderRoute: typeof ApiPublicIdkitVerifyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -204,6 +245,8 @@ const rootRouteChildren: RootRouteChildren = {
   IdentityRoute: IdentityRoute,
   LedgerRoute: LedgerRoute,
   QuantumGapRoute: QuantumGapRoute,
+  ApiPublicIdkitRpSignatureRoute: ApiPublicIdkitRpSignatureRoute,
+  ApiPublicIdkitVerifyRoute: ApiPublicIdkitVerifyRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
