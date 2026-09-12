@@ -56,6 +56,8 @@ export interface RunResult {
   payable: boolean;
   totalPaidMinor: number;
   startedAt: string;
+  /** The nullifier of the human who authorised this release, where one exists. */
+  authorisedBy: string | null;
 }
 
 function pseudoTx(seed: string): string {
@@ -71,8 +73,22 @@ function pseudoTx(seed: string): string {
   return `0x${out.join("")}`;
 }
 
+const authoritySchema = z.object({
+  nullifierHash: z.string(),
+  credential: z.string(),
+  verificationLevel: z.string(),
+  action: z.string(),
+  signal: z.string(),
+  verifiedAt: z.string(),
+  simulated: z.boolean(),
+});
+
 export const runPathwayJob = createServerFn({ method: "POST" })
-  .inputValidator((d: unknown) => z.object({ pathwayId: z.string() }).parse(d))
+  .inputValidator((d: unknown) =>
+    z
+      .object({ pathwayId: z.string(), authority: authoritySchema.nullish() })
+      .parse(d),
+  )
   .handler(async ({ data }): Promise<RunResult> => {
     const pathway = getPathway(data.pathwayId);
     const run = getRun(data.pathwayId);
