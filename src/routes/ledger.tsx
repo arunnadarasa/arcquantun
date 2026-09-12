@@ -94,6 +94,12 @@ function LedgerPage() {
                       paid to <span className="text-foreground">{r.ensName}</span>
                     </div>
                   ) : null}
+                  {r.authorisedBy ? (
+                    <div className="num mt-1 text-[0.68rem] text-muted-foreground">
+                      authorised by human{" "}
+                      <span className="text-foreground">{shortNullifier(r.authorisedBy)}</span>
+                    </div>
+                  ) : null}
                   {r.txHash ? (
                     <a
                       href={txUrl(r.txHash)}
