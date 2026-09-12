@@ -11,6 +11,8 @@ import { formatUsdc, txUrl } from "@/lib/arc-chain";
 import { gradeReceipt } from "@/lib/receipts";
 import { runPathwayJob, type RunResult } from "@/lib/exchange.functions";
 import { recordRun } from "@/lib/ledger";
+import { WorldIdGate } from "@/components/worldid-gate";
+import type { HumanAuthority } from "@/lib/world";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -50,9 +52,21 @@ function Index() {
   const [selected, setSelected] = useState<string | null>(null);
   const runFn = useServerFn(runPathwayJob);
   const [result, setResult] = useState<RunResult | null>(null);
+  const [authority, setAuthority] = useState<HumanAuthority | null>(null);
 
   const mutation = useMutation({
-    mutationFn: (pathwayId: string) => runFn({ data: { pathwayId } }),
+    mutationFn: (pathwayId: string) =>
+      runFn({
+        data: {
+          pathwayId,
+          authority:
+            authority && authority.signal === pathwayId
+              ? authority
+              : authority
+                ? { ...authority, signal: pathwayId }
+                : null,
+        },
+      }),
     onSuccess: (r) => {
       setResult(r);
       recordRun(r);
