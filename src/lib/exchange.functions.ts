@@ -356,6 +356,7 @@ export const runPathwayJob = createServerFn({ method: "POST" })
             transferId: res.transferId,
             agentId: a.id,
             amountMinor: amount,
+            ...(payeeName ? { ensName: payeeName } : {}),
           });
         } catch (e) {
           steps.push({
@@ -380,6 +381,7 @@ export const runPathwayJob = createServerFn({ method: "POST" })
           txHash: pseudoTx(`pay:${hash}:${a.id}`),
           agentId: a.id,
           amountMinor: amount,
+          ...(payeeName ? { ensName: payeeName } : {}),
         });
       }
     }
