@@ -397,7 +397,6 @@ export const runPathwayJob = createServerFn({ method: "POST" })
             toAddress: process.env[`CIRCLE_${a.id.toUpperCase()}_ADDRESS`] ?? "",
             amountUsdc: (amount / 1e6).toFixed(6),
           });
-          console.log("[runPathwayJob] transfer result", a.id, res.state, res.txHash);
           totalPaidMinor += amount;
           steps.push({
             kind: "settlement",
