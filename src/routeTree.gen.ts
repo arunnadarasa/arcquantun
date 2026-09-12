@@ -14,9 +14,12 @@ import { Route as AgentsRouteImport } from './routes/agents'
 import { Route as ArchitectureRouteImport } from './routes/architecture'
 import { Route as DeckRouteImport } from './routes/deck'
 import { Route as EvidenceRouteImport } from './routes/evidence'
+import { Route as HumanRouteImport } from './routes/human'
 import { Route as IdentityRouteImport } from './routes/identity'
 import { Route as LedgerRouteImport } from './routes/ledger'
 import { Route as QuantumGapRouteImport } from './routes/quantum-gap'
+import { Route as ApiPublicIdkitRpSignatureRouteImport } from './routes/api/public/idkit/rp-signature'
+import { Route as ApiPublicIdkitVerifyRouteImport } from './routes/api/public/idkit/verify'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -43,6 +46,11 @@ const EvidenceRoute = EvidenceRouteImport.update({
   path: '/evidence',
   getParentRoute: () => rootRouteImport,
 } as any)
+const HumanRoute = HumanRouteImport.update({
+  id: '/human',
+  path: '/human',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IdentityRoute = IdentityRouteImport.update({
   id: '/identity',
   path: '/identity',
@@ -58,6 +66,17 @@ const QuantumGapRoute = QuantumGapRouteImport.update({
   path: '/quantum-gap',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicIdkitRpSignatureRoute =
+  ApiPublicIdkitRpSignatureRouteImport.update({
+    id: '/api/public/idkit/rp-signature',
+    path: '/api/public/idkit/rp-signature',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiPublicIdkitVerifyRoute = ApiPublicIdkitVerifyRouteImport.update({
+  id: '/api/public/idkit/verify',
+  path: '/api/public/idkit/verify',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -65,9 +84,12 @@ export interface FileRoutesByFullPath {
   '/architecture': typeof ArchitectureRoute
   '/deck': typeof DeckRoute
   '/evidence': typeof EvidenceRoute
+  '/human': typeof HumanRoute
   '/identity': typeof IdentityRoute
   '/ledger': typeof LedgerRoute
   '/quantum-gap': typeof QuantumGapRoute
+  '/api/public/idkit/rp-signature': typeof ApiPublicIdkitRpSignatureRoute
+  '/api/public/idkit/verify': typeof ApiPublicIdkitVerifyRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -75,9 +97,12 @@ export interface FileRoutesByTo {
   '/architecture': typeof ArchitectureRoute
   '/deck': typeof DeckRoute
   '/evidence': typeof EvidenceRoute
+  '/human': typeof HumanRoute
   '/identity': typeof IdentityRoute
   '/ledger': typeof LedgerRoute
   '/quantum-gap': typeof QuantumGapRoute
+  '/api/public/idkit/rp-signature': typeof ApiPublicIdkitRpSignatureRoute
+  '/api/public/idkit/verify': typeof ApiPublicIdkitVerifyRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -86,9 +111,12 @@ export interface FileRoutesById {
   '/architecture': typeof ArchitectureRoute
   '/deck': typeof DeckRoute
   '/evidence': typeof EvidenceRoute
+  '/human': typeof HumanRoute
   '/identity': typeof IdentityRoute
   '/ledger': typeof LedgerRoute
   '/quantum-gap': typeof QuantumGapRoute
+  '/api/public/idkit/rp-signature': typeof ApiPublicIdkitRpSignatureRoute
+  '/api/public/idkit/verify': typeof ApiPublicIdkitVerifyRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -98,9 +126,12 @@ export interface FileRouteTypes {
     | '/architecture'
     | '/deck'
     | '/evidence'
+    | '/human'
     | '/identity'
     | '/ledger'
     | '/quantum-gap'
+    | '/api/public/idkit/rp-signature'
+    | '/api/public/idkit/verify'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -108,9 +139,12 @@ export interface FileRouteTypes {
     | '/architecture'
     | '/deck'
     | '/evidence'
+    | '/human'
     | '/identity'
     | '/ledger'
     | '/quantum-gap'
+    | '/api/public/idkit/rp-signature'
+    | '/api/public/idkit/verify'
   id:
     | '__root__'
     | '/'
@@ -118,9 +152,12 @@ export interface FileRouteTypes {
     | '/architecture'
     | '/deck'
     | '/evidence'
+    | '/human'
     | '/identity'
     | '/ledger'
     | '/quantum-gap'
+    | '/api/public/idkit/rp-signature'
+    | '/api/public/idkit/verify'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -129,9 +166,12 @@ export interface RootRouteChildren {
   ArchitectureRoute: typeof ArchitectureRoute
   DeckRoute: typeof DeckRoute
   EvidenceRoute: typeof EvidenceRoute
+  HumanRoute: typeof HumanRoute
   IdentityRoute: typeof IdentityRoute
   LedgerRoute: typeof LedgerRoute
   QuantumGapRoute: typeof QuantumGapRoute
+  ApiPublicIdkitRpSignatureRoute: typeof ApiPublicIdkitRpSignatureRoute
+  ApiPublicIdkitVerifyRoute: typeof ApiPublicIdkitVerifyRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -171,6 +211,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof EvidenceRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/human': {
+      id: '/human'
+      path: '/human'
+      fullPath: '/human'
+      preLoaderRoute: typeof HumanRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/identity': {
       id: '/identity'
       path: '/identity'
@@ -192,6 +239,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof QuantumGapRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/idkit/rp-signature': {
+      id: '/api/public/idkit/rp-signature'
+      path: '/api/public/idkit/rp-signature'
+      fullPath: '/api/public/idkit/rp-signature'
+      preLoaderRoute: typeof ApiPublicIdkitRpSignatureRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/idkit/verify': {
+      id: '/api/public/idkit/verify'
+      path: '/api/public/idkit/verify'
+      fullPath: '/api/public/idkit/verify'
+      preLoaderRoute: typeof ApiPublicIdkitVerifyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -201,9 +262,12 @@ const rootRouteChildren: RootRouteChildren = {
   ArchitectureRoute: ArchitectureRoute,
   DeckRoute: DeckRoute,
   EvidenceRoute: EvidenceRoute,
+  HumanRoute: HumanRoute,
   IdentityRoute: IdentityRoute,
   LedgerRoute: LedgerRoute,
   QuantumGapRoute: QuantumGapRoute,
+  ApiPublicIdkitRpSignatureRoute: ApiPublicIdkitRpSignatureRoute,
+  ApiPublicIdkitVerifyRoute: ApiPublicIdkitVerifyRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

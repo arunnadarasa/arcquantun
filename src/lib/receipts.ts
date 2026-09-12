@@ -177,13 +177,35 @@ export interface PayeeIdentity {
   checkedAt: string;
 }
 
+/**
+ * The human who authorised the spend, reduced to a nullifier hash. Carried into
+ * the hashed payload so the anchored digest commits to the authorisation too.
+ * Nothing here identifies a person.
+ */
+export interface HumanAuthorityRecord {
+  nullifierHash: string;
+  credential: string;
+  verificationLevel: string;
+  action: string;
+  signal: string;
+  verifiedAt: string;
+  simulated: boolean;
+}
+
 /** The exact bytes that get hashed, sealed and anchored. */
 export function receiptPayload(
   pathwayId: string,
   r: ReceiptEnvelope,
   identity?: PayeeIdentity[],
+  authority?: HumanAuthorityRecord | null,
 ): unknown {
-  return { pathwayId, receipt: r, commit: r.commit, identity: identity ?? null };
+  return {
+    pathwayId,
+    receipt: r,
+    commit: r.commit,
+    identity: identity ?? null,
+    humanAuthority: authority ?? null,
+  };
 }
 
 /** SHA-256 digest of the receipt payload. This is what SLH-DSA signs. */

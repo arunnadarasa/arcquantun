@@ -11,6 +11,7 @@ import {
   receiptDigest,
   receiptPayload,
   type PayeeIdentity,
+  type HumanAuthorityRecord,
 } from "@/lib/receipts";
 import { INTENT_FOR_AGENT } from "@/lib/ens-namespace";
 import type { ReceiptSeal } from "@/data/seal-info";
@@ -20,6 +21,7 @@ import contractCfg from "@/data/contract.json";
 export type StepKind =
   | "policy"
   | "identity"
+  | "human"
   | "classical"
   | "fitness"
   | "dequantization"
@@ -54,6 +56,8 @@ export interface RunResult {
   payable: boolean;
   totalPaidMinor: number;
   startedAt: string;
+  /** The nullifier of the human who authorised this release, where one exists. */
+  authorisedBy: string | null;
 }
 
 function pseudoTx(seed: string): string {
@@ -69,8 +73,22 @@ function pseudoTx(seed: string): string {
   return `0x${out.join("")}`;
 }
 
+const authoritySchema = z.object({
+  nullifierHash: z.string(),
+  credential: z.string(),
+  verificationLevel: z.string(),
+  action: z.string(),
+  signal: z.string(),
+  verifiedAt: z.string(),
+  simulated: z.boolean(),
+});
+
 export const runPathwayJob = createServerFn({ method: "POST" })
-  .inputValidator((d: unknown) => z.object({ pathwayId: z.string() }).parse(d))
+  .inputValidator((d: unknown) =>
+    z
+      .object({ pathwayId: z.string(), authority: authoritySchema.nullish() })
+      .parse(d),
+  )
   .handler(async ({ data }): Promise<RunResult> => {
     const pathway = getPathway(data.pathwayId);
     const run = getRun(data.pathwayId);
@@ -136,6 +154,37 @@ export const runPathwayJob = createServerFn({ method: "POST" })
         },
       });
     }
+
+    // 2b. Human authority. The identity gate says which agent is being paid; it
+    // cannot say who authorised the spend. World ID answers that, and answers it
+    // once per human: the nullifier is stable for this action, so a second
+    // release by the same person is visibly the same person. Nothing about who
+    // they are is carried — only the hash, and it is hashed into the receipt.
+    const authority: HumanAuthorityRecord | null = data.authority ?? null;
+    const humanOk = authority !== null && authority.signal === pathway.id;
+    steps.push({
+      kind: "human",
+      title: humanOk
+        ? authority.simulated
+          ? "Human authority — simulated credential accepted"
+          : "Human authority — unique human verified"
+        : "Human authority — budget release unauthorised",
+      detail: humanOk
+        ? authority.simulated
+          ? "A deterministic stand-in credential, used while the World sandbox entitlement is pending. It is recorded as simulated everywhere it appears and claims no verified human."
+          : "A World ID credential proves one unique human authorised this release, bound to this pathway. Only the nullifier hash is kept — no image, name or biometric reaches this app."
+        : authority === null
+          ? "No human authorised this release. The run still executes and publishes at full size; it settles nothing."
+          : "The authorisation was bound to a different pathway, so it does not cover this budget.",
+      ok: humanOk,
+      meta: {
+        nullifier: authority?.nullifierHash ?? null,
+        credential: authority?.credential ?? null,
+        level: authority?.verificationLevel ?? null,
+        action: authority?.action ?? null,
+        simulated: authority ? String(authority.simulated) : "n/a",
+      },
+    });
 
     // 3. Classical floor, recorded first — and drawn from the POWERED family,
     // never from a single unpowered baseline.
@@ -218,7 +267,7 @@ export const runPathwayJob = createServerFn({ method: "POST" })
 
     // 5. Receipt grading.
     const graded = gradeReceipt(r);
-    const hash = await receiptDigest(receiptPayload(pathway.id, r, identity));
+    const hash = await receiptDigest(receiptPayload(pathway.id, r, identity, authority));
     steps.push({
       kind: "receipt",
       title: `Receipt graded ${graded.grade}`,
@@ -259,7 +308,8 @@ export const runPathwayJob = createServerFn({ method: "POST" })
       });
     }
 
-    const payable = isPayable(graded.grade) && seal !== null && seal.verified && identityOk;
+    const payable =
+      isPayable(graded.grade) && seal !== null && seal.verified && identityOk && humanOk;
 
     // 7. Anchor the sealed digest before payment clears.
     let anchorTx: string | null = null;
@@ -328,7 +378,9 @@ export const runPathwayJob = createServerFn({ method: "POST" })
           kind: "settlement",
           title: `No payment — ${a.name}`,
           detail: identityOk
-            ? `Receipt graded ${graded.grade}. The Trust Agent releases funds only against a PASS receipt.`
+            ? !humanOk
+              ? "No human authorised this release. An agent may run the work; it may not release a budget on nobody's authority."
+              : `Receipt graded ${graded.grade}. The Trust Agent releases funds only against a PASS receipt.`
             : "The identity gate refused this payee. A name that does not resolve to the address on the receipt is not paid.",
           ok: false,
           agentId: a.id,
@@ -395,6 +447,7 @@ export const runPathwayJob = createServerFn({ method: "POST" })
       receiptHash: hash,
       grade: graded.grade,
       payable,
+      authorisedBy: humanOk ? authority.nullifierHash : null,
       totalPaidMinor,
       startedAt,
     };

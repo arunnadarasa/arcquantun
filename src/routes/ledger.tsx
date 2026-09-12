@@ -5,6 +5,7 @@ import { Reveal } from "@/components/motion";
 import { formatUsdc, txUrl } from "@/lib/arc-chain";
 import { clearLedger, readLedger, type LedgerEntry } from "@/lib/ledger";
 import { getPathway } from "@/data/pathways";
+import { shortNullifier } from "@/lib/world";
 
 const PAGE = 10;
 
@@ -92,6 +93,12 @@ function LedgerPage() {
                   {r.ensName ? (
                     <div className="num mt-1 text-[0.68rem] text-muted-foreground">
                       paid to <span className="text-foreground">{r.ensName}</span>
+                    </div>
+                  ) : null}
+                  {r.authorisedBy ? (
+                    <div className="num mt-1 text-[0.68rem] text-muted-foreground">
+                      authorised by human{" "}
+                      <span className="text-foreground">{shortNullifier(r.authorisedBy)}</span>
                     </div>
                   ) : null}
                   {r.txHash ? (

@@ -24,6 +24,8 @@ export interface Slide {
 const usd = (minor: number) => `${(minor / 1e6).toFixed(2)} USDC`;
 
 const ORDER = `policy check
+   -> agent identity           ENS: is this the right payee, for this intent?
+   -> human authority          World ID: one unique human released the budget
    -> classical floor          recorded FIRST, never revised after
    -> dequantization gate      can a classical surrogate reproduce it?
    -> quantum leg              a measurement, or assessed-blocked
@@ -407,6 +409,31 @@ export const deck: Slide[] = [
         title="The chat channel is not the evidence layer"
       >
         <SlideBullets items={OPERATING_LESSONS.map((l) => `${l.title} — ${l.body}`)} />
+      </SlideFrame>
+    ),
+  },
+  {
+    id: "who",
+    label: "Who is paid, on whose authority",
+    notes:
+      "Three layers, three different questions. Arc proves money moved. ENS on Sepolia proves which agent received it and that its record permitted that intent. World ID proves one unique human released the budget — kept as a nullifier hash and nothing else, hashed into the sealed receipt. World ID Selfie Check is a low-assurance authorisation signal, not clinical identity, and the sandbox entitlement is still pending, so demo credentials are labelled simulated everywhere they appear.",
+    render: (i, n) => (
+      <SlideFrame
+        index={i}
+        total={n}
+        kicker="Identity"
+        title="A payment rail cannot say who authorised the spend"
+      >
+        <SlideBullets
+          items={[
+            "Arc answers: did money move, and against which anchored receipt hash?",
+            "ENS (Sepolia) answers: is this name the exact Arc address being paid, and does its record permit this leg's intent? A mismatch blocks settlement.",
+            "World ID answers: did one unique human release this budget, bound to this pathway? Only a nullifier hash is kept — no image, name or biometric reaches the app.",
+            "The nullifier is hashed into the receipt digest, so the SLH-DSA seal covers the authorisation, not just the result.",
+            "No human, no settlement. The run still executes and publishes at full size; it simply pays nobody.",
+            "Selfie Check is an abuse-prevention and authorisation signal only — never identity, competence or clinical authority. Sandbox pending, so demo credentials are labelled simulated.",
+          ]}
+        />
       </SlideFrame>
     ),
   },

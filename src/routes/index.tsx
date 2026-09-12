@@ -11,6 +11,8 @@ import { formatUsdc, txUrl } from "@/lib/arc-chain";
 import { gradeReceipt } from "@/lib/receipts";
 import { runPathwayJob, type RunResult } from "@/lib/exchange.functions";
 import { recordRun } from "@/lib/ledger";
+import { WorldIdGate } from "@/components/worldid-gate";
+import type { HumanAuthority } from "@/lib/world";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -50,9 +52,13 @@ function Index() {
   const [selected, setSelected] = useState<string | null>(null);
   const runFn = useServerFn(runPathwayJob);
   const [result, setResult] = useState<RunResult | null>(null);
+  const [authority, setAuthority] = useState<HumanAuthority | null>(null);
 
+  // The authorisation is passed exactly as it was issued. One bound to another
+  // pathway is not silently re-pointed at this one — the run reports the
+  // mismatch and settles nothing.
   const mutation = useMutation({
-    mutationFn: (pathwayId: string) => runFn({ data: { pathwayId } }),
+    mutationFn: (pathwayId: string) => runFn({ data: { pathwayId, authority } }),
     onSuccess: (r) => {
       setResult(r);
       recordRun(r);
@@ -116,6 +122,15 @@ function Index() {
           Each question was written in clinician language before any method was chosen. The
           classical floor was recorded first, in every case.
         </p>
+
+        <div className="mt-6">
+          <WorldIdGate
+            pathwayId={selected ?? pathways[0]!.id}
+            authority={authority}
+            onAuthorised={setAuthority}
+            onCleared={() => setAuthority(null)}
+          />
+        </div>
 
         <div className="mt-8 grid gap-4 md:grid-cols-2">
           {pathways.map((p, i) => {

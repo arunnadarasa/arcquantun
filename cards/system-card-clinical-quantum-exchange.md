@@ -99,3 +99,28 @@ otherwise the committed namespace in `src/data/ens.json` is used and every
 affected surface is labelled "committed namespace entry — not yet read from
 Sepolia". Registration is performed by `scripts/ens-register.mjs`, which writes
 its results back into that same file.
+
+## Human authority (World ID)
+
+**Asserts, per budget release:** that one unique human authorised this specific
+pathway's spend; that the authorisation is bound to that pathway and does not
+carry to another; that only a nullifier hash is retained, and that it is hashed
+into the receipt digest before the SLH-DSA seal and the Arc anchor; that an
+absent, mismatched or cleared authorisation blocks settlement while the run
+itself still executes and publishes at full size.
+
+**Does not assert:** that the human is a named person, a clinician, a
+registrant or an accountable officer; that Selfie Check evidences identity,
+competence or clinical authority; that the nullifier can be resolved to anyone;
+that the credential is quantum-safe — it is classically signed, like the ENS and
+Arc legs.
+
+**Never collected:** image, biometric template, name, email, phone number,
+wallet address, or any other attribute of the human. The credential never
+touches this app's infrastructure; verification runs through World's endpoint
+and only the nullifier comes back.
+
+Component boundary: the World Sandbox entitlement for this app is pending, so
+authorisations are deterministic stand-ins labelled "simulated" wherever they
+appear, and AgentBook entries remain unregistered in `src/data/agentbook.json`
+until `scripts/agentbook-register.mjs` receives real entries back.

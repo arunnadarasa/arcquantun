@@ -8,6 +8,7 @@ const nav = [
   { to: "/", label: "Exchange" },
   { to: "/agents", label: "Agents" },
   { to: "/identity", label: "Identity" },
+  { to: "/human", label: "Human" },
   { to: "/ledger", label: "Settlements" },
   { to: "/evidence", label: "Evidence" },
   { to: "/quantum-gap", label: "Quantum gap" },

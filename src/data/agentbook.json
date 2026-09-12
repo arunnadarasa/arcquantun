@@ -1,0 +1,44 @@
+{
+  "registry": "AgentBook",
+  "docs": "https://docs.world.org/agents/agent-kit/integrate",
+  "registered": false,
+  "pendingReason": "Sandbox entitlement requested on 12 September 2026 and not yet approved. Registration runs through scripts/agentbook-register.mjs the moment it lands; the entries below are the exact payloads that will be submitted.",
+  "agents": [
+    {
+      "agentId": "trust",
+      "handle": "cqx-trust",
+      "ensName": "trust.clinicalquantum.eth",
+      "description": "Holds the pathway budget and releases payment against a graded receipt.",
+      "intents": ["budget-release"],
+      "humanBacked": true,
+      "entry": null
+    },
+    {
+      "agentId": "baseline",
+      "handle": "cqx-baseline",
+      "ensName": "baseline.clinicalquantum.eth",
+      "description": "Runs the powered classical floor, the cohort-fitness sweep and the dequantization gate.",
+      "intents": ["classical-floor"],
+      "humanBacked": true,
+      "entry": null
+    },
+    {
+      "agentId": "nexus",
+      "handle": "cqx-nexus",
+      "ensName": "nexus.clinicalquantum.eth",
+      "description": "Submits circuits to Quantinuum Nexus and returns a graded receipt or assessed-blocked.",
+      "intents": ["quantum-submit"],
+      "humanBacked": true,
+      "entry": null
+    },
+    {
+      "agentId": "registry",
+      "handle": "cqx-registry",
+      "ensName": "registry.clinicalquantum.eth",
+      "description": "Anchors the sealed receipt hash on Arc Testnet before any payment clears.",
+      "intents": ["anchor"],
+      "humanBacked": true,
+      "entry": null
+    }
+  ]
+}
