@@ -66,3 +66,31 @@ decision-making, not for triage in service, not for real-money settlement.
 ## Provenance
 Repository: Clinical Quantum Exchange. Agent definitions: `src/data/agents.ts`.
 Policy gate: `src/lib/policy.ts`. Template licence: CC0-1.0.
+
+## Named identity (ENS / ENSIP-25)
+
+Each agent carries a name under `clinicalquantum.eth` on ENSv2 (Sepolia), an
+`arc:actor[<agentId>]` record pointing at its Arc payout address as a CAIP-10
+pointer, an `agent:intents[<agentId>]` record listing what it may do, and an
+`agent-registration[<registry>][<agentId>]` ENSIP-25 record pointing back at the
+`ReceiptAnchor` contract on Arc Testnet.
+
+| Agent | ENS name | Agent id | Permitted intents |
+| --- | --- | --- | --- |
+| Trust | `trust.clinicalquantum.eth` | `cqx-trust-1` | `release-budget`, `settle` |
+| Baseline | `baseline.clinicalquantum.eth` | `cqx-baseline-1` | `classical-floor`, `dequantization`, `cohort-fitness` |
+| Nexus | `nexus.clinicalquantum.eth` | `cqx-nexus-1` | `quantum-submit` |
+| Registry | `registry.clinicalquantum.eth` | `cqx-registry-1` | `anchor` |
+
+The identity gate runs after the policy cap and before any spend. A payee whose
+name does not resolve to the exact Arc address the run is about to pay, or whose
+record does not list this leg's intent, is not paid — and the identity records
+are hashed into the receipt digest, so the sealed receipt states who was paid,
+not merely how much. Revoking an agent is a text-record edit, not a redeploy.
+
+Limits: ENS names live on Sepolia and settlement happens on Arc Testnet. The
+binding is an attested cross-chain pointer, not a bridge. An attestation proves
+a binding was asserted by the name's controller; it says nothing about whether
+the agent behaved well, which is what the receipt grade is for. ENS records are
+signed with classical ECDSA and are logged under the same open hazard as the
+rest of the chain-side provenance.

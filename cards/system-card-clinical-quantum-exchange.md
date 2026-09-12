@@ -73,3 +73,29 @@ work. Not a clinical system, not a triage tool, not a payment product.
 Orchestration: `src/lib/exchange.functions.ts`. Receipts: `src/lib/receipts.ts`.
 Ledger: `src/lib/ledger.ts`. Chain constants: `src/lib/arc-chain.ts`.
 Template licence: CC0-1.0.
+
+## Amendment — identity gate (ENS / ENSIP-25)
+
+The fixed order gains one step, immediately after the policy check:
+
+```text
+policy check -> identity gate -> classical floor -> cohort fitness
+             -> dequantization gate -> quantum leg -> receipt grading
+             -> post-quantum seal -> on-chain anchor -> USDC settlement
+```
+
+**Asserts:** every payee is resolved through ENS before a transfer is prepared;
+the resolved Arc address must equal the address being paid; the payee's record
+must permit this leg's intent; the identity records are hashed into the receipt
+digest before sealing and anchoring; a failed identity check blocks payment.
+
+**Does not assert:** that an ENS attestation proves good behaviour; that any
+cross-chain message passes between Sepolia and Arc; that ENS records are
+quantum-safe — they are ECDSA-signed and remain an open hazard.
+
+Component boundary: ENS reads run live against the Universal Resolver V2 on
+Sepolia when `SEPOLIA_RPC_URL` is configured and the namespace is registered;
+otherwise the committed namespace in `src/data/ens.json` is used and every
+affected surface is labelled "committed namespace entry — not yet read from
+Sepolia". Registration is performed by `scripts/ens-register.mjs`, which writes
+its results back into that same file.

@@ -49,3 +49,6 @@ a USDC settlement, in a fixed order that cannot be reordered to flatter a result
 - Never release a quantum budget before the cohort-fitness sweep; a classical ceiling under the bar means weak signal, not scarce data
 - Never re-band, re-run or re-scope a result that missed its bar; publish it with its diagnosis
 - Never amend a target after compute; amendments fix the tool only, and are listed on the receipt
+- Never pay an unnamed address: resolve the payee's ENS name, require it to point at the exact Arc address being paid, and require its record to permit this leg's intent
+- Never treat an ENSIP-25 attestation as evidence of good behaviour, or a Sepolia-to-Arc pointer as a bridge
+- Never present a committed namespace entry as a live on-chain read; label the source on every surface
