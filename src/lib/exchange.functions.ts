@@ -13,6 +13,7 @@ import contractCfg from "@/data/contract.json";
 export type StepKind =
   | "policy"
   | "classical"
+  | "fitness"
   | "dequantization"
   | "quantum"
   | "receipt"
