@@ -267,7 +267,7 @@ export const runPathwayJob = createServerFn({ method: "POST" })
 
     // 5. Receipt grading.
     const graded = gradeReceipt(r);
-    const hash = await receiptDigest(receiptPayload(pathway.id, r, identity));
+    const hash = await receiptDigest(receiptPayload(pathway.id, r, identity, authority));
     steps.push({
       kind: "receipt",
       title: `Receipt graded ${graded.grade}`,
@@ -308,7 +308,8 @@ export const runPathwayJob = createServerFn({ method: "POST" })
       });
     }
 
-    const payable = isPayable(graded.grade) && seal !== null && seal.verified && identityOk;
+    const payable =
+      isPayable(graded.grade) && seal !== null && seal.verified && identityOk && humanOk;
 
     // 7. Anchor the sealed digest before payment clears.
     let anchorTx: string | null = null;
@@ -377,7 +378,9 @@ export const runPathwayJob = createServerFn({ method: "POST" })
           kind: "settlement",
           title: `No payment — ${a.name}`,
           detail: identityOk
-            ? `Receipt graded ${graded.grade}. The Trust Agent releases funds only against a PASS receipt.`
+            ? !humanOk
+              ? "No human authorised this release. An agent may run the work; it may not release a budget on nobody's authority."
+              : `Receipt graded ${graded.grade}. The Trust Agent releases funds only against a PASS receipt.`
             : "The identity gate refused this payee. A name that does not resolve to the address on the receipt is not paid.",
           ok: false,
           agentId: a.id,
@@ -444,6 +447,7 @@ export const runPathwayJob = createServerFn({ method: "POST" })
       receiptHash: hash,
       grade: graded.grade,
       payable,
+      authorisedBy: humanOk ? authority.nullifierHash : null,
       totalPaidMinor,
       startedAt,
     };
