@@ -32,6 +32,11 @@ const DIAGRAM = `Trust Agent (budget holder)
 Policy gate  -- per-job ceiling + 24h cap, checked before any transfer
    |
    v
+Identity gate -> ENS (Sepolia): does the payee's name resolve to the exact
+   |             Arc address about to be paid, and does its record permit
+   |             this leg's intent? ENSIP-25 attestation binds the two.
+   |             A mismatch blocks the settlement outright.
+   v
 Baseline Agent  -> classical FAMILY recorded FIRST (plain, balanced,
    |                resampled, tuned) -- the bar is the best POWERED
    |                member, never the weakest
