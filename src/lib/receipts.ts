@@ -98,6 +98,30 @@ export function gradeReceipt(r: ReceiptEnvelope): {
   if (!r.engine) reasons.push("Engine missing.");
   if (r.commit === null) reasons.push("Source commit missing.");
   if (r.claims.length === 0) reasons.push("No falsifiable claim recorded.");
+  if (r.preRegistration === null || r.preRegistration === undefined) {
+    reasons.push("No pre-registration attached — the bars cannot be shown to predate the run.");
+  }
+
+  // A band outside sI is a kept negative. It is published, and it is not payable.
+  if (r.band === "sIII-FAIL") {
+    reasons.push(
+      "Noisy-tier band sIII-FAIL: the measurement fell outside its own pre-committed bar. Kept as a negative, paid nothing, not re-run.",
+    );
+    return { grade: "FAIL", reasons };
+  }
+  if (r.band === "sII-DEGRADED") {
+    reasons.push(
+      "Noisy-tier band sII-DEGRADED: direction survives, magnitude does not. Not a claim, so not payable.",
+    );
+  }
+
+  // A win against a single unpowered baseline is not a win.
+  if (r.performance === "UNPOWERED-FLOOR") {
+    reasons.push(
+      "Comparison was made against one unpowered baseline. The powered classical family was never measured, so no performance claim stands.",
+    );
+  }
+
 
   // A FAIL is an envelope that is present and contradicted.
   if (r.shots !== null && r.measured !== null && r.envelope !== null) {
