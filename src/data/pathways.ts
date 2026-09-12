@@ -4,6 +4,16 @@
 //
 // Framing rule: these are capacity, cost and patient-experience questions.
 // Nothing here claims diagnosis, efficacy or patient-outcome improvement.
+//
+// Floor rule (added after a kernel "win" was found to have been measured against
+// an unpowered baseline): the floor is a FAMILY, not a number. Plain, balanced,
+// resampled and tuned members are all run, and the best of them is the bar. A
+// comparison against a single unpowered member can never read as a win.
+//
+// Fitness rule: before any budget is committed, the cohort gets a classical
+// ceiling sweep — the best recall any method reaches as the sample size grows to
+// a large oracle fit. If that ceiling sits under the bar, the signal is weak
+// rather than the data scarce, and the pathway is unfit-cohort. Nothing is spent.
 
 export type PathwayId =
   | "endo-triage"
@@ -12,7 +22,25 @@ export type PathwayId =
   | "msk-physio"
   | "cardio-echo"
   | "endoscopy-slots"
-  | "mh-capacity";
+  | "mh-capacity"
+  | "rare-subgroup";
+
+/** One member of the classical family the floor is drawn from. */
+export interface FloorMember {
+  method: string;
+  value: number;
+  /** False means the off-the-shelf turn was never applied — a straw man, not a floor. */
+  powered: boolean;
+}
+
+/** The classical ceiling sweep run before any quantum budget is released. */
+export interface CohortCeiling {
+  bar: string;
+  /** Best result any method reached at the largest sample size tried. */
+  oracle: number;
+  oracleN: number;
+  note: string;
+}
 
 export interface Pathway {
   id: PathwayId;
@@ -25,12 +53,15 @@ export interface Pathway {
     metric: string;
     value: number;
     unit: string;
+    /** Every member tested. The bar is the best of these, never the weakest. */
+    family: FloorMember[];
   };
   formulation: string;
   qubitsNeeded: number;
   budgetMinor: number; // USDC minor units the Trust Agent holds
-  status: "queued" | "assessed" | "assessed-blocked";
+  status: "queued" | "assessed" | "assessed-blocked" | "unfit-cohort";
   blockedReason?: string;
+  ceiling?: CohortCeiling;
 }
 
 export const pathways: Pathway[] = [
@@ -47,6 +78,11 @@ export const pathways: Pathway[] = [
       metric: "AUROC",
       value: 0.742,
       unit: "",
+      family: [
+        { method: "Logistic regression, plain", value: 0.701, powered: true },
+        { method: "Logistic regression, balanced class weights", value: 0.742, powered: true },
+        { method: "Tuned RBF kernel, 5-fold grid", value: 0.738, powered: true },
+      ],
     },
     formulation: "Binary ranking over a fixed feature vector; kernel similarity between referrals",
     qubitsNeeded: 14,
@@ -66,6 +102,11 @@ export const pathways: Pathway[] = [
       metric: "Long-waiters cleared",
       value: 31,
       unit: "of 40",
+      family: [
+        { method: "Greedy longest-wait-first", value: 27, powered: true },
+        { method: "Greedy then 2-opt local search", value: 31, powered: true },
+        { method: "Simulated annealing, 8 ms budget", value: 31, powered: true },
+      ],
     },
     formulation: "QUBO over slot assignment with capacity and urgency penalties",
     qubitsNeeded: 24,
@@ -85,6 +126,11 @@ export const pathways: Pathway[] = [
       metric: "AUROC",
       value: 0.781,
       unit: "",
+      family: [
+        { method: "Logistic regression, balanced", value: 0.744, powered: true },
+        { method: "Gradient-boosted trees, tuned", value: 0.781, powered: true },
+        { method: "Resampled (SMOTE) + RBF kernel", value: 0.769, powered: true },
+      ],
     },
     formulation: "Kernel classification with a quantum feature map on 11 features",
     qubitsNeeded: 11,
@@ -104,6 +150,11 @@ export const pathways: Pathway[] = [
       metric: "AUROC",
       value: 0.688,
       unit: "",
+      family: [
+        { method: "Logistic regression, plain", value: 0.612, powered: false },
+        { method: "Logistic regression with class weights", value: 0.688, powered: true },
+        { method: "Resampled (SMOTE) + RBF kernel", value: 0.674, powered: true },
+      ],
     },
     formulation: "Kernel classification with an angle-encoded feature map",
     qubitsNeeded: 9,
@@ -122,6 +173,11 @@ export const pathways: Pathway[] = [
       metric: "MAPE",
       value: 9.4,
       unit: "%",
+      family: [
+        { method: "Seasonal naive", value: 14.8, powered: true },
+        { method: "Seasonal ARIMA", value: 9.4, powered: true },
+        { method: "Kernel ridge on lag windows", value: 9.5, powered: true },
+      ],
     },
     formulation: "Time-series kernel over lagged windows, 16-qubit register",
     qubitsNeeded: 16,
@@ -141,6 +197,10 @@ export const pathways: Pathway[] = [
       metric: "Max site imbalance",
       value: 4,
       unit: "patients",
+      family: [
+        { method: "Proportional allocation", value: 11, powered: true },
+        { method: "Integer programme, exact solve", value: 4, powered: true },
+      ],
     },
     formulation: "Ising model over site-slot assignment, 32-qubit register",
     qubitsNeeded: 32,
@@ -162,14 +222,61 @@ export const pathways: Pathway[] = [
       metric: "AUROC",
       value: 0.803,
       unit: "",
+      family: [
+        { method: "Logistic regression, balanced", value: 0.751, powered: true },
+        { method: "Random forest, tuned", value: 0.803, powered: true },
+        { method: "Tuned RBF kernel", value: 0.788, powered: true },
+      ],
     },
     formulation: "Kernel classification on 13 features with parity-window readout",
     qubitsNeeded: 13,
     budgetMinor: 210_000,
     status: "assessed",
   },
+  {
+    id: "rare-subgroup",
+    service: "Multimodal triage — rare presenting subgroup",
+    question:
+      "In a mixed symptom, genomic and imaging record set, can the small subgroup that needs a different waiting-list route be picked out at all?",
+    whyItMatters:
+      "If the subgroup cannot be separated by any method, no amount of compute makes the list fairer. Knowing that early is what stops the money.",
+    cohort: "Synthetic multimodal cohort, 8 / 12 / 10 dimensions, 8% minority",
+    classicalFloor: {
+      method: "Best of the powered classical family",
+      metric: "Minority recall",
+      value: 0.76,
+      unit: "",
+      family: [
+        { method: "Linear SVM, plain", value: 0.0, powered: false },
+        { method: "Linear SVM, balanced class weights", value: 0.76, powered: true },
+        { method: "Resampled (SMOTE) + RBF kernel", value: 0.3, powered: true },
+        { method: "Tuned RBF kernel", value: 0.26, powered: true },
+      ],
+    },
+    formulation: "Quantum kernel over the fused multimodal vector, 11-qubit register",
+    qubitsNeeded: 11,
+    budgetMinor: 240_000,
+    status: "unfit-cohort",
+    ceiling: {
+      bar: "0.80 minority recall on held-out records",
+      oracle: 0.4,
+      oracleN: 20_000,
+      note: "Sample sizes from 320 to 10,240 were swept, then a 20,000-record oracle fit as an upper bound on what any classifier could recover. The ceiling reached 0.40 recall — below the bar, and below the balanced floor at 320 records. The signal is weak, not the data scarce. 'More data' is falsified; the cohort is not fit for a quantum receipt at any size, so no quantum budget was released.",
+    },
+  },
 ];
 
 export function getPathway(id: string): Pathway | undefined {
   return pathways.find((p) => p.id === id);
+}
+
+/** The bar a performance verdict has to clear: the best POWERED member, never the weakest. */
+export function poweredFloor(p: Pathway): FloorMember | undefined {
+  const powered = p.classicalFloor.family.filter((m) => m.powered);
+  if (powered.length === 0) return undefined;
+  // Lower is better for error-style metrics; the unit tells us which way is up.
+  const lowerIsBetter = p.classicalFloor.unit === "%" || p.classicalFloor.metric.startsWith("Max");
+  return powered.reduce((best, m) =>
+    lowerIsBetter ? (m.value < best.value ? m : best) : m.value > best.value ? m : best,
+  );
 }
