@@ -100,7 +100,44 @@ export const runPathwayJob = createServerFn({ method: "POST" })
       });
     }
 
-    // 2. Classical floor, recorded first — and drawn from the POWERED family,
+    // 2. Identity gate. A verifiable money rail paying an unnamed hex string is
+    // only half a receipt. Each payee is resolved through ENS: the name must
+    // point at the exact Arc address about to be paid, and must permit this
+    // leg's intent. A mismatch blocks payment outright.
+    const { checkAgentIdentity } = await import("@/lib/ens.server");
+    const identity: PayeeIdentity[] = [];
+    let identityOk = true;
+    for (const a of agents) {
+      if (a.feeShare === 0) continue;
+      const chk = await checkAgentIdentity(a.id, INTENT_FOR_AGENT[a.id]);
+      if (!chk.ok) identityOk = false;
+      identity.push({
+        agentId: chk.agentId,
+        ensName: chk.ensName,
+        payeeArcAddress: chk.payeeArcAddress,
+        intent: chk.intent,
+        state: chk.state,
+        source: chk.source,
+        checkedAt: chk.checkedAt,
+      });
+      steps.push({
+        kind: "identity",
+        title: `Identity gate — ${chk.ensName}`,
+        detail: chk.reason,
+        ok: chk.ok,
+        agentId: a.id,
+        ensName: chk.ensName,
+        meta: {
+          intent: chk.intent,
+          state: chk.state,
+          source: chk.source,
+          "arc actor": chk.payeeArcAddress,
+          attestation: chk.attestation.present ? "ENSIP-25 present" : "none found",
+        },
+      });
+    }
+
+    // 3. Classical floor, recorded first — and drawn from the POWERED family,
     // never from a single unpowered baseline.
     const powered = poweredFloor(pathway);
     steps.push({
