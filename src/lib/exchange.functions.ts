@@ -5,7 +5,14 @@ import { z } from "zod";
 import { agents, type AgentId } from "@/data/agents";
 import { getPathway, poweredFloor } from "@/data/pathways";
 import { getRun } from "@/data/runs";
-import { gradeReceipt, isPayable, receiptDigest, receiptPayload } from "@/lib/receipts";
+import {
+  gradeReceipt,
+  isPayable,
+  receiptDigest,
+  receiptPayload,
+  type PayeeIdentity,
+} from "@/lib/receipts";
+import { INTENT_FOR_AGENT } from "@/lib/ens-namespace";
 import type { ReceiptSeal } from "@/data/seal-info";
 import { checkPolicy } from "@/lib/policy";
 import contractCfg from "@/data/contract.json";
@@ -32,6 +39,8 @@ export interface RunStep {
   transferId?: string;
   agentId?: AgentId;
   amountMinor?: number;
+  /** The ENS name this leg is paid to, where one is bound. */
+  ensName?: string;
 }
 
 export interface RunResult {
