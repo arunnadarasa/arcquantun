@@ -103,22 +103,24 @@ export async function readWalletBalance(
 
 const isHash = (v: unknown): v is string => typeof v === "string" && /^0x[a-f0-9]{64}$/i.test(v);
 
-async function pollTransaction(
+const FINAL_STATES = ["COMPLETE", "CONFIRMED", "FAILED", "DENIED", "CANCELLED", "CANCELED"];
+
+export async function pollTransaction(
   txId: string,
-  attempts = 0,
+  attempts = 8,
+  intervalMs = 1500,
 ): Promise<{ txHash: string | null; state: string }> {
   for (let i = 0; i < attempts; i++) {
-    await new Promise((r) => setTimeout(r, 2000));
+    await new Promise((r) => setTimeout(r, intervalMs));
     try {
       const json = await get<{ data?: { transaction?: { state?: string; txHash?: string } } }>(
-        `/developer/transactions/${txId}`,
+        `/transactions/${txId}`,
       );
       const tx = json?.data?.transaction;
       const state = String(tx?.state ?? "PENDING");
       const txHash = isHash(tx?.txHash) ? tx.txHash : null;
-      if (["COMPLETE", "CONFIRMED", "FAILED", "DENIED", "CANCELED"].includes(state)) {
-        return { txHash, state };
-      }
+      // A hash means it reached the chain; that is enough to link to Arcscan.
+      if (txHash || FINAL_STATES.includes(state)) return { txHash, state };
     } catch {
       // transient — keep polling
     }

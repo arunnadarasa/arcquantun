@@ -350,7 +350,7 @@ export const runPathwayJob = createServerFn({ method: "POST" })
           kind: "anchor",
           title: "Receipt hash anchored (demo mode)",
           detail:
-            "Simulated envelope. Add the Circle keys and deploy the anchoring contract to write this to Arc Testnet for real.",
+            "Simulated envelope — this deployment has no Circle keys, so nothing was written to Arc.",
           ok: true,
           txHash: anchorTx,
           agentId: "registry",

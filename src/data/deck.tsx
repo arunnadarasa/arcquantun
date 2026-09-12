@@ -331,7 +331,7 @@ export const deck: Slide[] = [
     id: "honesty",
     label: "Real vs simulated",
     notes:
-      "Honesty is the pitch, so the boundary gets its own slide rather than a footnote. Grading and the ledger are real; payments and the anchor are simulated envelopes until the keys and the contract exist.",
+      "Honesty is the pitch, so the boundary gets its own slide rather than a footnote. Payments and the anchor are real Arc Testnet transactions with Arcscan links. The quantum legs are committed emulator runs and the cohorts are synthetic, and we say so.",
     render: (i, n) => (
       <SlideFrame index={i} total={n} kicker="The boundary" title="What is real, what is simulated">
         <div className="grid grid-cols-2 gap-[40px]">
@@ -339,15 +339,15 @@ export const deck: Slide[] = [
             <p className="slide-kicker text-pass">Running for real</p>
             <p className="slide-body mt-[26px] text-foreground/90">
               Pathway board · policy gate · classical floors · dequantization gate · receipt grading
-              · receipt hashing · settlement ledger
+              · SLH-DSA sealing · USDC settlement on Arc Testnet · ReceiptAnchor contract writes ·
+              every hash checkable on Arcscan
             </p>
           </SlideCard>
           <SlideCard>
             <p className="slide-kicker text-gap">Simulated, and labelled as such</p>
             <p className="slide-body mt-[26px] text-foreground/90">
-              USDC transfers and the on-chain anchor, until the Circle keys are configured and
-              ReceiptAnchor is deployed. Quantum legs are committed offline runs — emulator tier,
-              never a QPU.
+              Quantum legs are committed offline runs — emulator tier, never a QPU. World ID
+              credentials are deterministic stand-ins while the sandbox entitlement is pending.
             </p>
           </SlideCard>
         </div>
@@ -441,12 +441,12 @@ export const deck: Slide[] = [
     id: "close",
     label: "Close",
     notes:
-      "Two Circle keys and one contract deployment away from live money. The boundary stays: attestation and capacity planning, not prediction.",
+      "Money already moves on Arc Testnet. What is left is a live Nexus submission and the World sandbox entitlement. The boundary stays: attestation and capacity planning, not prediction.",
     render: (i, n) => (
-      <SlideFrame index={i} total={n} kicker="What is next" title="One deployment from live money">
+      <SlideFrame index={i} total={n} kicker="What is next" title="Money already moves">
         <SlideBullets
           items={[
-            "Two Circle keys and a deployed ReceiptAnchor turn every simulated envelope into a real Arc transaction.",
+            "Live today: Circle developer-controlled wallets settle USDC and write ReceiptAnchor on Arc Testnet, every hash verifiable on Arcscan.",
             "A live Quantinuum Nexus submission needs a token and a spend guard — the receipt rules do not change.",
             "Deployment boundary: attestation and capacity planning. Not a clinical system, not a triage tool.",
             "Receipts are SLH-DSA sealed; the Arc anchor transaction is still ECDSA-signed, and that leg stays an open hazard.",
