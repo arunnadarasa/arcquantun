@@ -54,19 +54,11 @@ function Index() {
   const [result, setResult] = useState<RunResult | null>(null);
   const [authority, setAuthority] = useState<HumanAuthority | null>(null);
 
+  // The authorisation is passed exactly as it was issued. One bound to another
+  // pathway is not silently re-pointed at this one — the run reports the
+  // mismatch and settles nothing.
   const mutation = useMutation({
-    mutationFn: (pathwayId: string) =>
-      runFn({
-        data: {
-          pathwayId,
-          authority:
-            authority && authority.signal === pathwayId
-              ? authority
-              : authority
-                ? { ...authority, signal: pathwayId }
-                : null,
-        },
-      }),
+    mutationFn: (pathwayId: string) => runFn({ data: { pathwayId, authority } }),
     onSuccess: (r) => {
       setResult(r);
       recordRun(r);
