@@ -47,6 +47,8 @@ Nexus Agent -> emulator run (or assessed-blocked with the limit named)
    |
    v
 Receipt grading -> PASS / GAP / STRUCTURAL / FAIL
+   |               noisy tier also bands it: sI-PASS / sII-DEGRADED /
+   |               sIII-FAIL, against bars pre-registered before compute
    |
    v
 Registry Agent -> anchor receipt hash on Arc (ReceiptAnchor.sol)
