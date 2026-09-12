@@ -322,6 +322,7 @@ export const runPathwayJob = createServerFn({ method: "POST" })
     for (const a of agents) {
       if (a.feeShare === 0) continue;
       const amount = Math.round(pathway.budgetMinor * a.feeShare);
+      const payeeName = identity.find((i) => i.agentId === a.id)?.ensName;
       if (!payable) {
         steps.push({
           kind: "settlement",
