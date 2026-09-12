@@ -34,9 +34,9 @@ a USDC settlement, in a fixed order that cannot be reordered to flatter a result
 
 ## Evaluation Quad
 - **Evaluation Agent:** deterministic run orchestration in `src/lib/exchange.functions.ts`, seeded, no model in the loop
-- **Evaluation Tasks:** seven waiting-list pathways, one blocked by design
-- **Evaluation Metrics:** mechanism inside `4*sqrt(0.5/shots)`; performance against the committed classical floor; receipt grade; USDC settled
-- **Evaluation Results:** six assessed lanes with graded receipts; one `assessed-blocked` lane at 32 qubits against a 26-qubit ceiling, paying nothing
+- **Evaluation Tasks:** eight waiting-list pathways — one blocked by a register ceiling, one stopped by a cohort-fitness gate
+- **Evaluation Metrics:** mechanism inside `4*sqrt(0.5/shots)`; performance against the best POWERED member of the classical family; noisy-tier band `sI-PASS` / `sII-DEGRADED` / `sIII-FAIL`; receipt grade; USDC settled
+- **Evaluation Results:** six assessed lanes with graded receipts; one `assessed-blocked` lane at 32 qubits against a 26-qubit ceiling; one `unfit-cohort` lane whose classical ceiling reached 0.40 minority recall at 20,000 records against a 0.80 bar. Both pay nothing.
 
 ## Safety Guidelines
 - Never reorder the seven steps, and never compute a classical floor after a quantum result
@@ -45,3 +45,7 @@ a USDC settlement, in a fixed order that cannot be reordered to flatter a result
 - Never treat "quantum" as "quantum-safe"; log the classical signing chain as an open hazard
 - Publish blocked and negative legs at full size, with the limit named
 - Never pay against a receipt that is not PASS, and never pay before the anchor is written
+- Never draw a floor from a single unpowered baseline; run the powered family and take the best of it as the bar
+- Never release a quantum budget before the cohort-fitness sweep; a classical ceiling under the bar means weak signal, not scarce data
+- Never re-band, re-run or re-scope a result that missed its bar; publish it with its diagnosis
+- Never amend a target after compute; amendments fix the tool only, and are listed on the receipt
