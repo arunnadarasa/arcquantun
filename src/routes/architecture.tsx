@@ -32,8 +32,13 @@ const DIAGRAM = `Trust Agent (budget holder)
 Policy gate  -- per-job ceiling + 24h cap, checked before any transfer
    |
    v
-Baseline Agent  -> classical floor recorded FIRST
-   |
+Baseline Agent  -> classical FAMILY recorded FIRST (plain, balanced,
+   |                resampled, tuned) -- the bar is the best POWERED
+   |                member, never the weakest
+   v
+Cohort fitness gate -> does a large classical oracle clear the bar at all?
+   |                   if not, the signal is weak, not the data scarce:
+   |                   unfit-cohort, nothing is spent
    v
 Dequantization gate -> can a classical surrogate reproduce it?
    |
