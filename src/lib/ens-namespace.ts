@@ -63,6 +63,12 @@ export function ensAppUrl(name: string): string {
   return `https://sepolia.app.ens.domains/${name}`;
 }
 
+/** Sepolia Etherscan link for an ENS-side contract or transaction. */
+export function sepoliaUrl(hashOrAddress: string): string {
+  const kind = hashOrAddress.length > 42 ? "tx" : "address";
+  return `https://sepolia.etherscan.io/${kind}/${hashOrAddress}`;
+}
+
 /** How a resolution was obtained. A committed record is never called a live read. */
 export type IdentitySource = "onchain" | "committed";
 

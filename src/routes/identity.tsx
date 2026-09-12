@@ -7,6 +7,7 @@ import { getIdentityStatus, resolveName } from "@/lib/ens.functions";
 import {
   ensNamespace,
   ensAppUrl,
+  sepoliaUrl,
   identityTone,
   actorPointer,
   agentRegistrationKey,
@@ -75,7 +76,9 @@ function IdentityPage() {
             { k: "Attested to", v: ensNamespace.attestationRegistry.caip2 },
             {
               k: "Namespace state",
-              v: ensNamespace.registered ? "registered on ENSv2" : "committed, not yet registered",
+              v: ensNamespace.registered
+                ? "registered on the ENSv2 beta registrar"
+                : "committed, not yet registered",
             },
           ].map((c) => (
             <Reveal key={c.k} className="glass-card rounded-lg p-4">
@@ -86,6 +89,41 @@ function IdentityPage() {
             </Reveal>
           ))}
         </div>
+
+        <Reveal className="glass-card mt-4 rounded-lg p-5">
+          <h2 className="text-base font-semibold">The live wiring on Sepolia</h2>
+          <p className="mt-2 text-xs leading-relaxed text-muted-foreground">
+            The name is registered on the permissionless ENSv2 beta registrar and its registry entry
+            points at a resolver this project owns. The beta&rsquo;s shared permissioned resolver is
+            role-gated per resource and a freshly registered name holds no write role on it, so
+            records are served from{" "}
+            <span className="num text-foreground">AgentResolver.sol</span> instead — an ENSIP-10
+            wildcard resolver read through the Universal Resolver V2, exactly as any ENS client
+            would.
+          </p>
+          <dl className="mt-3 space-y-2 text-xs">
+            {[
+              ["ENSv2 registry", ensNamespace.contracts["registry"]],
+              ["ETHRegistrar", ensNamespace.contracts["ethRegistrar"]],
+              ["Universal Resolver V2", ensNamespace.contracts["universalResolver"]],
+              ["AgentResolver", ensNamespace.contracts["agentResolver"]],
+              ["records tx", (ensNamespace as { recordsTx?: string }).recordsTx],
+            ].map(([k, v]) =>
+              v ? (
+                <Row key={k} label={String(k)}>
+                  <a
+                    className="num text-primary hover:underline"
+                    href={sepoliaUrl(String(v))}
+                    target="_blank"
+                    rel="noreferrer"
+                  >
+                    {String(v)}
+                  </a>
+                </Row>
+              ) : null,
+            )}
+          </dl>
+        </Reveal>
 
         <h2 className="mt-12 text-lg font-semibold">The namespace</h2>
         <div className="mt-4 grid gap-4 md:grid-cols-2">

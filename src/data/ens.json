@@ -2,9 +2,9 @@
   "parent": "clinicalquantum.eth",
   "network": "sepolia",
   "chainId": 11155111,
-  "registered": false,
-  "registeredAt": null,
-  "tokenId": null,
+  "registered": true,
+  "registeredAt": "2026-09-12T15:52:51.355Z",
+  "tokenId": "79872443362876707932135173008003082201643380439775860472170747272501135409152",
   "registerTx": null,
   "contracts": {
     "ethRegistrar": "0xa88553F454b77203B0D036A05c894d555EAAa2Cc",
@@ -12,7 +12,8 @@
     "universalResolver": "0xeEeEEEeE14D718C2B47D9923Deab1335E144EeEe",
     "permissionedResolverImpl": "0x9EAe5C2730a7dD16BDD1DeE6421a1B91e3B0365e",
     "rentPriceOracle": "0x8914b66260EB8C4fff795650c3AE8Cd335958987",
-    "paymentToken": "0x768F42455A2D082E23ceeF7d51e5787C82d67a39"
+    "paymentToken": "0x768F42455A2D082E23ceeF7d51e5787C82d67a39",
+    "agentResolver": "0xc305afd781febf64e84f83ce4eb38f4001352a4f"
   },
   "attestationRegistry": {
     "caip2": "eip155:5042002",
@@ -28,35 +29,55 @@
       "name": "trust.clinicalquantum.eth",
       "agentId": "cqx-trust-1",
       "arcActor": "0x5904e3bd7c43896964768757de0b490bf82f9d4f",
-      "intents": ["release-budget", "settle"],
-      "records": { "setAt": null, "tx": null }
+      "intents": [
+        "release-budget",
+        "settle"
+      ],
+      "records": {
+        "setAt": "2026-09-12T15:52:39.180Z"
+      }
     },
     {
       "id": "baseline",
       "label": "Baseline Agent",
       "name": "baseline.clinicalquantum.eth",
       "agentId": "cqx-baseline-1",
-      "arcActor": null,
-      "intents": ["classical-floor", "dequantization", "cohort-fitness"],
-      "records": { "setAt": null, "tx": null }
+      "arcActor": "0xb7f0e767d182f814a67a5d5cbb2fb342ab81a792",
+      "intents": [
+        "classical-floor",
+        "dequantization",
+        "cohort-fitness"
+      ],
+      "records": {
+        "setAt": "2026-09-12T15:52:39.180Z"
+      }
     },
     {
       "id": "nexus",
       "label": "Nexus Agent",
       "name": "nexus.clinicalquantum.eth",
       "agentId": "cqx-nexus-1",
-      "arcActor": null,
-      "intents": ["quantum-submit"],
-      "records": { "setAt": null, "tx": null }
+      "arcActor": "0x34cd94af3bb5c0b8fb3aba1cc29fad5f55611308",
+      "intents": [
+        "quantum-submit"
+      ],
+      "records": {
+        "setAt": "2026-09-12T15:52:39.180Z"
+      }
     },
     {
       "id": "registry",
       "label": "Registry Agent",
       "name": "registry.clinicalquantum.eth",
       "agentId": "cqx-registry-1",
-      "arcActor": null,
-      "intents": ["anchor"],
-      "records": { "setAt": null, "tx": null }
+      "arcActor": "0x95614436158d93f5b6d68b0d77be41b9082b3a8c",
+      "intents": [
+        "anchor"
+      ],
+      "records": {
+        "setAt": "2026-09-12T15:52:39.180Z"
+      }
     }
-  ]
+  ],
+  "recordsTx": "0x2121fe4da262ecc2fff9ef88f4492a5b8a65b9dfc6ba14a16c78eb798ed38b6c"
 }
