@@ -246,6 +246,46 @@ export const deck: Slide[] = [
     },
   },
   {
+    id: "false-win",
+    label: "What stops a false win",
+    notes:
+      "Every one of these four gates exists because something got past us first. The floor is a family because a kernel 'win' turned out to be measured against an untuned baseline. Cohort fitness exists because a cohort topped out at 0.40 recall no matter what we threw at it. Bands exist because a noiseless success does not survive noise. And the negative stays published.",
+    render: (i, n) => (
+      <SlideFrame
+        index={i}
+        total={n}
+        kicker="Gates added after being caught out"
+        title="What stops a false win"
+      >
+        <div className="grid grid-cols-2 gap-[36px]">
+          {[
+            [
+              "The floor is a family",
+              "Plain, balanced, resampled, tuned — the bar is the best of them. A win over an untuned baseline reads UNPOWERED-FLOOR and pays nothing.",
+            ],
+            [
+              "Fitness before spend",
+              "A 20,000-record classical oracle ceiling of 0.40 against a 0.80 bar. Weak signal, not scarce data: unfit-cohort, no quantum budget released.",
+            ],
+            [
+              "Pre-register, then amend",
+              "Bars fixed before compute, amendments listed. An amendment fixes the tool; it never moves the target.",
+            ],
+            [
+              "Negatives kept at full size",
+              "A 17-qubit estimator lost ~33% of its signal and missed its degraded bar. Published as sIII-FAIL, not re-run until it sealed.",
+            ],
+          ].map(([t, b]) => (
+            <SlideCard key={t}>
+              <p className="slide-kicker text-primary">{t}</p>
+              <p className="slide-caption mt-[24px] text-muted-foreground">{b}</p>
+            </SlideCard>
+          ))}
+        </div>
+      </SlideFrame>
+    ),
+  },
+  {
     id: "arc",
     label: "Arc and Circle",
     notes:
