@@ -5,7 +5,7 @@ import { useMutation } from "@tanstack/react-query";
 import { ArrowRight, CircleDot, Loader2, ShieldCheck } from "lucide-react";
 import { Shell, Pill } from "@/components/shell";
 import { CountUp, Meter, Reveal } from "@/components/motion";
-import { pathways } from "@/data/pathways";
+import { pathways, poweredFloor } from "@/data/pathways";
 import { getRun } from "@/data/runs";
 import { formatUsdc, txUrl } from "@/lib/arc-chain";
 import { gradeReceipt } from "@/lib/receipts";
