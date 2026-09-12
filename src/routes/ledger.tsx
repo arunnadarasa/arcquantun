@@ -89,6 +89,11 @@ function LedgerPage() {
                     {getPathway(r.pathwayId)?.service ?? r.pathwayId} ·{" "}
                     {new Date(r.at).toLocaleString()}
                   </div>
+                  {r.ensName ? (
+                    <div className="num mt-1 text-[0.68rem] text-muted-foreground">
+                      paid to <span className="text-foreground">{r.ensName}</span>
+                    </div>
+                  ) : null}
                   {r.txHash ? (
                     <a
                       href={txUrl(r.txHash)}
