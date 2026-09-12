@@ -7,6 +7,7 @@ import { getIdentityStatus, resolveName } from "@/lib/ens.functions";
 import {
   ensNamespace,
   ensAppUrl,
+  sepoliaUrl,
   identityTone,
   actorPointer,
   agentRegistrationKey,
@@ -102,10 +103,10 @@ function IdentityPage() {
           </p>
           <dl className="mt-3 space-y-2 text-xs">
             {[
-              ["ENSv2 registry", ensNamespace.contracts.registry],
-              ["ETHRegistrar", ensNamespace.contracts.ethRegistrar],
-              ["Universal Resolver V2", ensNamespace.contracts.universalResolver],
-              ["AgentResolver", ensNamespace.contracts.agentResolver],
+              ["ENSv2 registry", ensNamespace.contracts["registry"]],
+              ["ETHRegistrar", ensNamespace.contracts["ethRegistrar"]],
+              ["Universal Resolver V2", ensNamespace.contracts["universalResolver"]],
+              ["AgentResolver", ensNamespace.contracts["agentResolver"]],
               ["records tx", (ensNamespace as { recordsTx?: string }).recordsTx],
             ].map(([k, v]) =>
               v ? (
