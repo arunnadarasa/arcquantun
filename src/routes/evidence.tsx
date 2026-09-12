@@ -260,6 +260,21 @@ function EvidencePage() {
                       {p.classicalFloor.unit === "%" ? "%" : ` ${p.classicalFloor.unit}`}{" "}
                       {run.classical.metric} · {run.classical.method}
                     </div>
+                    <ul className="mt-2 space-y-1 text-[0.65rem]">
+                      {p.classicalFloor.family.map((m) => {
+                        const best = poweredFloor(p);
+                        return (
+                          <li key={m.method} className="num text-muted-foreground">
+                            <span className={m.powered ? "text-foreground" : "text-gap"}>
+                              {m.value}
+                            </span>{" "}
+                            {m.method}
+                            {!m.powered ? " — unpowered, not a bar" : ""}
+                            {best && best.method === m.method ? " — the bar" : ""}
+                          </li>
+                        );
+                      })}
+                    </ul>
                   </div>
                 </div>
 
