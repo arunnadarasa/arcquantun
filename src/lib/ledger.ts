@@ -12,6 +12,11 @@ export interface LedgerEntry {
   label: string;
   amountMinor: number;
   txHash: string | null;
+  /** Circle's internal transfer id. Not a transaction hash, never an Arcscan link. */
+  transferId?: string | undefined;
+  /** Independent Arcscan confirmation, once resolved. */
+  arcscanStatus?: string | undefined;
+  arcscanBlock?: number | undefined;
   simulated: boolean;
   grade: string;
   receiptHash: string;
@@ -49,7 +54,8 @@ export function recordRun(result: RunResult): LedgerEntry[] {
       ensName: s.ensName,
       label: s.kind === "anchor" ? "Receipt anchored" : s.title,
       amountMinor: s.amountMinor ?? 0,
-      txHash: s.txHash ?? s.transferId ?? null,
+      txHash: s.txHash ?? null,
+      transferId: s.transferId,
       simulated: result.simulated,
       grade: result.grade,
       receiptHash: result.receiptHash,
@@ -65,6 +71,34 @@ export function recordRun(result: RunResult): LedgerEntry[] {
     window.localStorage.setItem(KEY, JSON.stringify(merged.slice(0, 300)));
   } catch {
     /* storage full — ledger stays in memory for this session */
+  }
+  return merged;
+}
+
+/** Write back hashes for rows that were still pending when the run ended. */
+export function applyResolutions(
+  updates: Array<{
+    transferId: string;
+    txHash: string | null;
+    arcscan?: { status: string | null; block: number | null } | undefined;
+  }>,
+): LedgerEntry[] {
+  if (typeof window === "undefined") return [];
+  const byId = new Map(updates.map((u) => [u.transferId, u]));
+  const merged = readLedger().map((e) => {
+    const u = e.transferId ? byId.get(e.transferId) : undefined;
+    if (!u) return e;
+    return {
+      ...e,
+      txHash: u.txHash ?? e.txHash,
+      arcscanStatus: u.arcscan?.status ?? e.arcscanStatus,
+      arcscanBlock: u.arcscan?.block ?? e.arcscanBlock,
+    };
+  });
+  try {
+    window.localStorage.setItem(KEY, JSON.stringify(merged));
+  } catch {
+    /* storage full — keep the in-memory copy */
   }
   return merged;
 }
