@@ -24,6 +24,8 @@ export interface Slide {
 const usd = (minor: number) => `${(minor / 1e6).toFixed(2)} USDC`;
 
 const ORDER = `policy check
+   -> agent identity           ENS: is this the right payee, for this intent?
+   -> human authority          World ID: one unique human released the budget
    -> classical floor          recorded FIRST, never revised after
    -> dequantization gate      can a classical surrogate reproduce it?
    -> quantum leg              a measurement, or assessed-blocked
