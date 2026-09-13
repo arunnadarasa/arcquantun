@@ -59,6 +59,8 @@ export interface RunResult {
   startedAt: string;
   /** The nullifier of the human who authorised this release, where one exists. */
   authorisedBy: string | null;
+  /** The address of the device that signed the release, where one approved it. */
+  approvedBy: string | null;
 }
 
 function pseudoTx(seed: string): string {
@@ -359,7 +361,7 @@ export const runPathwayJob = createServerFn({ method: "POST" })
     }
 
     const payable =
-      isPayable(graded.grade) && seal !== null && seal.verified && identityOk && humanOk;
+      isPayable(graded.grade) && seal !== null && seal.verified && identityOk && humanOk && deviceOk;
 
     // 7. Anchor the sealed digest before payment clears.
     let anchorTx: string | null = null;
@@ -430,7 +432,9 @@ export const runPathwayJob = createServerFn({ method: "POST" })
           detail: identityOk
             ? !humanOk
               ? "No human authorised this release. An agent may run the work; it may not release a budget on nobody's authority."
-              : `Receipt graded ${graded.grade}. The Trust Agent releases funds only against a PASS receipt.`
+              : !deviceOk
+                ? "No device approval for this release. The enrolled Ledger must sign the exact release parameters before the budget moves."
+                : `Receipt graded ${graded.grade}. The Trust Agent releases funds only against a PASS receipt.`
             : "The identity gate refused this payee. A name that does not resolve to the address on the receipt is not paid.",
           ok: false,
           agentId: a.id,
@@ -497,6 +501,7 @@ export const runPathwayJob = createServerFn({ method: "POST" })
       grade: graded.grade,
       payable,
       authorisedBy: humanOk ? authority.nullifierHash : null,
+      approvedBy: deviceOk ? deviceGate.approvedBy : null,
       totalPaidMinor,
       startedAt,
     };
