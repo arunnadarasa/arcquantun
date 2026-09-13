@@ -43,8 +43,22 @@ export interface PreRegistration {
   amendments: string[];
 }
 
+/**
+ * Where the numbers came from. A live job carries a Nexus job id anyone can look
+ * up; a committed record does not. One pathway running live must never be able
+ * to imply the others did, so this marker is per receipt, never per page.
+ */
+export interface ExecutionProvenance {
+  mode: "live-nexus" | "committed-offline";
+  jobId: string | null;
+  account?: string | null;
+  executedAt?: string | null;
+}
+
 export interface ReceiptEnvelope {
   schema: string;
+  /** Live Nexus job or committed offline record. Absent reads as committed. */
+  execution?: ExecutionProvenance;
   /** Sentences that could be false, not topics. */
   claims: string[];
   engine: string;
