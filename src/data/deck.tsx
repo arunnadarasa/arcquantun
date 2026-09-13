@@ -428,30 +428,74 @@ export const deck: Slide[] = [
     ),
   },
   {
-    id: "who",
-    label: "Who is paid, on whose authority",
+    id: "ens",
+    label: "ENS — which agent is paid",
     notes:
-      "Three layers, three different questions. Arc proves money moved. ENS on Sepolia proves which agent received it and that its record permitted that intent. World ID proves one unique human released the budget — kept as a nullifier hash and nothing else, hashed into the sealed receipt. World ID Selfie Check is a low-assurance authorisation signal, not clinical identity, and the sandbox entitlement is still pending, so demo credentials are labelled simulated everywhere they appear.",
+      "ENS answers which agent is being paid and whether it was permitted. Each agent holds an ENSv2 Sepolia subname under clinicalquantum.eth with ENSIP-25 records pointing at its Arc actor address and naming the intent it may be paid for. Before any budget is released the payee is resolved through the Universal Resolver and compared to the address on the receipt. The shared PermissionedResolver rejected our writes, so we deployed AgentResolver and wired it through the ENSv2 registry.",
     render: (i, n) => (
       <SlideFrame
         index={i}
         total={n}
-        kicker="Identity"
-        title="A payment rail cannot say who authorised the spend"
+        kicker="Identity · ENS"
+        title="A payment rail cannot say who it paid"
       >
-        <SlideBullets
-          items={[
-            "Arc answers: did money move, and against which anchored receipt hash?",
-            "ENS (Sepolia) answers: is this name the exact Arc address being paid, and does its record permit this leg's intent? A mismatch blocks settlement.",
-            "World ID answers: did one unique human release this budget, bound to this pathway? Only a nullifier hash is kept — no image, name or biometric reaches the app.",
-            "The nullifier is hashed into the receipt digest, so the SLH-DSA seal covers the authorisation, not just the result.",
-            "No human, no settlement. The run still executes and publishes at full size; it simply pays nobody.",
-            "Selfie Check is an abuse-prevention and authorisation signal only — never identity, competence or clinical authority. Sandbox pending, so demo credentials are labelled simulated.",
-          ]}
-        />
+        <div className="grid grid-cols-3 gap-[32px]">
+          {[
+            ["Name", "Four ENSv2 Sepolia subnames under clinicalquantum.eth — one per agent."],
+            [
+              "Record",
+              "ENSIP-25 records carry the Arc actor address and the intent that agent may be paid for.",
+            ],
+            [
+              "Check",
+              "The payee is resolved through the Universal Resolver and compared to the receipt. A mismatch blocks settlement.",
+            ],
+          ].map(([h, b]) => (
+            <SlideCard key={h}>
+              <p className="slide-kicker text-primary">{h}</p>
+              <p className="slide-caption mt-[24px] text-muted-foreground">{b}</p>
+            </SlideCard>
+          ))}
+        </div>
+        <p className="slide-body mt-[44px] max-w-[1500px] text-foreground/90">
+          The shared PermissionedResolver refused our writes, so we deployed our own AgentResolver
+          and wired it through the ENSv2 registry.
+        </p>
+        <p className="slide-chrome mt-[26px] text-muted-foreground">
+          AgentResolver {ENS.contracts.agentResolver} · Sepolia {ENS.chainId}
+        </p>
       </SlideFrame>
     ),
   },
+  {
+    id: "world",
+    label: "World — whose authority",
+    notes:
+      "An agent may not release a budget on nobody's authority. World ID sits between agent identity and spend: one unique human authorises the release for that specific pathway, and only the nullifier hash is kept. That hash folds into the receipt digest and seals with SLH-DSA before anchoring. Authority is bound to one pathway and never rebound; unauthorised runs settle 0.00 USDC. Sandbox entitlement is still pending, so Selfie Check credentials are deterministic stand-ins.",
+    render: (i, n) => (
+      <SlideFrame
+        index={i}
+        total={n}
+        kicker="Authority · World ID"
+        title="No agent releases a budget on nobody's authority"
+      >
+        <SlideBullets
+          items={[
+            "One unique human authorises the release, bound to that one pathway — never rebound to another.",
+            "Only the nullifier hash is kept. No image, no name, no biometric and no wallet reaches the app.",
+            "The nullifier folds into the receipt digest, so the SLH-DSA seal and the Arc anchor cover the authorisation, not just the result.",
+            "No human, no settlement: the run still executes and publishes at full size, and pays 0.00 USDC.",
+          ]}
+        />
+        <p className="slide-chrome mt-[34px] text-muted-foreground">
+          Selfie Check is an abuse-prevention and authorisation signal only — never identity,
+          competence or clinical authority. Sandbox entitlement pending, so demo credentials are
+          labelled simulated.
+        </p>
+      </SlideFrame>
+    ),
+  },
+
   {
     id: "device",
     label: "The device tap",
