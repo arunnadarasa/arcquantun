@@ -11,6 +11,9 @@ import { pathways } from "@/data/pathways";
 import { QUANTUM_GAP, GAP_REMAINING, TRACKER_READ_ON } from "@/data/quantum-gap";
 import { SEAL_SCHEME, SEAL_STANDARD } from "@/data/seal-info";
 import { OPERATING_LESSONS } from "@/data/operations";
+import CONTRACT from "@/data/contract.json";
+import ENS from "@/data/ens.json";
+
 
 export interface Slide {
   id: string;
