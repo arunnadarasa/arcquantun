@@ -1,0 +1,112 @@
+{
+  "schema": "nexus-cost/1",
+  "generatedAt": "2026-09-13T01:48:22.822615+00:00",
+  "engine": "Offline sizing analysis (pytket gate census + ideal statevector)",
+  "backendQualifier": "offline",
+  "note": "No job submitted, no shots bought. Gate counts and HQC estimates only; the AUROC column is an ideal statevector score, not a measured result.",
+  "formula": {
+    "expression": "HQC = 5 + (N1q + 10*N2q + 5*Nm) / 5000 * C",
+    "base": 5.0,
+    "divisor": 5000.0,
+    "terms": {
+      "N1q": "one-qubit gates",
+      "N2q": "two-qubit gates, weighted 10x",
+      "Nm": "measurements, inits and resets, weighted 5x",
+      "C": "shots"
+    },
+    "note": "The +5 is per circuit, so for small circuits the program count dominates the bill before a single shot is taken."
+  },
+  "envelope": [
+    {
+      "knob": "Two-qubit gates per circuit",
+      "limit": "target <= 100, hard stop 1000, absolute ceiling 2000 with noise",
+      "why": "Fidelity collapses past this on ion traps."
+    },
+    {
+      "knob": "Qubits",
+      "limit": "4-20 for a demonstrator; 30+ before classical simulation stops being easy",
+      "why": "Below 20 a laptop reproduces the result."
+    },
+    {
+      "knob": "Shots",
+      "limit": "128-512 typical; 1024 only with a stated reason",
+      "why": "Cost is linear in shots."
+    },
+    {
+      "knob": "Circuits per experiment",
+      "limit": "Keep low \u2014 each carries +5 HQC",
+      "why": "69 circuits is 345 HQC before a single shot."
+    },
+    {
+      "knob": "Budget",
+      "limit": "10,000 HQC normal project, 100,000 HQC showcase",
+      "why": "Cheaper is better; the guard refuses rather than overspends."
+    }
+  ],
+  "hardwareNote": "A million shots is not possible on Helios (98 qubits). Allowable shots fall as the two-qubit gate count rises, so the two-qubit fidelity spec and the shot count belong in the same sentence.",
+  "sizing": {
+    "nQubits": 6,
+    "shots": 256,
+    "nTrain": 6,
+    "nTest": 4,
+    "programs": 46
+  },
+  "classicalFloor": {
+    "method": "Logistic regression with balanced class weights",
+    "metric": "AUROC",
+    "value": NaN
+  },
+  "candidates": [
+    {
+      "key": "angle",
+      "label": "Angle encoding + entangling ring",
+      "nQubits": 6,
+      "depth": 15,
+      "n1q": 24,
+      "n2q": 10,
+      "nm": 6,
+      "perProgramHqc": 12.88,
+      "programs": 46,
+      "batchHqc": 592.7,
+      "idealAuroc": NaN,
+      "withinTarget2q": true
+    },
+    {
+      "key": "zz",
+      "label": "Second-order ZZ feature map",
+      "nQubits": 6,
+      "depth": 35,
+      "n1q": 34,
+      "n2q": 20,
+      "nm": 6,
+      "perProgramHqc": 18.52,
+      "programs": 46,
+      "batchHqc": 851.77,
+      "idealAuroc": NaN,
+      "withinTarget2q": true
+    },
+    {
+      "key": "hea",
+      "label": "Hardware-efficient ansatz, 2 layers",
+      "nQubits": 6,
+      "depth": 23,
+      "n1q": 48,
+      "n2q": 20,
+      "nm": 6,
+      "perProgramHqc": 19.23,
+      "programs": 46,
+      "batchHqc": 884.75,
+      "idealAuroc": NaN,
+      "withinTarget2q": true
+    }
+  ],
+  "chosen": "angle",
+  "prior": {
+    "label": "Original msk-physio sizing",
+    "nQubits": 9,
+    "shots": 1024,
+    "programs": 69,
+    "batchHqc": 3750.62,
+    "perProgramHqc": 54.357
+  }
+}
