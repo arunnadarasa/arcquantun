@@ -29,6 +29,7 @@ const usd = (minor: number) => `${(minor / 1e6).toFixed(2)} USDC`;
 const ORDER = `policy check
    -> agent identity           ENS: is this the right payee, for this intent?
    -> human authority          World ID: one unique human released the budget
+   -> device confirmation      Ledger: the release parameters tapped on hardware
    -> classical floor          recorded FIRST, never revised after
    -> dequantization gate      can a classical surrogate reproduce it?
    -> quantum leg              a measurement, or assessed-blocked
@@ -532,7 +533,7 @@ export const deck: Slide[] = [
         <SlideBullets
           items={[
             "Live today: Circle developer-controlled wallets settle USDC and write ReceiptAnchor on Arc Testnet, every hash verifiable on Arcscan.",
-            "A live Quantinuum Nexus submission needs a token and a spend guard — the receipt rules do not change.",
+            "The MSK pathway ran live on the Quantinuum Nexus H2-Emulator with its own job id; the receipt rules did not change.",
             "Deployment boundary: attestation and capacity planning. Not a clinical system, not a triage tool.",
             "Receipts are SLH-DSA sealed; the Arc anchor transaction is still ECDSA-signed, and that leg stays an open hazard.",
           ]}
