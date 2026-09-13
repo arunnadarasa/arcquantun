@@ -52,18 +52,27 @@ export function BridgeChip({ className = "" }: { className?: string }) {
   const { bridge } = useDeviceBridge();
   const online = bridge.data?.connected === true;
   const pending = bridge.isLoading;
+  const emulated = bridge.data?.qualifier === "emulator";
 
   const tone = online
     ? "border-pass/40 bg-pass/10 text-pass"
     : "border-border bg-muted/40 text-muted-foreground";
-  const label = online ? "bridge online" : pending ? "bridge…" : "bridge offline";
+  const label = online
+    ? emulated
+      ? "bridge (speculos)"
+      : "bridge online"
+    : pending
+      ? "bridge…"
+      : "bridge offline";
 
   return (
     <span
-      aria-label={`Ledger bridge ${online ? "online" : "offline"}`}
+      aria-label={`Ledger bridge ${online ? "online" : "offline"}${emulated ? " (speculos)" : ""}`}
       title={
         online
-          ? "The local Ledger bridge is reachable — you can approve on the device."
+          ? emulated
+            ? "The local Ledger bridge is reachable and running against Speculos — Ledger's emulated device. Same app binary, same code path; labelled as emulated."
+            : "The local Ledger bridge is reachable — you can approve on the device."
           : "Bridge offline — start scripts/ledger on the machine the Ledger is plugged into."
       }
       className={`inline-flex shrink-0 items-center gap-1.5 rounded-full border px-2.5 py-1 text-[0.62rem] font-medium uppercase tracking-[0.12em] ${tone} ${className}`}
@@ -126,15 +135,22 @@ export function DeviceGate({
         seed,
         issuedAt,
       });
-      const { address, signature } = await bridgeFetch<{ address: string; signature: string }>(
-        "/approve",
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ message }),
-        },
-      );
-      onApproved({ message, signature, address, issuedAt });
+      const res = await bridgeFetch<{
+        address: string;
+        signature: string;
+        qualifier?: "device" | "emulator" | undefined;
+      }>("/approve", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ message }),
+      });
+      onApproved({
+        message,
+        signature: res.signature,
+        address: res.address,
+        issuedAt,
+        qualifier: res.qualifier ?? bridge.data?.qualifier ?? "device",
+      });
     } catch (e) {
       setError(e instanceof Error ? e.message : "bridge unreachable");
       onApproved(null);
