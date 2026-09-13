@@ -95,6 +95,38 @@ function SizingPage() {
 
         <Reveal className="mt-10">
           <h2 className="text-sm font-semibold uppercase tracking-[0.14em]">
+            {cost.attribution}
+          </h2>
+          <p className="mt-2 max-w-3xl text-xs leading-relaxed text-muted-foreground">
+            The envelope below is not ours. It came from a review on the hardware side, and each
+            point is written here as a rule the run now follows, with the line that enforces it.
+          </p>
+          <div className="mt-4 grid gap-4 md:grid-cols-2">
+            {cost.reviewerFeedback.map((block) => (
+              <div key={block.group} className="glass-card rounded-lg p-5">
+                <div className="text-[0.65rem] uppercase tracking-[0.14em] text-accent">
+                  {block.group}
+                </div>
+                <ul className="mt-3 space-y-2 text-xs leading-relaxed text-muted-foreground">
+                  {block.points.map((p) => (
+                    <li key={p} className="flex gap-2">
+                      <span aria-hidden className="text-accent">
+                        —
+                      </span>
+                      <span>{p}</span>
+                    </li>
+                  ))}
+                </ul>
+                <p className="mt-3 border-t border-border/60 pt-3 text-xs leading-relaxed text-foreground">
+                  {block.enforcement}
+                </p>
+              </div>
+            ))}
+          </div>
+        </Reveal>
+
+        <Reveal className="mt-10">
+          <h2 className="text-sm font-semibold uppercase tracking-[0.14em]">
             The operating envelope
           </h2>
           <div className="mt-4 overflow-x-auto">
