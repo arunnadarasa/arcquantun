@@ -123,7 +123,7 @@ async function signPersonal(message) {
       signature: `0x${r}${s}${v}`,
       transport: TRANSPORT,
       qualifier: QUALIFIER,
-icity      emulated: TRANSPORT === "speculos",
+emulated: TRANSPORT === "speculos",
     };
   });
 }
