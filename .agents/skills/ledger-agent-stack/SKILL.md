@@ -114,9 +114,13 @@ wallet-cli ring decrypt -i secrets.enc -o - --key my-key   # no device needed
 - **`recoverMessageAddress` on EIP-191:** signPersonalMessage already applies
   the personal-message prefix; pass the raw string message to viem, not the
   hex.
+- **`AppEth is not a constructor`** (bridge 502): Node's CJS interop nests the
+  class one level. Resolve it as
+  `mod.default?.default ?? (typeof mod.default === "function" ? mod.default : null) ?? mod.AppEth`.
 - **Device refused / locked** surfaces as a transport error — publish the
   failure loudly with the reason; never retry in a loop or fall back to an
-  unapproved settlement.
+  unapproved settlement. On Speculos the equivalent is a review screen that
+  stops advancing: that is a failed approval, not something to retry.
 - **DMK migration:** LedgerJS transports are being migrated to the Device
   Management Kit; for new UI-side work prefer DMK, but the Node bridge above
   is the stable path for headless signing today.
