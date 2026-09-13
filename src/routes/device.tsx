@@ -79,7 +79,16 @@ function DevicePage() {
             k="bridge"
             v={online ? `online — ${DEVICE_BRIDGE_URL}` : `offline — start scripts/ledger`}
           />
-          <Row k="device" v={bridge.data ? `${bridge.data.app} app at ${bridge.data.path}` : "—"} />
+          <Row
+            k="device"
+            v={
+              bridge.data
+                ? bridge.data.qualifier === "emulator"
+                  ? `Speculos (emulated device) — ${bridge.data.app} app at ${bridge.data.path}`
+                  : `${bridge.data.app} app at ${bridge.data.path}`
+                : "—"
+            }
+          />
           <Row
             k="signer"
             v={
@@ -95,7 +104,9 @@ function DevicePage() {
           <p className="mt-3 text-xs text-fail">
             Bridge unreachable: {String(bridge.error)}. Run{" "}
             <span className="num">cd scripts/ledger && npm install && npm start</span>{" "}
-            with the device unlocked and the Ethereum app open.
+            with the device unlocked and the Ethereum app open — or{" "}
+            <span className="num">LEDGER_TRANSPORT=speculos npm start</span> against
+            Ledger's emulator (see <span className="num">scripts/ledger/speculos.sh</span>).
           </p>
         ) : null}
         {!status?.enrolled ? (
@@ -103,7 +114,17 @@ function DevicePage() {
             To make the gate mandatory, enrol the signer: read the address above and save it as
             the <span className="num">LEDGER_SIGNER_ADDRESS</span> secret in Project Settings →
             Secrets. From then on, a run without the device's signature settles 0.00 USDC and says
-            so.
+            so. A Speculos session is enrolled separately with{" "}
+            <span className="num">LEDGER_SIGNER_ADDRESS_EMULATOR</span> and never touches the
+            real device's enrolment.
+          </p>
+        ) : null}
+        {bridge.data?.qualifier === "emulator" ? (
+          <p className="mt-3 text-xs leading-relaxed text-muted-foreground">
+            Speculos is Ledger's device emulator: the genuine Ethereum app binary running in
+            software, with the same APDU flow and the same signing code path as a physical
+            Ledger. Every surface on this site labels it as emulated — a physical device remains
+            the primary path, and this is the explicitly-labelled fallback.
           </p>
         ) : null}
       </section>
@@ -119,6 +140,11 @@ function DevicePage() {
             the Ledger seed with the Ledger Key Ring: one device tap to provision, then decryption
             needs no device at all. The agent requests a scoped, short-lived capability per
             pathway run; it never handles the underlying key.
+          </p>
+          <p className="mt-2 text-xs leading-relaxed text-muted-foreground">
+            Key Ring provisioning always uses the real Ledger Key Ring (trust chain)
+            protocol on a physical device — Speculos never substitutes for it. One tap
+            to provision; decryption afterwards needs no device at all.
           </p>
           <div className="glass-card mt-5 rounded-lg p-5">
             {RING_COMMANDS.map(([label, cmd]) => (

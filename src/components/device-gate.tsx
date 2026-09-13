@@ -15,6 +15,9 @@ interface BridgeInfo {
   address: string;
   path: string;
   app: string;
+  /** "emulator" = Speculos; absent = physical device. */
+  qualifier?: "device" | "emulator" | undefined;
+  emulated?: boolean | undefined;
 }
 
 async function bridgeFetch<T>(path: string, init?: RequestInit): Promise<T> {
@@ -49,18 +52,27 @@ export function BridgeChip({ className = "" }: { className?: string }) {
   const { bridge } = useDeviceBridge();
   const online = bridge.data?.connected === true;
   const pending = bridge.isLoading;
+  const emulated = bridge.data?.qualifier === "emulator";
 
   const tone = online
     ? "border-pass/40 bg-pass/10 text-pass"
     : "border-border bg-muted/40 text-muted-foreground";
-  const label = online ? "bridge online" : pending ? "bridge…" : "bridge offline";
+  const label = online
+    ? emulated
+      ? "bridge (speculos)"
+      : "bridge online"
+    : pending
+      ? "bridge…"
+      : "bridge offline";
 
   return (
     <span
-      aria-label={`Ledger bridge ${online ? "online" : "offline"}`}
+      aria-label={`Ledger bridge ${online ? "online" : "offline"}${emulated ? " (speculos)" : ""}`}
       title={
         online
-          ? "The local Ledger bridge is reachable — you can approve on the device."
+          ? emulated
+            ? "The local Ledger bridge is reachable and running against Speculos — Ledger's emulated device. Same app binary, same code path; labelled as emulated."
+            : "The local Ledger bridge is reachable — you can approve on the device."
           : "Bridge offline — start scripts/ledger on the machine the Ledger is plugged into."
       }
       className={`inline-flex shrink-0 items-center gap-1.5 rounded-full border px-2.5 py-1 text-[0.62rem] font-medium uppercase tracking-[0.12em] ${tone} ${className}`}
@@ -105,6 +117,7 @@ export function DeviceGate({
   }, [pathwayId, approval, onApproved]);
 
   const online = bridge.data?.connected === true;
+  const emulated = bridge.data?.qualifier === "emulator";
   const required = status?.enrolled === true;
   const approvedForPathway =
     approval !== null && approval.message.includes(`pathway: ${pathwayId}`);
@@ -123,15 +136,22 @@ export function DeviceGate({
         seed,
         issuedAt,
       });
-      const { address, signature } = await bridgeFetch<{ address: string; signature: string }>(
-        "/approve",
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ message }),
-        },
-      );
-      onApproved({ message, signature, address, issuedAt });
+      const res = await bridgeFetch<{
+        address: string;
+        signature: string;
+        qualifier?: "device" | "emulator" | undefined;
+      }>("/approve", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ message }),
+      });
+      onApproved({
+        message,
+        signature: res.signature,
+        address: res.address,
+        issuedAt,
+        qualifier: res.qualifier ?? bridge.data?.qualifier ?? "device",
+      });
     } catch (e) {
       setError(e instanceof Error ? e.message : "bridge unreachable");
       onApproved(null);
@@ -145,6 +165,11 @@ export function DeviceGate({
       <div className="flex flex-wrap items-center gap-2">
         <Usb className="size-4 text-muted-foreground" aria-hidden />
         <span className="text-sm font-medium">Device confirmation</span>
+        {approvedForPathway && emulated ? (
+          <span className="inline-flex items-center gap-1 rounded border border-gap/40 bg-gap/10 px-2 py-0.5 text-[0.65rem] text-gap">
+            Speculos — emulated device
+          </span>
+        ) : null}
         {approvedForPathway ? (
           <span className="inline-flex items-center gap-1 rounded border border-pass/40 bg-pass/10 px-2 py-0.5 text-[0.65rem] text-pass">
             <ShieldCheck className="size-3" /> signed by{" "}
@@ -162,12 +187,24 @@ export function DeviceGate({
           </span>
         )}
         <span className="num ml-auto text-[0.65rem] text-muted-foreground">
-          bridge {online ? "online" : "offline"} · {bridge.data?.path ?? "127.0.0.1:8943"}
+          bridge {online ? (emulated ? "online · speculos" : "online") : "offline"} ·{" "}
+          {bridge.data?.path ?? "127.0.0.1:8943"}
         </span>
       </div>
       <p className="mt-2 text-xs leading-relaxed text-muted-foreground">
-        The enrolled Ledger signs the exact release parameters — pathway, budget, chain and
-        quantum leg — after they are shown on its screen. No tap, no settlement.
+        {emulated ? (
+          <>
+            Speculos — Ledger's emulator — runs the same Ethereum app binary and the
+            same signing flow as a physical Ledger; every surface labels it as
+            emulated. The Key Ring still belongs to the real device.
+          </>
+        ) : (
+          <>
+            The enrolled Ledger signs the exact release parameters — pathway, budget,
+            chain and quantum leg — after they are shown on its screen. No tap, no
+            settlement.
+          </>
+        )}
       </p>
       <div className="mt-3 flex flex-wrap items-center gap-2">
         <button

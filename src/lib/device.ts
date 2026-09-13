@@ -18,7 +18,16 @@ export interface DeviceApproval {
   signature: string;
   address: string;
   issuedAt: string;
+  /**
+   * "device" = physical Ledger; "emulator" = Speculos, Ledger's emulator.
+   * Same app binary, same APDU flow, same code path — only the hardware is
+   * simulated, and every surface labels it as such.
+   */
+  qualifier?: "device" | "emulator" | undefined;
 }
+
+/** The transport the bridge is using, as reported by GET /device. */
+export type BridgeQualifier = "device" | "emulator";
 
 export function formatUsdcFixed(minor: number): string {
   return (minor / 1e6).toFixed(6);

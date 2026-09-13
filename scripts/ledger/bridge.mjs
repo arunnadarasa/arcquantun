@@ -15,19 +15,38 @@
 //
 //   cd scripts/ledger && npm install && npm start
 //
+// Transport:
+//   LEDGER_TRANSPORT=hid       (default) physical Ledger over USB
+//   LEDGER_TRANSPORT=speculos  Ledger's Speculos emulator over TCP — the same
+//                              Ethereum app binary and the same APDU flow,
+//                              reported as an emulated device. Start it with
+//                              ./speculos.sh (APDU port 9999). The Key Ring
+//                              endpoints always use the real device/CLI.
+//
 // Setup (once): `npm i -g @ledgerhq/wallet-cli && wallet-cli ring init`
 // with WALLET_PASS injected from your OS keychain — never typed inline.
 
 import { createServer } from "node:http";
 import { execFile } from "node:child_process";
 import { promisify } from "node:util";
-import TransportNodeHid from "@ledgerhq/hw-transport-node-hid";
-import AppEth from "@ledgerhq/hw-app-eth";
+// The ESM wrapper over the CJS build nests the class one level deep
+// (exports.default = Eth). Resolve all shapes so both node and bun work.
+const AppEthMod = await import("@ledgerhq/hw-app-eth");
+const AppEth =
+  AppEthMod.default?.default ??
+  (typeof AppEthMod.default === "function" ? AppEthMod.default : null) ??
+  AppEthMod.AppEth;
 
 const execFileAsync = promisify(execFile);
 
 const PORT = Number(process.env["LEDGER_BRIDGE_PORT"] ?? 8943);
 const DERIVATION_PATH = process.env["LEDGER_SIGNER_PATH"] ?? "44'/60'/0'/0/0";
+
+const TRANSPORT =
+  process.env["LEDGER_TRANSPORT"] === "speculos" ? "speculos" : "hid";
+const SPECULOS_HOST = process.env["LEDGER_SPECULOS_HOST"] ?? "127.0.0.1";
+const SPECULOS_APDU_PORT = Number(process.env["LEDGER_SPECULOS_PORT"] ?? 9999);
+const QUALIFIER = TRANSPORT === "speculos" ? "emulator" : "device";
 
 const ALLOWED_ORIGINS = new Set(
   [
@@ -55,8 +74,26 @@ function json(res, status, body) {
   res.end(JSON.stringify(body));
 }
 
+// Transports load lazily: an emulator-only machine never needs the native HID
+// module, and a device-only machine never opens a TCP socket.
+async function openTransport() {
+  if (TRANSPORT === "speculos") {
+    const { default: SpeculosTransport } = await import(
+      "@ledgerhq/hw-transport-node-speculos"
+    );
+    return SpeculosTransport.open({
+      apduPort: SPECULOS_APDU_PORT,
+      host: SPECULOS_HOST,
+    });
+  }
+  const { default: TransportNodeHid } = await import(
+    "@ledgerhq/hw-transport-node-hid"
+  );
+  return TransportNodeHid.open("");
+}
+
 async function withDevice(fn) {
-  const transport = await TransportNodeHid.open("");
+  const transport = await openTransport();
   try {
     return await fn(new AppEth(transport));
   } finally {
@@ -67,7 +104,15 @@ async function withDevice(fn) {
 async function deviceInfo() {
   return withDevice(async (eth) => {
     const { address } = await eth.getAddress(DERIVATION_PATH, false);
-    return { connected: true, address, path: DERIVATION_PATH, app: "Ethereum" };
+    return {
+      connected: true,
+      address,
+      path: DERIVATION_PATH,
+      app: "Ethereum",
+      transport: TRANSPORT,
+      qualifier: QUALIFIER,
+      emulated: TRANSPORT === "speculos",
+    };
   });
 }
 
@@ -79,7 +124,13 @@ async function signPersonal(message) {
     const r = sig.r.padStart(64, "0");
     const s = sig.s.padStart(64, "0");
     const v = (sig.v & 0xff).toString(16).padStart(2, "0");
-    return { address, signature: `0x${r}${s}${v}` };
+    return {
+      address,
+      signature: `0x${r}${s}${v}`,
+      transport: TRANSPORT,
+      qualifier: QUALIFIER,
+emulated: TRANSPORT === "speculos",
+    };
   });
 }
 
@@ -158,5 +209,11 @@ function readBody(req) {
 }
 
 server.listen(PORT, "127.0.0.1", () => {
-  console.log(`Ledger signer bridge on http://127.0.0.1:${PORT} (path ${DERIVATION_PATH})`);
+  const mode =
+    TRANSPORT === "speculos"
+      ? `Speculos emulator at ${SPECULOS_HOST}:${SPECULOS_APDU_PORT} (emulated device)`
+      : "physical Ledger over USB";
+  console.log(
+    `Ledger signer bridge on http://127.0.0.1:${PORT} (path ${DERIVATION_PATH}, ${mode})`,
+  );
 });

@@ -61,6 +61,8 @@ export interface RunResult {
   authorisedBy: string | null;
   /** The address of the device that signed the release, where one approved it. */
   approvedBy: string | null;
+  /** "device" = physical Ledger; "emulator" = Speculos, labelled as emulated. */
+  approvedByQualifier: "device" | "emulator" | null;
 }
 
 function pseudoTx(seed: string): string {
@@ -91,6 +93,7 @@ export const deviceApprovalSchema = z.object({
   signature: z.string(),
   address: z.string(),
   issuedAt: z.string(),
+  qualifier: z.enum(["device", "emulator"]).optional(),
 });
 
 export const runPathwayJob = createServerFn({ method: "POST" })
@@ -208,17 +211,25 @@ export const runPathwayJob = createServerFn({ method: "POST" })
     const { verifyDeviceApproval } = await import("@/lib/device.server");
     const deviceGate = await verifyDeviceApproval(data.pathwayId, data.deviceApproval ?? null);
     const deviceOk = deviceGate.ok;
+    const deviceEmulated = deviceGate.qualifier === "emulator";
     steps.push({
       kind: "device",
       title: deviceGate.required
         ? deviceOk
-          ? "Device confirmation — Ledger approved the release"
+          ? deviceEmulated
+            ? "Device confirmation — Speculos approved the release (emulated device)"
+            : "Device confirmation — Ledger approved the release"
           : "Device confirmation — release not approved"
         : "Device confirmation — no device enrolled",
       detail: deviceGate.reason,
       ok: deviceOk,
       meta: {
         "signed by": deviceGate.approvedBy,
+        device: deviceGate.qualifier
+          ? deviceEmulated
+            ? "Speculos (emulated device)"
+            : "Ledger (physical)"
+          : "n/a",
         "gate mandatory": String(deviceGate.required),
       },
     });
@@ -316,6 +327,7 @@ export const runPathwayJob = createServerFn({ method: "POST" })
               signature: data.deviceApproval.signature,
               message: data.deviceApproval.message,
               issuedAt: data.deviceApproval.issuedAt,
+              qualifier: data.deviceApproval.qualifier ?? "device",
             }
           : null,
       ),
@@ -502,6 +514,7 @@ export const runPathwayJob = createServerFn({ method: "POST" })
       payable,
       authorisedBy: humanOk ? authority.nullifierHash : null,
       approvedBy: deviceOk ? deviceGate.approvedBy : null,
+      approvedByQualifier: deviceOk ? deviceGate.qualifier : null,
       totalPaidMinor,
       startedAt,
     };

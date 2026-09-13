@@ -16,18 +16,27 @@ export interface DeviceGateResult {
   ok: boolean;
   reason: string;
   approvedBy: string | null;
+  /** "device" = physical Ledger; "emulator" = Speculos; null = no approval. */
+  qualifier: "device" | "emulator" | null;
 }
 
-function enrolledSigner(): string | null {
-  const addr = process.env["LEDGER_SIGNER_ADDRESS"];
-  return addr && addr.startsWith("0x") ? addr : null;
+function enrolledSigner(qualifier: "device" | "emulator"): string | null {
+  // The emulator has its own enrolment so the real device's signer is never
+  // touched or rebound; it falls back to the main address when unset.
+  const raw =
+    qualifier === "emulator"
+      ? (process.env["LEDGER_SIGNER_ADDRESS_EMULATOR"] ??
+        process.env["LEDGER_SIGNER_ADDRESS"])
+      : process.env["LEDGER_SIGNER_ADDRESS"];
+  return raw && raw.startsWith("0x") ? raw : null;
 }
 
 export async function verifyDeviceApproval(
   pathwayId: string,
   approval: DeviceApproval | null | undefined,
 ): Promise<DeviceGateResult> {
-  const enrolled = enrolledSigner();
+  const qualifier = approval?.qualifier === "emulator" ? "emulator" : "device";
+  const enrolled = enrolledSigner(qualifier);
   if (!enrolled) {
     return {
       required: false,
@@ -35,6 +44,7 @@ export async function verifyDeviceApproval(
       reason:
         "No approving device is enrolled on this deployment, so settlement runs without hardware confirmation. Enrolling a Ledger signer makes this gate mandatory.",
       approvedBy: null,
+      qualifier: null,
     };
   }
   if (!approval || !approval.message || !approval.signature) {
@@ -44,13 +54,14 @@ export async function verifyDeviceApproval(
       reason:
         "No device approval presented. The enrolled Ledger must sign the release parameters before this budget moves.",
       approvedBy: null,
+      qualifier,
     };
   }
 
   const pathway = getPathway(pathwayId);
   const run = getRun(pathwayId);
   if (!pathway || !run) {
-    return { required: true, ok: false, reason: `Unknown pathway ${pathwayId}.`, approvedBy: null };
+    return { required: true, ok: false, reason: `Unknown pathway ${pathwayId}.`, approvedBy: null, qualifier };
   }
 
   const message = buildDeviceApprovalMessage({
@@ -69,19 +80,20 @@ export async function verifyDeviceApproval(
       reason:
         "The signed payload does not match this pathway's committed release parameters, so the signature is refused.",
       approvedBy: null,
+      qualifier,
     };
   }
 
   const issued = Date.parse(approval.issuedAt);
   if (!Number.isFinite(issued)) {
-    return { required: true, ok: false, reason: "Approval timestamp unparseable.", approvedBy: null };
+    return { required: true, ok: false, reason: "Approval timestamp unparseable.", approvedBy: null, qualifier };
   }
   const age = Date.now() - issued;
   if (age > APPROVAL_TTL_MS) {
-    return { required: true, ok: false, reason: "Device approval has expired; approve again on the device.", approvedBy: null };
+    return { required: true, ok: false, reason: "Device approval has expired; approve again on the device.", approvedBy: null, qualifier };
   }
   if (age < -2 * 60 * 1000) {
-    return { required: true, ok: false, reason: "Device approval is dated in the future.", approvedBy: null };
+    return { required: true, ok: false, reason: "Device approval is dated in the future.", approvedBy: null, qualifier };
   }
 
   try {
@@ -97,17 +109,21 @@ export async function verifyDeviceApproval(
         ok: false,
         reason: `The signature recovers to ${signer.slice(0, 10)}…, not the enrolled device. Only the enrolled signer can approve a release.`,
         approvedBy: null,
+        qualifier,
       };
     }
     return {
       required: true,
       ok: true,
       reason:
-        "The enrolled Ledger signed the exact release parameters — pathway, budget, chain and quantum leg — after they were shown on the device screen.",
+        qualifier === "emulator"
+          ? "Speculos — Ledger's emulated device — signed the exact release parameters after they were shown on the emulated screen. Same Ethereum app binary, same APDU flow, same code path as a physical Ledger; only the hardware is simulated."
+          : "The enrolled Ledger signed the exact release parameters — pathway, budget, chain and quantum leg — after they were shown on the device screen.",
       approvedBy: signer,
+      qualifier,
     };
   } catch {
-    return { required: true, ok: false, reason: "Signature recovery failed; the approval is malformed.", approvedBy: null };
+    return { required: true, ok: false, reason: "Signature recovery failed; the approval is malformed.", approvedBy: null, qualifier };
   }
 }
 
@@ -120,7 +136,7 @@ export interface DeviceStatus {
 /** Read-only status for the /device page. Never returns the enrolled address. */
 export const getDeviceStatus = createServerFn({ method: "GET" }).handler(
   async (): Promise<DeviceStatus> => {
-    const enrolled = Boolean(enrolledSigner());
+    const enrolled = Boolean(enrolledSigner("device"));
     return {
       enrolled,
       bridgeUrl: "http://127.0.0.1:8943",
