@@ -38,6 +38,133 @@ def envelope(shots: int) -> float:
     return 4 * math.sqrt(0.5 / shots)
 
 
+# --- Cost model ------------------------------------------------------------
+# Quantinuum Hardware Quantum Credits:
+#
+#     HQC = 5 + (N1q + 10*N2q + 5*Nm) / 5000 * C
+#
+# The +5 is PER CIRCUIT, so for small circuits the program count dominates the
+# bill; a two-qubit gate costs ten single-qubit gates; cost is linear in shots.
+HQC_BASE = 5.0
+HQC_DIVISOR = 5000.0
+
+# The operating envelope. Every number here has a reason, not a preference.
+LIMITS = {
+    "target_2q_per_circuit": 100,   # ion-trap fidelity target
+    "hard_2q_per_circuit": 1000,    # refuse past this
+    "ceiling_2q_noisy": 2000,       # absolute open limit with noise
+    "max_qubits": 20,               # above this, stop calling it classically easy
+    "typical_shots": 512,           # 1024+ needs a stated reason
+}
+
+_MEASUREY = {"Measure", "Reset", "Init"}
+
+
+class SizingRefusal(RuntimeError):
+    """Raised BEFORE upload. A run outside the envelope is refused, never trimmed quietly."""
+
+
+def gate_census(circuit) -> dict:
+    """N1q / N2q / Nm straight off the circuit. No recollection, no hand-typed guess."""
+    n1q = n2q = nm = 0
+    for cmd in circuit.get_commands():
+        name = cmd.op.get_name().split("(")[0]
+        if name in _MEASUREY:
+            nm += 1
+            continue
+        if name == "Barrier":
+            continue
+        width = len(cmd.qubits)
+        if width == 1:
+            n1q += 1
+        elif width >= 2:
+            # A 3+ qubit gate is not native; count its pairwise cost honestly.
+            n2q += width - 1
+    return {
+        "nQubits": circuit.n_qubits,
+        "depth": circuit.depth(),
+        "n1q": n1q,
+        "n2q": n2q,
+        "nm": nm,
+    }
+
+
+def hqc_cost(circuit, shots: int) -> float:
+    c = gate_census(circuit)
+    return HQC_BASE + (c["n1q"] + 10 * c["n2q"] + 5 * c["nm"]) / HQC_DIVISOR * shots
+
+
+def batch_cost(circuits: list, shots: int) -> dict:
+    per = [hqc_cost(c, shots) for c in circuits]
+    census = [gate_census(c) for c in circuits]
+    return {
+        "programs": len(circuits),
+        "shots": shots,
+        "perProgramHqc": round(sum(per) / max(len(per), 1), 3),
+        "totalHqc": round(sum(per), 2),
+        "constantHqc": round(HQC_BASE * len(circuits), 2),
+        "max2q": max((c["n2q"] for c in census), default=0),
+        "maxQubits": max((c["nQubits"] for c in census), default=0),
+    }
+
+
+def sizing_preflight(
+    circuits: list,
+    shots: int,
+    *,
+    budget_hqc: float,
+    device_width: int | None = None,
+    limits: dict | None = None,
+) -> dict:
+    """Refuse an oversized or overpriced batch before a single byte is uploaded."""
+    lim = {**LIMITS, **(limits or {})}
+    summary = batch_cost(circuits, shots)
+
+    if summary["max2q"] > lim["hard_2q_per_circuit"]:
+        raise SizingRefusal(
+            f"{summary['max2q']} two-qubit gates in one circuit, over the "
+            f"{lim['hard_2q_per_circuit']} hard limit "
+            f"(target {lim['target_2q_per_circuit']}, noisy ceiling {lim['ceiling_2q_noisy']})"
+        )
+    if device_width is not None and summary["maxQubits"] > device_width:
+        raise SizingRefusal(
+            f"{summary['maxQubits']} qubits, over the {device_width}-qubit device width"
+        )
+    if summary["totalHqc"] > budget_hqc:
+        raise SizingRefusal(
+            f"batch estimates {summary['totalHqc']:.1f} HQC, over the "
+            f"{budget_hqc:.1f} HQC budget "
+            f"({summary['constantHqc']:.0f} of it is the per-circuit +5 on "
+            f"{summary['programs']} programs)"
+        )
+
+    warnings = []
+    if summary["max2q"] > lim["target_2q_per_circuit"]:
+        warnings.append(
+            f"{summary['max2q']} two-qubit gates is over the {lim['target_2q_per_circuit']} target"
+        )
+    if shots > lim["typical_shots"]:
+        warnings.append(f"{shots} shots is above the {lim['typical_shots']} typical budget")
+    summary["warnings"] = warnings
+    return summary
+
+
+def print_cost_table(label: str, circuits: list, shots: int, summary: dict) -> None:
+    """The spend is printed before it is committed, not reconstructed afterwards."""
+    print(f"\n  cost estimate — {label}", flush=True)
+    print(f"    programs        {summary['programs']}", flush=True)
+    print(f"    shots           {shots}", flush=True)
+    print(f"    widest circuit  {summary['maxQubits']} qubits, {summary['max2q']} 2q gates", flush=True)
+    print(f"    per program     {summary['perProgramHqc']:.2f} HQC", flush=True)
+    print(f"    constant (+5)   {summary['constantHqc']:.0f} HQC", flush=True)
+    print(f"    batch total     {summary['totalHqc']:.1f} HQC", flush=True)
+    for w in summary.get("warnings", []):
+        print(f"    WARNING         {w}", flush=True)
+    print("", flush=True)
+
+
+
+
 def login() -> str:
     token = os.environ.get("QNEXUS_TOKEN")
     if token:
