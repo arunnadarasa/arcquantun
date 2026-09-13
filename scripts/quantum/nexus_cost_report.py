@@ -199,6 +199,53 @@ def main() -> int:
         "hardwareNote": "A million shots is not possible on Helios (98 qubits). Allowable "
         "shots fall as the two-qubit gate count rises, so the two-qubit fidelity spec and "
         "the shot count belong in the same sentence.",
+        "attribution": "Reviewer feedback from a Quantinuum engineer",
+        "reviewerFeedback": [
+            {
+                "group": "Gate, qubit and shot limits",
+                "points": [
+                    "Two-qubit gates: target 100 per circuit, hard stop 1000, absolute "
+                    "ceiling 2000 once noise is counted.",
+                    "Qubits: 4-20 for a demonstrator; 30+ is where classical simulation "
+                    "stops being easy.",
+                    "Shots: 128-512 is the normal range. 1024 only with a stated reason.",
+                ],
+                "enforcement": "The sizing preflight reads the compiled circuit and refuses "
+                "over-width or over-gate batches by name before upload.",
+            },
+            {
+                "group": "What actually drives the bill",
+                "points": [
+                    "The +5 is charged per circuit, so for small circuits the program count "
+                    "dominates before a single shot is taken.",
+                    "A two-qubit gate counts ten times a one-qubit gate.",
+                    "Cost is linear in shots — doubling shots doubles the bill.",
+                ],
+                "enforcement": "Gate counts come off the compiled circuit, not a hand-typed "
+                "estimate, and the per-program cost table prints at submit time.",
+            },
+            {
+                "group": "Hardware reality",
+                "points": [
+                    "A million shots is not possible on Helios (98 qubits).",
+                    "Allowable shots fall as the two-qubit gate count rises.",
+                    "The two-qubit fidelity spec and the shot count belong in the same "
+                    "sentence.",
+                ],
+                "enforcement": "Every quantum leg is labelled H2-Emulator, and the shot count "
+                "is published next to the gate census rather than on its own.",
+            },
+            {
+                "group": "Budget framing",
+                "points": [
+                    "10,000 credits is a normal project; 100,000 is a showcase.",
+                    "Cheaper is better — a smaller job that answers the question beats a "
+                    "large one that impresses.",
+                ],
+                "enforcement": "A per-run budget is reserved up front; an over-budget batch "
+                "is refused with the number named, never quietly trimmed.",
+            },
+        ],
         "sizing": {
             "nQubits": NQ,
             "shots": SHOTS,
