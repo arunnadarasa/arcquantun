@@ -301,14 +301,27 @@ def run_batch(
     shots: int,
     ctx: dict,
     ledger: Ledger,
-    estimate: float,
+    estimate: float | None = None,
     max_cost: float,
+    budget_hqc: float | None = None,
+    device_width: int | None = None,
     properties: dict | None = None,
 ) -> dict:
     """One job, many programs. A sweep fired as N jobs is N queue positions and N bills.
 
     Returns one normalised distribution per program, in submission order.
+    The estimate is COMPUTED from the circuits unless one is forced in.
     """
+    summary = sizing_preflight(
+        circuits,
+        shots,
+        budget_hqc=budget_hqc if budget_hqc is not None else ledger.budget,
+        device_width=device_width,
+    )
+    if estimate is None:
+        estimate = summary["totalHqc"]
+    print_cost_table(name, circuits, shots, summary)
+
     cached = CACHE / f"{name}.json"
     exec_job = None
     if cached.exists():
