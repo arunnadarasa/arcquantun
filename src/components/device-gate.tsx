@@ -42,6 +42,38 @@ export function useDeviceBridge() {
   return { status, bridge };
 }
 
+// Compact bridge indicator for the top bar: green the moment the local signer
+// bridge answers, so there is no need to check the terminal. Presentational
+// only — it reuses the same polling query as the gate.
+export function BridgeChip({ className = "" }: { className?: string }) {
+  const { bridge } = useDeviceBridge();
+  const online = bridge.data?.connected === true;
+  const pending = bridge.isLoading;
+
+  const tone = online
+    ? "border-pass/40 bg-pass/10 text-pass"
+    : "border-border bg-muted/40 text-muted-foreground";
+  const label = online ? "bridge online" : pending ? "bridge…" : "bridge offline";
+
+  return (
+    <span
+      aria-label={`Ledger bridge ${online ? "online" : "offline"}`}
+      title={
+        online
+          ? "The local Ledger bridge is reachable — you can approve on the device."
+          : "Bridge offline — start scripts/ledger on the machine the Ledger is plugged into."
+      }
+      className={`inline-flex shrink-0 items-center gap-1.5 rounded-full border px-2.5 py-1 text-[0.62rem] font-medium uppercase tracking-[0.12em] ${tone} ${className}`}
+    >
+      <span
+        className={`size-1.5 rounded-full bg-current ${online ? "animate-pulse" : ""}`}
+        aria-hidden
+      />
+      {label}
+    </span>
+  );
+}
+
 export function DeviceGate({
   pathwayId,
   budgetMinor,

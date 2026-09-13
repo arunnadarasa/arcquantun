@@ -1,7 +1,8 @@
-import { Link, useRouterState } from "@tanstack/react-router";
+import { Link, useRouterState, ClientOnly } from "@tanstack/react-router";
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { ChevronDown, Menu, X } from "lucide-react";
 import { AuroraBackground } from "@/components/aurora-background";
+import { BridgeChip } from "@/components/device-gate";
 import { CHAT_FOOTER_CLAUSE } from "@/data/operations";
 
 // The route list is the single source of truth. Ten flat links no longer fit a
@@ -168,6 +169,12 @@ export function Shell({ children }: { children: ReactNode }) {
             ))}
           </nav>
 
+          <ClientOnly fallback={null}>
+            <span className="hidden xl:inline-flex">
+              <BridgeChip />
+            </span>
+          </ClientOnly>
+
           <Link
             to="/"
             hash="board"
@@ -190,6 +197,11 @@ export function Shell({ children }: { children: ReactNode }) {
         />
         {open ? (
           <nav className="max-h-[calc(100vh-4rem)] overflow-y-auto border-t border-border bg-background/95 px-5 pb-6 pt-2 lg:hidden">
+            <div className="border-b border-border/60 py-3">
+              <ClientOnly fallback={null}>
+                <BridgeChip />
+              </ClientOnly>
+            </div>
             {primary.map((n) => (
               <Link
                 key={n.to}
