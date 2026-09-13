@@ -74,14 +74,14 @@ export async function verifyDeviceApproval(
 
   const issued = Date.parse(approval.issuedAt);
   if (!Number.isFinite(issued)) {
-    return { required: true, ok: false, reason: "Approval timestamp unparseable.", approvedBy: null };
+    return { required: true, ok: false, reason: "Approval timestamp unparseable.", approvedBy: null, qualifier };
   }
   const age = Date.now() - issued;
   if (age > APPROVAL_TTL_MS) {
-    return { required: true, ok: false, reason: "Device approval has expired; approve again on the device.", approvedBy: null };
+    return { required: true, ok: false, reason: "Device approval has expired; approve again on the device.", approvedBy: null, qualifier };
   }
   if (age < -2 * 60 * 1000) {
-    return { required: true, ok: false, reason: "Device approval is dated in the future.", approvedBy: null };
+    return { required: true, ok: false, reason: "Device approval is dated in the future.", approvedBy: null, qualifier };
   }
 
   try {
@@ -97,17 +97,21 @@ export async function verifyDeviceApproval(
         ok: false,
         reason: `The signature recovers to ${signer.slice(0, 10)}…, not the enrolled device. Only the enrolled signer can approve a release.`,
         approvedBy: null,
+        qualifier,
       };
     }
     return {
       required: true,
       ok: true,
       reason:
-        "The enrolled Ledger signed the exact release parameters — pathway, budget, chain and quantum leg — after they were shown on the device screen.",
+        qualifier === "emulator"
+          ? "Speculos — Ledger's emulated device — signed the exact release parameters after they were shown on the emulated screen. Same Ethereum app binary, same APDU flow, same code path as a physical Ledger; only the hardware is simulated."
+          : "The enrolled Ledger signed the exact release parameters — pathway, budget, chain and quantum leg — after they were shown on the device screen.",
       approvedBy: signer,
+      qualifier,
     };
   } catch {
-    return { required: true, ok: false, reason: "Signature recovery failed; the approval is malformed.", approvedBy: null };
+    return { required: true, ok: false, reason: "Signature recovery failed; the approval is malformed.", approvedBy: null, qualifier };
   }
 }
 
