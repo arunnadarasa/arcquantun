@@ -12,7 +12,9 @@ import { gradeReceipt } from "@/lib/receipts";
 import { runPathwayJob, type RunResult } from "@/lib/exchange.functions";
 import { recordRun } from "@/lib/ledger";
 import { WorldIdGate } from "@/components/worldid-gate";
+import { DeviceGate } from "@/components/device-gate";
 import type { HumanAuthority } from "@/lib/world";
+import type { DeviceApproval } from "@/lib/device";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -53,12 +55,15 @@ function Index() {
   const runFn = useServerFn(runPathwayJob);
   const [result, setResult] = useState<RunResult | null>(null);
   const [authority, setAuthority] = useState<HumanAuthority | null>(null);
+  const [deviceApproval, setDeviceApproval] = useState<DeviceApproval | null>(null);
 
   // The authorisation is passed exactly as it was issued. One bound to another
   // pathway is not silently re-pointed at this one — the run reports the
-  // mismatch and settles nothing.
+  // mismatch and settles nothing. The device approval travels the same way:
+  // signed parameters, verified server-side, never re-derived in the client.
   const mutation = useMutation({
-    mutationFn: (pathwayId: string) => runFn({ data: { pathwayId, authority } }),
+    mutationFn: (pathwayId: string) =>
+      runFn({ data: { pathwayId, authority, deviceApproval } }),
     onSuccess: (r) => {
       setResult(r);
       recordRun(r);
@@ -130,6 +135,25 @@ function Index() {
             onAuthorised={setAuthority}
             onCleared={() => setAuthority(null)}
           />
+        </div>
+
+        <div className="mt-4">
+          {(() => {
+            const p = pathways.find((x) => x.id === (selected ?? pathways[0]!.id)) ?? pathways[0]!;
+            const run = getRun(p.id);
+            return (
+              <DeviceGate
+                pathwayId={p.id}
+                budgetMinor={p.budgetMinor}
+                engine={run?.receipt.engine ?? ""}
+                backendQualifier={run?.receipt.backendQualifier ?? "not-run"}
+                shots={run?.receipt.shots ?? null}
+                seed={run?.receipt.seed ?? null}
+                approval={deviceApproval}
+                onApproved={setDeviceApproval}
+              />
+            );
+          })()}
         </div>
 
         <div className="mt-8 grid gap-4 md:grid-cols-2">

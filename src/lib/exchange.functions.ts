@@ -22,6 +22,7 @@ export type StepKind =
   | "policy"
   | "identity"
   | "human"
+  | "device"
   | "classical"
   | "fitness"
   | "dequantization"
@@ -58,6 +59,8 @@ export interface RunResult {
   startedAt: string;
   /** The nullifier of the human who authorised this release, where one exists. */
   authorisedBy: string | null;
+  /** The address of the device that signed the release, where one approved it. */
+  approvedBy: string | null;
 }
 
 function pseudoTx(seed: string): string {
@@ -83,10 +86,21 @@ const authoritySchema = z.object({
   simulated: z.boolean(),
 });
 
+export const deviceApprovalSchema = z.object({
+  message: z.string(),
+  signature: z.string(),
+  address: z.string(),
+  issuedAt: z.string(),
+});
+
 export const runPathwayJob = createServerFn({ method: "POST" })
   .inputValidator((d: unknown) =>
     z
-      .object({ pathwayId: z.string(), authority: authoritySchema.nullish() })
+      .object({
+        pathwayId: z.string(),
+        authority: authoritySchema.nullish(),
+        deviceApproval: deviceApprovalSchema.nullish(),
+      })
       .parse(d),
   )
   .handler(async ({ data }): Promise<RunResult> => {
@@ -186,6 +200,29 @@ export const runPathwayJob = createServerFn({ method: "POST" })
       },
     });
 
+    // 2c. Device authority. World proves which human authorised the release;
+    // it cannot prove the release parameters were seen by anyone but software.
+    // The enrolled Ledger signs the exact pathway, budget, chain and quantum
+    // leg after they are shown on its screen, and the signature is recovered
+    // server-side against the enrolled signer. No tap, no release.
+    const { verifyDeviceApproval } = await import("@/lib/device.server");
+    const deviceGate = await verifyDeviceApproval(data.pathwayId, data.deviceApproval ?? null);
+    const deviceOk = deviceGate.ok;
+    steps.push({
+      kind: "device",
+      title: deviceGate.required
+        ? deviceOk
+          ? "Device confirmation — Ledger approved the release"
+          : "Device confirmation — release not approved"
+        : "Device confirmation — no device enrolled",
+      detail: deviceGate.reason,
+      ok: deviceOk,
+      meta: {
+        "signed by": deviceGate.approvedBy,
+        "gate mandatory": String(deviceGate.required),
+      },
+    });
+
     // 3. Classical floor, recorded first — and drawn from the POWERED family,
     // never from a single unpowered baseline.
     const powered = poweredFloor(pathway);
@@ -267,7 +304,22 @@ export const runPathwayJob = createServerFn({ method: "POST" })
 
     // 5. Receipt grading.
     const graded = gradeReceipt(r);
-    const hash = await receiptDigest(receiptPayload(pathway.id, r, identity, authority));
+    const hash = await receiptDigest(
+      receiptPayload(
+        pathway.id,
+        r,
+        identity,
+        authority,
+        deviceOk && data.deviceApproval
+          ? {
+              approvedBy: data.deviceApproval.address,
+              signature: data.deviceApproval.signature,
+              message: data.deviceApproval.message,
+              issuedAt: data.deviceApproval.issuedAt,
+            }
+          : null,
+      ),
+    );
     steps.push({
       kind: "receipt",
       title: `Receipt graded ${graded.grade}`,
@@ -309,7 +361,7 @@ export const runPathwayJob = createServerFn({ method: "POST" })
     }
 
     const payable =
-      isPayable(graded.grade) && seal !== null && seal.verified && identityOk && humanOk;
+      isPayable(graded.grade) && seal !== null && seal.verified && identityOk && humanOk && deviceOk;
 
     // 7. Anchor the sealed digest before payment clears.
     let anchorTx: string | null = null;
@@ -380,7 +432,9 @@ export const runPathwayJob = createServerFn({ method: "POST" })
           detail: identityOk
             ? !humanOk
               ? "No human authorised this release. An agent may run the work; it may not release a budget on nobody's authority."
-              : `Receipt graded ${graded.grade}. The Trust Agent releases funds only against a PASS receipt.`
+              : !deviceOk
+                ? "No device approval for this release. The enrolled Ledger must sign the exact release parameters before the budget moves."
+                : `Receipt graded ${graded.grade}. The Trust Agent releases funds only against a PASS receipt.`
             : "The identity gate refused this payee. A name that does not resolve to the address on the receipt is not paid.",
           ok: false,
           agentId: a.id,
@@ -447,6 +501,7 @@ export const runPathwayJob = createServerFn({ method: "POST" })
       grade: graded.grade,
       payable,
       authorisedBy: humanOk ? authority.nullifierHash : null,
+      approvedBy: deviceOk ? deviceGate.approvedBy : null,
       totalPaidMinor,
       startedAt,
     };
