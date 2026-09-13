@@ -1,54 +1,42 @@
-# Ledger: device-backed approval and Key Ring secrets
+# Premium visual pass + navbar fix + slide refresh
 
-Two Ledger prize rows, one implementation: Continuity ($1,500) — this project already existed and gains a hardware signer — and AI Agents x Ledger ($3,500) — an autonomous agent stack where the device holds secrets and approves spend. Submissions close today, so the build is scoped to what can be demonstrated live with your device plugged in.
+Three things: make the site feel high-end, stop the desktop menu from being cut off, and bring the Arc, ENS and World slides up to date with what the app now actually does.
 
-## What Ledger adds that isn't here today
+## 1. Navigation (desktop cropping)
 
-Right now a run is authorised by a World human proof and an ENS agent identity, then the four Circle wallet agents move real USDC on Arc with no hardware in the loop. The private keys and the Circle entity secret live in project secrets — software all the way down.
+Ten items at full width no longer fit inside the centred container, so the last ones get clipped.
 
-After this:
+- Widen the header container to the full viewport with generous side padding, keeping page content at its current width.
+- Group the ten links into three: primary run flow (Exchange, Agents, Settlements), proof layers (Identity, Human, Device) collapsed under one "Proof" menu, and evidence (Evidence, Quantum gap, Architecture, Deck) under one "Evidence" menu.
+- Active state highlights the parent group when a child page is open; the current page keeps its underline.
+- A sliding highlight follows the active item; keyboard focus and Escape-to-close behave correctly.
+- Mobile menu becomes a full-height panel with the same three groups and larger tap targets.
+- Add a compact "Run a pathway" call-to-action on the right so the bar reads as a product, not a list.
 
-- **Nothing irreversible happens without a device tap.** Before any budget is released, the Ledger signs the exact receipt digest, pathway and amount shown on its screen. No signature, no settlement — the run publishes `assessed-unapproved` and settles 0.00 USDC.
-- **The agent never sees the API key.** The Circle entity secret and the Nexus token move onto the Key Ring, encrypted under keys derived from your Ledger seed. The local broker decrypts and hands the agent a scoped, short-lived capability instead of the key itself.
-- **A clear before/after** on the evidence page: the same pathway, run once without the device and once with it, side by side.
+## 2. Premium look and feel
 
-## How it fits together
+Keeping the existing instrument-panel identity (deep slate, signal amber, verdict green/red) and the existing fonts — refining, not restyling.
 
-The app runs in an edge worker, which cannot talk to USB. So the device is driven by a small local bridge you run next to the app, and the browser talks to it directly.
+- Header: thin gradient hairline under the bar, deeper blur, and a subtle shrink-on-scroll.
+- Hero on the Exchange page: larger display headline with the signal gradient on the key phrase, a live status strip (Arc Testnet, Nexus emulator, device gate) and a soft spotlight that tracks the pointer.
+- Cards: unify on the existing glass treatment with a faint top-edge highlight, tighter shadow, and a restrained lift on hover.
+- Numbers and verdicts: tabular figures, verdict pills with a soft glow matching their tone, and a short count-up when results land.
+- Section rhythm: consistent heading kickers, more vertical breathing room, and a divider that fades in from the centre.
+- Motion: staggered fade-and-rise on first paint per section, and gate steps that fill in sequence as the run advances. All of it disabled under reduced-motion.
+- Footer: restructured into three columns (what this is, the rails, the disclaimer) instead of one dense paragraph.
 
-```text
-browser  ──approve(digest, pathway, amount)──▶  local bridge (127.0.0.1)
-                                                   │ wallet-cli / DMK
-                                                   ▼
-                                              Ledger device  (screen shows
-                                                              digest + amount)
-browser  ◀──────── signature ─────────────────────┘
-   │
-   └─ signature + device address ──▶ server: recover, compare to enrolled
-                                     address, fold into receipt, then seal,
-                                     anchor, settle
-```
+## 3. Slides — Arc, ENS, World
 
-Enrolment is one-time: the bridge reports the device address, and you bind it to the project as the approving signer. Only that address can approve; a signature from any other device is rejected.
-
-## Build steps
-
-1. **Local bridge** (`scripts/ledger/bridge.mjs`) — Node process on your machine wrapping the Ledger CLI: `GET /device` (connected, address, app version), `POST /approve` (sign a typed approval payload), `POST /ring/decrypt` (Key Ring read). Localhost-bound, origin-checked, no network exposure.
-2. **Key Ring secret backend** (`scripts/ledger/ring.mjs`) — `wallet-cli ring` encrypts the Circle entity secret and the Nexus token into a committed, device-encrypted file. A capability broker mints a short-lived scoped token for one pathway run; the agent gets that, never the underlying key.
-3. **Approval gate** (`src/lib/device.server.ts`, wired into `src/lib/exchange.functions.ts`) — new gate placed after the World check and before the classical floor. `isPayable` gains `deviceOk`. Receipt envelope gains `approvedBy` (device address), `approvalSig`, and `deviceModel`; the digest covers them, so the post-quantum seal binds the tap to the result.
-4. **Device page** (`/device`) — bridge status, enrolment, the approval prompt, and the before/after pair for one pathway. Naming stays distinct from the existing settlement ledger page.
-5. **Run history and evidence** — every settled run shows whether it was device-approved, with the device address truncated; unapproved runs show the refusal reason, never a quiet fallback.
-6. **Deck and submission text** — two track write-ups plus the required developer-experience feedback, based on what actually cost us time during this build.
-7. **Ledger skill** — a reusable workspace skill (`.agents/skills/ledger-agent-stack`) covering the bridge pattern, `wallet-cli ring`, the edge-runtime USB limitation, and the traps we hit, then activated.
+- **Arc**: state the settled facts plainly — chain 5042002, USDC as gas, four Circle wallets, the ReceiptAnchor address, anchor-before-payment ordering, and that a losing method still gets paid with the loss on the record. Add the real Arcscan-verifiable framing.
+- **ENS**: replace generic wording with the actual shape — ENSv2 Sepolia subnames under clinicalquantum.eth, records carrying the Arc actor address plus a permitted intent, resolution through the Universal Resolver before release, and the custom AgentResolver we had to deploy.
+- **World**: keep the nullifier-hash-only stance, authority bound to one pathway and never rebound, unauthorised runs settling 0.00, and the sandbox-pending label on demo credentials.
+- Each of the three gets the same premium slide treatment: gradient kicker, one large claim, a three-item evidence row, and the address/identifier line in mono at chrome size.
+- Also refresh the boundary slide so the Nexus leg reads as executed on the H2 emulator with its job id, not as a committed offline run, and mention the Ledger device tap in the gate order.
 
 ## Technical notes
 
-- `@ledgerhq/wallet-cli` and the DMK are Node-only and need USB; they can never run in the Cloudflare worker or in a server function. The bridge is the only place device code executes, and the app treats it as an untrusted client — signature recovery and enrolment comparison happen server-side.
-- Approval payload is EIP-191 over a canonical string containing receipt digest, pathway id, amount, chain id and a single-use nonce, so it cannot be replayed onto another pathway or amount.
-- If the bridge is unreachable or the tap is declined, the gate fails loudly with a named reason — consistent with how blocked quantum legs are already handled.
-- Skill drafts under `.agents/skills/` are inert until applied; the skill is activated at the end.
-- Clinical framing unchanged: capacity, cost and patient experience only.
-
-## Not in scope
-
-Moving Arc transaction signing itself onto the device — the Circle wallets are developer-controlled and sign server-side. Ledger governs authority and secrets here, not the raw transfer key.
+- All colour work goes through existing tokens in `src/styles.css`; new gradients, glows and the highlight are added there as tokens, never hardcoded in components.
+- Navbar rebuild lives in `src/components/shell.tsx` using the existing shadcn navigation primitives; route list stays the single source.
+- Slide edits are in `src/data/deck.tsx` only, using the existing `SlideFrame` and `.slide-*` classes so the print/PDF route stays byte-correct at 1920x1080.
+- Density check on each edited slide: header ~100px + body + footer ~80px must stay inside 1080px.
+- No changes to gating, receipts, settlement or any server logic.
