@@ -55,12 +55,15 @@ function Index() {
   const runFn = useServerFn(runPathwayJob);
   const [result, setResult] = useState<RunResult | null>(null);
   const [authority, setAuthority] = useState<HumanAuthority | null>(null);
+  const [deviceApproval, setDeviceApproval] = useState<DeviceApproval | null>(null);
 
   // The authorisation is passed exactly as it was issued. One bound to another
   // pathway is not silently re-pointed at this one — the run reports the
-  // mismatch and settles nothing.
+  // mismatch and settles nothing. The device approval travels the same way:
+  // signed parameters, verified server-side, never re-derived in the client.
   const mutation = useMutation({
-    mutationFn: (pathwayId: string) => runFn({ data: { pathwayId, authority } }),
+    mutationFn: (pathwayId: string) =>
+      runFn({ data: { pathwayId, authority, deviceApproval } }),
     onSuccess: (r) => {
       setResult(r);
       recordRun(r);
