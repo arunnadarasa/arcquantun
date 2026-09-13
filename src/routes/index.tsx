@@ -12,7 +12,9 @@ import { gradeReceipt } from "@/lib/receipts";
 import { runPathwayJob, type RunResult } from "@/lib/exchange.functions";
 import { recordRun } from "@/lib/ledger";
 import { WorldIdGate } from "@/components/worldid-gate";
+import { DeviceGate } from "@/components/device-gate";
 import type { HumanAuthority } from "@/lib/world";
+import type { DeviceApproval } from "@/lib/device";
 
 export const Route = createFileRoute("/")({
   head: () => ({
