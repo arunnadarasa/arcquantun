@@ -190,7 +190,7 @@ function Index() {
             return (
               <Reveal key={p.id} delay={(i % 2) * 80} className="h-full">
               <article
-                className={`glass-card h-full rounded-lg p-5 ${active ? "border-primary" : ""}`}
+                className={`glass-card edge-sheen h-full rounded-xl p-5 ${active ? "border-primary" : ""}`}
               >
                 <div className="flex flex-wrap items-center gap-2">
                   <Pill tone={p.status === "assessed" ? "muted" : "gap"}>{p.status}</Pill>

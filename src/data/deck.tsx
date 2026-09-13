@@ -291,20 +291,32 @@ export const deck: Slide[] = [
     id: "arc",
     label: "Arc and Circle",
     notes:
-      "Arc Testnet, USDC as the gas token, Circle developer-controlled wallets, and a ReceiptAnchor contract that gets the hash before any transfer clears.",
+      "Arc Testnet, USDC as the gas token, four Circle developer-controlled wallets, and a ReceiptAnchor contract that gets the hash before any transfer clears. Every settlement and anchor carries a real Arcscan hash.",
     render: (i, n) => (
-      <SlideFrame index={i} total={n} kicker="The rail" title="Arc, USDC and the anchor">
-        <SlideBullets
-          items={[
-            "Arc Testnet, chain 5042002 — USDC is the gas token, six decimals, no paymaster needed.",
-            "Circle developer-controlled wallets: one per agent, no EOA and no funded private key.",
-            "ReceiptAnchor.sol stores keccak of the receipt with its signal, engine and shot count.",
-            "The anchor is written before settlement. An unanchored receipt is not payable.",
-          ]}
-        />
+      <SlideFrame index={i} total={n} kicker="The rail · Arc" title="Anchor first, then the money">
+        <div className="grid grid-cols-3 gap-[32px]">
+          {[
+            ["5042002", "Arc Testnet — USDC is the gas token, six decimals, no paymaster"],
+            ["4 wallets", "Circle developer-controlled: Trust, Baseline, Nexus, Registry — no EOA, no funded private key"],
+            ["Anchor → pay", "ReceiptAnchor stores the receipt hash with signal, engine and shots before any transfer"],
+          ].map(([h, b]) => (
+            <SlideCard key={h}>
+              <p className="num text-[54px] leading-none text-primary">{h}</p>
+              <p className="slide-caption mt-[24px] text-muted-foreground">{b}</p>
+            </SlideCard>
+          ))}
+        </div>
+        <p className="slide-body mt-[44px] max-w-[1500px] text-foreground/90">
+          A method that loses still gets paid, and the record says it lost. An unanchored receipt is
+          not payable at all — every settlement and anchor is checkable on Arcscan.
+        </p>
+        <p className="slide-chrome mt-[28px] text-muted-foreground">
+          ReceiptAnchor {CONTRACT.address}
+        </p>
       </SlideFrame>
     ),
   },
+
   {
     id: "demo",
     label: "Live demo",
