@@ -1,4 +1,4 @@
-// The submission deck, eleven slides, one idea each.
+// The submission deck, twelve slides, one idea each.
 //
 // Every figure here is read from the app's own committed data — pathways,
 // agents, receipts. Nothing is invented for the pitch, and the claim rules that
