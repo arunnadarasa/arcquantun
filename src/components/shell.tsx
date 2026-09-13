@@ -1,7 +1,8 @@
-import { Link, useRouterState } from "@tanstack/react-router";
+import { Link, useRouterState, ClientOnly } from "@tanstack/react-router";
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { ChevronDown, Menu, X } from "lucide-react";
 import { AuroraBackground } from "@/components/aurora-background";
+import { BridgeChip } from "@/components/device-gate";
 import { CHAT_FOOTER_CLAUSE } from "@/data/operations";
 
 // The route list is the single source of truth. Ten flat links no longer fit a
