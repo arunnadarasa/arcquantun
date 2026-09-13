@@ -23,7 +23,7 @@ export interface DeviceApproval {
    * Same app binary, same APDU flow, same code path — only the hardware is
    * simulated, and every surface labels it as such.
    */
-  qualifier?: "device" | "emulator";
+  qualifier?: "device" | "emulator" | undefined;
 }
 
 /** The transport the bridge is using, as reported by GET /device. */

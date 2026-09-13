@@ -15,6 +15,9 @@ interface BridgeInfo {
   address: string;
   path: string;
   app: string;
+  /** "emulator" = Speculos; absent = physical device. */
+  qualifier?: "device" | "emulator" | undefined;
+  emulated?: boolean | undefined;
 }
 
 async function bridgeFetch<T>(path: string, init?: RequestInit): Promise<T> {
