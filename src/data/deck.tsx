@@ -13,6 +13,10 @@ import { SEAL_SCHEME, SEAL_STANDARD } from "@/data/seal-info";
 import { OPERATING_LESSONS } from "@/data/operations";
 import CONTRACT from "@/data/contract.json";
 import ENS from "@/data/ens.json";
+import COST from "@/data/nexus-cost.json";
+
+const CHOSEN_BATCH_HQC =
+  COST.candidates.find((c) => c.key === COST.chosen)?.batchHqc ?? 0;
 
 
 export interface Slide {
