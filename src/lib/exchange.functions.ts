@@ -302,7 +302,22 @@ export const runPathwayJob = createServerFn({ method: "POST" })
 
     // 5. Receipt grading.
     const graded = gradeReceipt(r);
-    const hash = await receiptDigest(receiptPayload(pathway.id, r, identity, authority));
+    const hash = await receiptDigest(
+      receiptPayload(
+        pathway.id,
+        r,
+        identity,
+        authority,
+        deviceOk && data.deviceApproval
+          ? {
+              approvedBy: data.deviceApproval.address,
+              signature: data.deviceApproval.signature,
+              message: data.deviceApproval.message,
+              issuedAt: data.deviceApproval.issuedAt,
+            }
+          : null,
+      ),
+    );
     steps.push({
       kind: "receipt",
       title: `Receipt graded ${graded.grade}`,
