@@ -73,6 +73,8 @@ export function BridgeChip({ className = "" }: { className?: string }) {
     </span>
   );
 }
+
+export function DeviceGate({
   pathwayId,
   budgetMinor,
   engine,
