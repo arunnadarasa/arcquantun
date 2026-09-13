@@ -22,6 +22,7 @@ export type StepKind =
   | "policy"
   | "identity"
   | "human"
+  | "device"
   | "classical"
   | "fitness"
   | "dequantization"
@@ -83,10 +84,21 @@ const authoritySchema = z.object({
   simulated: z.boolean(),
 });
 
+export const deviceApprovalSchema = z.object({
+  message: z.string(),
+  signature: z.string(),
+  address: z.string(),
+  issuedAt: z.string(),
+});
+
 export const runPathwayJob = createServerFn({ method: "POST" })
   .inputValidator((d: unknown) =>
     z
-      .object({ pathwayId: z.string(), authority: authoritySchema.nullish() })
+      .object({
+        pathwayId: z.string(),
+        authority: authoritySchema.nullish(),
+        deviceApproval: deviceApprovalSchema.nullish(),
+      })
       .parse(d),
   )
   .handler(async ({ data }): Promise<RunResult> => {
@@ -183,6 +195,29 @@ export const runPathwayJob = createServerFn({ method: "POST" })
         level: authority?.verificationLevel ?? null,
         action: authority?.action ?? null,
         simulated: authority ? String(authority.simulated) : "n/a",
+      },
+    });
+
+    // 2c. Device authority. World proves which human authorised the release;
+    // it cannot prove the release parameters were seen by anyone but software.
+    // The enrolled Ledger signs the exact pathway, budget, chain and quantum
+    // leg after they are shown on its screen, and the signature is recovered
+    // server-side against the enrolled signer. No tap, no release.
+    const { verifyDeviceApproval } = await import("@/lib/device.server");
+    const deviceGate = await verifyDeviceApproval(data.pathwayId, data.deviceApproval ?? null);
+    const deviceOk = deviceGate.ok;
+    steps.push({
+      kind: "device",
+      title: deviceGate.required
+        ? deviceOk
+          ? "Device confirmation — Ledger approved the release"
+          : "Device confirmation — release not approved"
+        : "Device confirmation — no device enrolled",
+      detail: deviceGate.reason,
+      ok: deviceOk,
+      meta: {
+        "signed by": deviceGate.approvedBy,
+        "gate mandatory": String(deviceGate.required),
       },
     });
 
