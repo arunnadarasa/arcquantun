@@ -13,6 +13,10 @@ import { SEAL_SCHEME, SEAL_STANDARD } from "@/data/seal-info";
 import { OPERATING_LESSONS } from "@/data/operations";
 import CONTRACT from "@/data/contract.json";
 import ENS from "@/data/ens.json";
+import COST from "@/data/nexus-cost.json";
+
+const CHOSEN_BATCH_HQC =
+  COST.candidates.find((c) => c.key === COST.chosen)?.batchHqc ?? 0;
 
 
 export interface Slide {
@@ -409,6 +413,50 @@ export const deck: Slide[] = [
             `Every receipt digest is signed with ${SEAL_SCHEME} (${SEAL_STANDARD}) and verified before it is anchored or paid.`,
             "Arc supports SLH-DSA today; the Arc transaction carrying the anchor is still ECDSA-signed.",
             "Post-quantum at the evidence layer, classical underneath — stated, not claimed away.",
+          ]}
+        />
+      </SlideFrame>
+    ),
+  },
+  {
+    id: "sizing",
+    label: "What a job costs",
+    notes:
+      "The first version of this experiment was sized by hand: 69 programs, 9 qubits, 1024 shots — about 3,751 credits of work. The credit formula now lives in the code, gate counts are read off the compiled circuit, and a batch outside the envelope is refused with the number named. Same question, same cohort, same verdict discipline, at a quarter of the cost. The envelope came from reviewer feedback on the hardware side.",
+    render: (i, n) => (
+      <SlideFrame
+        index={i}
+        total={n}
+        kicker="Sizing before submitting"
+        title="What a job costs, before it runs"
+      >
+        <div className="grid grid-cols-2 gap-[32px]">
+          <SlideCard>
+            <p className="slide-kicker text-accent">The credit formula</p>
+            <p className="num mt-[24px] text-[34px] leading-tight">{COST.formula.expression}</p>
+            <p className="slide-caption mt-[24px] text-muted-foreground">
+              {COST.formula.note}
+            </p>
+          </SlideCard>
+          <SlideCard>
+            <p className="slide-kicker text-muted-foreground">Sized by hand</p>
+            <p className="num text-fail mt-[12px] text-[64px] leading-none">
+              {Math.round(COST.prior.batchHqc).toLocaleString()}
+            </p>
+            <p className="slide-kicker mt-[26px] text-muted-foreground">Sized by the model</p>
+            <p className="num text-accent mt-[12px] text-[64px] leading-none">
+              {Math.round(CHOSEN_BATCH_HQC).toLocaleString()}
+            </p>
+            <p className="slide-caption mt-[22px] text-muted-foreground">
+              Credits. Same question, same cohort, same verdict discipline.
+            </p>
+          </SlideCard>
+        </div>
+        <SlideBullets
+          items={[
+            "Gate counts are read off the compiled circuit — no hand-typed estimate.",
+            "A batch outside the envelope is refused with the number named, before anything uploads.",
+            `Envelope and limits: ${COST.attribution}.`,
           ]}
         />
       </SlideFrame>
