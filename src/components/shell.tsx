@@ -31,6 +31,7 @@ const groups: NavGroup[] = [
     items: [
       { to: "/evidence", label: "Evidence", hint: "Receipts, engines, shots, seeds" },
       { to: "/quantum-gap", label: "Quantum gap", hint: "Why receipts are sealed" },
+      { to: "/sizing", label: "Job sizing", hint: "What a quantum job costs" },
       { to: "/architecture", label: "Architecture", hint: "The order a job runs in" },
       { to: "/deck", label: "Deck", hint: "The submission slides" },
     ],
