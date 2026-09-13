@@ -3,7 +3,7 @@
 // enrolled signer address, and the message is rebuilt from committed data so
 // a replayed or re-pointed approval cannot pass.
 import { createServerFn } from "@tanstack/react-start";
-import { recoverMessageAddress, type SignatureType } from "viem";
+import { recoverMessageAddress } from "viem";
 import { getPathway } from "@/data/pathways";
 import { getRun } from "@/data/runs";
 import { buildDeviceApprovalMessage, type DeviceApproval } from "@/lib/device";
@@ -87,7 +87,9 @@ export async function verifyDeviceApproval(
   try {
     const signer = await recoverMessageAddress({
       message: approval.message,
-      signature: approval.signature as SignatureType,
+      signature: approval.signature.startsWith("0x")
+        ? (approval.signature as `0x${string}`)
+        : (`0x${approval.signature}` as `0x${string}`),
     });
     if (signer.toLowerCase() !== enrolled.toLowerCase()) {
       return {
