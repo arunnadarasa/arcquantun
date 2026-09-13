@@ -170,7 +170,9 @@ export function Shell({ children }: { children: ReactNode }) {
           </nav>
 
           <ClientOnly fallback={null}>
-            <BridgeChip className="hidden xl:inline-flex" />
+            <span className="hidden xl:inline-flex">
+              <BridgeChip />
+            </span>
           </ClientOnly>
 
           <Link
