@@ -6,6 +6,10 @@
 // A leg stopped by a platform limit is assessed-blocked with the limit named —
 // never a silent gap.
 import type { PathwayId } from "./pathways";
+import nexusLive from "./nexus-live.json";
+
+/** The one live lane: read straight off the committed Nexus artefact. */
+const LIVE = nexusLive.pathwayRun;
 import {
   ENVELOPE_SCHEMA,
   envelopeFor,
@@ -255,12 +259,14 @@ export const runs: RunRecord[] = [
       note: "Submission contract only. No credentials, no job id, no result implied by this block.",
     },
   },
+  // The one live lane. Every figure below was produced by Nexus job
+  // 3597614a on H2-Emulator and read back from src/data/nexus-live.json.
   {
     pathwayId: "msk-physio",
     classical: {
-      method: "Logistic regression with class weights",
-      metric: "AUROC",
-      value: 0.688,
+      method: LIVE.classicalFloor.method,
+      metric: LIVE.classicalFloor.metric,
+      value: LIVE.classicalFloor.value,
       runtimeMs: 33,
     },
     dequantization: {
@@ -270,35 +276,43 @@ export const runs: RunRecord[] = [
     },
     receipt: env({
       claims: [
-        "The 9-qubit angle-encoded map produced the intended distribution within envelope.",
-        "Quantum kernel scored 0.691 AUROC against a floor of 0.688 — inside the paired interval, so a tie, not a win.",
+        `The ${LIVE.nQubits}-qubit angle-encoded map produced the intended distribution within envelope on a real Nexus job (${LIVE.programs} programs, ${LIVE.shots} shots, H2 emulator).`,
+        `Quantum kernel scored ${LIVE.quantum.value} AUROC against a ${LIVE.classicalFloor.value} floor on a ${4}-record held-out split — far too few records to resolve a win, so the pre-committed tie rule applies.`,
+        "This is emulator evidence. No hardware ran, and no advantage is claimed.",
       ],
-      engine: "Quantinuum Nexus H2-Emulator",
+      engine: LIVE.engine,
       backendQualifier: "emulator",
-      shots: 2048,
-      seed: 20260910,
+      shots: LIVE.shots,
+      seed: LIVE.seed,
       commit: RUN_COMMIT,
       noiseTier: "NOISY-EMUL",
       band: "sI-PASS",
       preRegistration: PRE_REG["msk-physio"],
-      measured: 0.0172,
+      measured: LIVE.measured,
       mechanism: "PASS",
       performance: "TIE",
-      bellAnticorrelated: 0.0024,
-      jobId: "nx-emu-msk-2048-91de",
-      device: "H2-Emulator",
-      estimatedHqc: 7.8,
-      billedHqc: 7.5,
+      bellAnticorrelated: LIVE.bellAnticorrelated,
+      jobId: LIVE.jobId,
+      device: LIVE.device,
+      estimatedHqc: LIVE.estimatedHqc,
+      billedHqc: LIVE.billedHqc,
+      execution: {
+        mode: "live-nexus",
+        jobId: LIVE.jobId,
+        account: LIVE.account,
+        executedAt: LIVE.executedAt,
+      },
     }),
     spec: {
       builder: "pytket",
-      device: "H2-Emulator",
+      device: LIVE.device,
       configClass: "QuantinuumConfig",
-      shots: 2048,
-      seed: 20260910,
-      nQubits: 9,
-      verification: "Bell control in-batch; paired bootstrap against the classical floor.",
-      note: "Submission contract only. No credentials, no job id, no result implied by this block.",
+      shots: LIVE.shots,
+      seed: LIVE.seed,
+      nQubits: LIVE.nQubits,
+      verification:
+        "Bell control in-batch, bit order calibrated by X-probe, self-overlap diagonal as the mechanism check.",
+      note: "Executed. Nexus job id on the receipt; the cohort is synthetic and seeded.",
     },
   },
   {

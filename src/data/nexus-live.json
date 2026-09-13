@@ -35,6 +35,43 @@
       "jobId": "f8ad8c10-4df7-4653-a414-7eedbdd5fa86",
       "estimatedHqc": 2.0,
       "billedHqc": 0.0
+    },
+    {
+      "label": "msk-physio-kernel",
+      "jobId": "3597614a-d89f-4634-8e8b-b1e649a44be0",
+      "estimatedHqc": 120.0,
+      "billedHqc": 0.0
     }
-  ]
+  ],
+  "pathwayRun": {
+    "pathway": "msk-physio",
+    "status": "live",
+    "jobId": "3597614a-d89f-4634-8e8b-b1e649a44be0",
+    "device": "H2-Emulator",
+    "backendQualifier": "emulator",
+    "engine": "Quantinuum Nexus H2-Emulator",
+    "account": "Arun Nadarasa",
+    "shots": 1024,
+    "seed": 20260910,
+    "nQubits": 9,
+    "programs": 69,
+    "executedAt": "2026-09-13T00:20:20.365450+00:00",
+    "classicalFloor": {
+      "method": "Logistic regression with balanced class weights",
+      "metric": "AUROC",
+      "value": 0.5
+    },
+    "quantum": {
+      "metric": "AUROC",
+      "value": 1.0
+    },
+    "measured": 0.021484,
+    "envelope": 0.088388,
+    "bellAnticorrelated": 0.003906,
+    "mechanism": "PASS",
+    "performance": "TIE",
+    "estimatedHqc": 120.0,
+    "billedHqc": 0.0,
+    "cohort": "Synthetic seeded cohort, 8 train / 4 held out, 9 features."
+  }
 }
