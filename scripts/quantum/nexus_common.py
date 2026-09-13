@@ -24,7 +24,10 @@ import time
 
 sys.path.insert(0, "/dev-server/.pydeps")
 
-import qnexus as qnx  # noqa: E402
+try:  # the cost model is usable offline; the submission path is not
+    import qnexus as qnx  # noqa: E402
+except ModuleNotFoundError:  # pragma: no cover - offline sizing only
+    qnx = None  # type: ignore[assignment]
 
 PROJECT_NAME = "ClinicalQuantumExchange"
 DEVICE = "H2-Emulator"
