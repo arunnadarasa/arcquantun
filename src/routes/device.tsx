@@ -77,19 +77,19 @@ function DevicePage() {
         <div className="glass-card mt-5 rounded-lg p-5">
           <Row
             k="bridge"
-            value={online ? `online — ${DEVICE_BRIDGE_URL}` : `offline — start scripts/ledger`}
+            v={online ? `online — ${DEVICE_BRIDGE_URL}` : `offline — start scripts/ledger`}
           />
-          <Row k="device" value={bridge.data ? `${bridge.data.app} app at ${bridge.data.path}` : "—"} />
+          <Row k="device" v={bridge.data ? `${bridge.data.app} app at ${bridge.data.path}` : "—"} />
           <Row
             k="signer"
-            value={
+            v={
               bridge.data
                 ? `${bridge.data.address.slice(0, 10)}…${bridge.data.address.slice(-6)}`
                 : "—"
             }
           />
-          <Row k="enrolled on this deployment" value={status?.enrolled ? "yes — gate mandatory" : "no — gate open"} />
-          <Row k="approval context" value={DEVICE_APPROVAL_CONTEXT} />
+          <Row k="enrolled on this deployment" v={status?.enrolled ? "yes — gate mandatory" : "no — gate open"} />
+          <Row k="approval context" v={DEVICE_APPROVAL_CONTEXT} />
         </div>
         {bridge.error ? (
           <p className="mt-3 text-xs text-fail">
@@ -122,7 +122,7 @@ function DevicePage() {
           </p>
           <div className="glass-card mt-5 rounded-lg p-5">
             {RING_COMMANDS.map(([label, cmd]) => (
-              <Row key={cmd} k={label} value={cmd} />
+              <Row key={cmd} k={label} v={cmd} />
             ))}
           </div>
           <p className="mt-3 text-xs leading-relaxed text-muted-foreground">

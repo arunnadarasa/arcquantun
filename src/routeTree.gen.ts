@@ -13,6 +13,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AgentsRouteImport } from './routes/agents'
 import { Route as ArchitectureRouteImport } from './routes/architecture'
 import { Route as DeckRouteImport } from './routes/deck'
+import { Route as DeviceRouteImport } from './routes/device'
 import { Route as EvidenceRouteImport } from './routes/evidence'
 import { Route as HumanRouteImport } from './routes/human'
 import { Route as IdentityRouteImport } from './routes/identity'
@@ -39,6 +40,11 @@ const ArchitectureRoute = ArchitectureRouteImport.update({
 const DeckRoute = DeckRouteImport.update({
   id: '/deck',
   path: '/deck',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DeviceRoute = DeviceRouteImport.update({
+  id: '/device',
+  path: '/device',
   getParentRoute: () => rootRouteImport,
 } as any)
 const EvidenceRoute = EvidenceRouteImport.update({
@@ -83,6 +89,7 @@ export interface FileRoutesByFullPath {
   '/agents': typeof AgentsRoute
   '/architecture': typeof ArchitectureRoute
   '/deck': typeof DeckRoute
+  '/device': typeof DeviceRoute
   '/evidence': typeof EvidenceRoute
   '/human': typeof HumanRoute
   '/identity': typeof IdentityRoute
@@ -96,6 +103,7 @@ export interface FileRoutesByTo {
   '/agents': typeof AgentsRoute
   '/architecture': typeof ArchitectureRoute
   '/deck': typeof DeckRoute
+  '/device': typeof DeviceRoute
   '/evidence': typeof EvidenceRoute
   '/human': typeof HumanRoute
   '/identity': typeof IdentityRoute
@@ -110,6 +118,7 @@ export interface FileRoutesById {
   '/agents': typeof AgentsRoute
   '/architecture': typeof ArchitectureRoute
   '/deck': typeof DeckRoute
+  '/device': typeof DeviceRoute
   '/evidence': typeof EvidenceRoute
   '/human': typeof HumanRoute
   '/identity': typeof IdentityRoute
@@ -125,6 +134,7 @@ export interface FileRouteTypes {
     | '/agents'
     | '/architecture'
     | '/deck'
+    | '/device'
     | '/evidence'
     | '/human'
     | '/identity'
@@ -138,6 +148,7 @@ export interface FileRouteTypes {
     | '/agents'
     | '/architecture'
     | '/deck'
+    | '/device'
     | '/evidence'
     | '/human'
     | '/identity'
@@ -151,6 +162,7 @@ export interface FileRouteTypes {
     | '/agents'
     | '/architecture'
     | '/deck'
+    | '/device'
     | '/evidence'
     | '/human'
     | '/identity'
@@ -165,6 +177,7 @@ export interface RootRouteChildren {
   AgentsRoute: typeof AgentsRoute
   ArchitectureRoute: typeof ArchitectureRoute
   DeckRoute: typeof DeckRoute
+  DeviceRoute: typeof DeviceRoute
   EvidenceRoute: typeof EvidenceRoute
   HumanRoute: typeof HumanRoute
   IdentityRoute: typeof IdentityRoute
@@ -202,6 +215,13 @@ declare module '@tanstack/react-router' {
       path: '/deck'
       fullPath: '/deck'
       preLoaderRoute: typeof DeckRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/device': {
+      id: '/device'
+      path: '/device'
+      fullPath: '/device'
+      preLoaderRoute: typeof DeviceRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/evidence': {
@@ -261,6 +281,7 @@ const rootRouteChildren: RootRouteChildren = {
   AgentsRoute: AgentsRoute,
   ArchitectureRoute: ArchitectureRoute,
   DeckRoute: DeckRoute,
+  DeviceRoute: DeviceRoute,
   EvidenceRoute: EvidenceRoute,
   HumanRoute: HumanRoute,
   IdentityRoute: IdentityRoute,
