@@ -29,7 +29,13 @@
 import { createServer } from "node:http";
 import { execFile } from "node:child_process";
 import { promisify } from "node:util";
-import AppEth from "@ledgerhq/hw-app-eth";
+// The ESM wrapper over the CJS build nests the class one level deep
+// (exports.default = Eth). Resolve all shapes so both node and bun work.
+const AppEthMod = await import("@ledgerhq/hw-app-eth");
+const AppEth =
+  AppEthMod.default?.default ??
+  (typeof AppEthMod.default === "function" ? AppEthMod.default : null) ??
+  AppEthMod.AppEth;
 
 const execFileAsync = promisify(execFile);
 
