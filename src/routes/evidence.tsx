@@ -309,6 +309,24 @@ function EvidencePage() {
                   ))}
                 </div>
 
+                <div className="mt-4 rounded border border-border bg-surface-2/40 p-3">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <div className="text-[0.65rem] uppercase tracking-[0.14em] text-muted-foreground">
+                      Execution
+                    </div>
+                    <Pill tone={r.execution?.mode === "live-nexus" ? "pass" : "muted"}>
+                      {r.execution?.mode === "live-nexus"
+                        ? "executed on Nexus"
+                        : "committed record"}
+                    </Pill>
+                  </div>
+                  <p className="mt-1.5 text-xs leading-relaxed text-muted-foreground">
+                    {r.execution?.mode === "live-nexus"
+                      ? `Submitted to Quantinuum Nexus from account ${r.execution.account ?? "—"} on ${String(r.execution.executedAt ?? "").slice(0, 10)}. The job id above is live and resolvable. Emulator, not a QPU.`
+                      : "Figures committed from an earlier offline run. No live job id is claimed for this pathway."}
+                  </p>
+                </div>
+
                 {p.ceiling ? (
                   <div className="mt-4 rounded border border-gap/40 bg-gap/10 p-3">
                     <div className="flex flex-wrap items-center gap-2">
