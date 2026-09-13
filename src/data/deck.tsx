@@ -438,6 +438,30 @@ export const deck: Slide[] = [
     ),
   },
   {
+    id: "device",
+    label: "The device tap",
+    notes:
+      "Ledger adds the missing half of authority: a hardware tap on the exact release parameters. The enrolled Ledger personal-signs pathway, budget, chain and quantum leg after they are shown on its screen; the signature is recovered server-side against the enrolled address and hashed into the receipt digest. The Key Ring seals the entity secret and Nexus token under the seed, so the agent requests a scoped capability instead of holding a key. No tap, no settlement.",
+    render: (i, n) => (
+      <SlideFrame
+        index={i}
+        total={n}
+        kicker="Ledger Agent Stack"
+        title="A tap between autonomy and the budget"
+      >
+        <SlideBullets
+          items={[
+            "The agents decide autonomously; the last irreversible step needs a human hand on hardware.",
+            "The enrolled Ledger signs the exact release parameters — pathway, budget, chain, quantum leg — shown on its own screen. No tap, no settlement; the run publishes and pays nobody.",
+            "The signature is recovered server-side against the enrolled signer address, so a re-pointed or replayed approval is refused by construction.",
+            "The device approval is hashed into the receipt digest: the SLH-DSA seal and the Arc anchor commit to the tap as well.",
+            "The Key Ring (LKRP) seals the Circle entity secret and Nexus token under keys derived from the seed — the agent requests a scoped, short-lived capability and never holds the key.",
+          ]}
+        />
+      </SlideFrame>
+    ),
+  },
+  {
     id: "close",
     label: "Close",
     notes:
