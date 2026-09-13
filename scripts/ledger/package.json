@@ -1,0 +1,12 @@
+{
+  "name": "cqx-ledger-bridge",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "start": "node bridge.mjs"
+  },
+  "dependencies": {
+    "@ledgerhq/hw-app-eth": "^6.39.0",
+    "@ledgerhq/hw-transport-node-hid": "^6.29.0"
+  }
+}
