@@ -456,7 +456,7 @@ export const deck: Slide[] = [
           items={[
             "Gate counts are read off the compiled circuit — no hand-typed estimate.",
             "A batch outside the envelope is refused with the number named, before anything uploads.",
-            `Envelope and limits: ${COST.attribution.toLowerCase()}.`,
+            `Envelope and limits: ${COST.attribution}.`,
           ]}
         />
       </SlideFrame>
