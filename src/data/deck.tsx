@@ -415,6 +415,50 @@ export const deck: Slide[] = [
     ),
   },
   {
+    id: "sizing",
+    label: "What a job costs",
+    notes:
+      "The first version of this experiment was sized by hand: 69 programs, 9 qubits, 1024 shots — about 3,751 credits of work. The credit formula now lives in the code, gate counts are read off the compiled circuit, and a batch outside the envelope is refused with the number named. Same question, same cohort, same verdict discipline, at a quarter of the cost. The envelope came from reviewer feedback on the hardware side.",
+    render: (i, n) => (
+      <SlideFrame
+        index={i}
+        total={n}
+        kicker="Sizing before submitting"
+        title="What a job costs, before it runs"
+      >
+        <div className="grid grid-cols-2 gap-[32px]">
+          <SlideCard>
+            <p className="slide-kicker text-accent">The credit formula</p>
+            <p className="num mt-[24px] text-[34px] leading-tight">{COST.formula.expression}</p>
+            <p className="slide-caption mt-[24px] text-muted-foreground">
+              {COST.formula.note}
+            </p>
+          </SlideCard>
+          <SlideCard>
+            <p className="slide-kicker text-muted-foreground">Sized by hand</p>
+            <p className="num text-fail mt-[12px] text-[64px] leading-none">
+              {Math.round(COST.prior.batchHqc).toLocaleString()}
+            </p>
+            <p className="slide-kicker mt-[26px] text-muted-foreground">Sized by the model</p>
+            <p className="num text-accent mt-[12px] text-[64px] leading-none">
+              {Math.round(CHOSEN_BATCH_HQC).toLocaleString()}
+            </p>
+            <p className="slide-caption mt-[22px] text-muted-foreground">
+              Credits. Same question, same cohort, same verdict discipline.
+            </p>
+          </SlideCard>
+        </div>
+        <SlideBullets
+          items={[
+            "Gate counts are read off the compiled circuit — no hand-typed estimate.",
+            "A batch outside the envelope is refused with the number named, before anything uploads.",
+            `Envelope and limits: ${COST.attribution.toLowerCase()}.`,
+          ]}
+        />
+      </SlideFrame>
+    ),
+  },
+  {
     id: "operating-model",
     label: "Operating model",
     notes:
