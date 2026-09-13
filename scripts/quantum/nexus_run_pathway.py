@@ -30,15 +30,20 @@ sys.path.insert(0, "/dev-server/scripts/quantum")
 
 from pytket import Circuit  # noqa: E402
 
+from circuit_families import FAMILIES, overlap_circuit  # noqa: E402
 from nexus_common import Ledger, envelope, preflight, run_batch  # noqa: E402
+
+COST = json.loads(pathlib.Path("/dev-server/src/data/nexus-cost.json").read_text())
+FAMILY = COST["chosen"]  # chosen on the committed cost/score table, not on taste
 
 OUT = pathlib.Path("/dev-server/src/data/nexus-live.json")
 PATHWAY = "msk-physio"
 SEED = 20260910
-NQ = 9
-SHOTS = 1024
-N_TRAIN = 8
+NQ = 6
+SHOTS = 256
+N_TRAIN = 6
 N_TEST = 4
+BUDGET_HQC = 1200.0
 
 
 def cohort(rng: np.random.Generator):
@@ -48,12 +53,17 @@ def cohort(rng: np.random.Generator):
     x = rng.normal(0, 1, size=(n, NQ))
     # A weak, genuinely learnable signal — not a giveaway.
     x[:, 0] += 0.9 * y
-    x[:, 3] += 0.6 * y
-    x[:, 6] -= 0.5 * y
-    idx = rng.permutation(n)
-    x, y = x[idx], y[idx]
+    x[:, 2] += 0.6 * y
+    x[:, 4] -= 0.5 * y
     x = (x - x.mean(0)) / (x.std(0) + 1e-9)
-    return x[:N_TRAIN], y[:N_TRAIN], x[N_TRAIN:], y[N_TRAIN:]
+    # Stratified split: a held-out set that lost a class scores NaN, not a result.
+    pos = rng.permutation(np.flatnonzero(y == 1))
+    neg = rng.permutation(np.flatnonzero(y == 0))
+    half = N_TEST // 2
+    te = np.concatenate([pos[:half], neg[:half]])
+    tr = np.concatenate([pos[half:], neg[half:]])
+    te, tr = rng.permutation(te), rng.permutation(tr)
+    return x[tr], y[tr], x[te], y[te]
 
 
 def auroc(y: np.ndarray, s: np.ndarray) -> float:
@@ -85,23 +95,9 @@ def classical_floor(xtr, ytr, xte, yte) -> dict:
     }
 
 
-def feature_circuit(x: np.ndarray) -> Circuit:
-    """Angle encoding with one entangling ring. pytket angles are HALFTURNS."""
-    c = Circuit(NQ)
-    for q in range(NQ):
-        c.Ry(float(x[q]) / np.pi, q)
-    for q in range(NQ - 1):
-        c.CX(q, q + 1)
-    for q in range(NQ):
-        c.Rz(float(x[q]) / (2 * np.pi), q)
-    return c
-
-
-def overlap_circuit(a: np.ndarray, b: np.ndarray) -> Circuit:
-    c = feature_circuit(a)
-    c.append(feature_circuit(b).dagger())
-    c.measure_all()
-    return c
+def build_overlap(a: np.ndarray, b: np.ndarray) -> Circuit:
+    """Compute-uncompute overlap on the family the cost table chose."""
+    return overlap_circuit(FAMILIES[FAMILY][1], a, b, NQ)
 
 
 def main() -> int:
@@ -114,17 +110,17 @@ def main() -> int:
 
     ctx = preflight()
     print("account:", ctx["account"], "| device:", ctx["device"], flush=True)
-    ledger = Ledger(budget_hqc=400.0)
+    ledger = Ledger(budget_hqc=BUDGET_HQC)
 
     # --- STAGE 2: circuit batch --------------------------------------------
     circuits, tags = [], []
     for i in range(N_TRAIN):
         for j in range(i, N_TRAIN):
-            circuits.append(overlap_circuit(xtr[i], xtr[j]))
+            circuits.append(build_overlap(xtr[i], xtr[j]))
             tags.append(("tt", i, j))
     for i in range(N_TEST):
         for j in range(N_TRAIN):
-            circuits.append(overlap_circuit(xte[i], xtr[j]))
+            circuits.append(build_overlap(xte[i], xtr[j]))
             tags.append(("st", i, j))
     bell = Circuit(2, 2)
     bell.H(0)
@@ -141,13 +137,14 @@ def main() -> int:
             shots=SHOTS,
             ctx=ctx,
             ledger=ledger,
-            estimate=120.0,
-            max_cost=6.0,
+            max_cost=40.0,
+            budget_hqc=BUDGET_HQC,
             properties={
                 "pathway": PATHWAY,
                 "shots": SHOTS,
                 "seed": SEED,
                 "n_qubits": NQ,
+                "family": FAMILY,
             },
         )
     except Exception as exc:  # assessed-blocked, with the limit named
@@ -230,7 +227,8 @@ def main() -> int:
         "bellAnticorrelated": round(bell_anti, 6),
         "mechanism": mechanism,
         "performance": performance,
-        "estimatedHqc": 120.0,
+        "estimatedHqc": ledger.committed,
+        "circuitFamily": FAMILY,
         "billedHqc": out["billedHqc"],
         "cohort": f"Synthetic seeded cohort, {N_TRAIN} train / {N_TEST} held out, {NQ} features.",
     }
