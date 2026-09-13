@@ -206,6 +206,47 @@
   color: transparent;
 }
 
+/* Faint light catching the top edge of a panel — the difference between a box
+ * and something that looks machined. */
+@utility edge-sheen {
+  position: relative;
+  &::before {
+    content: "";
+    position: absolute;
+    inset-inline: 1rem;
+    top: 0;
+    height: 1px;
+    background-image: linear-gradient(
+      to right,
+      transparent,
+      color-mix(in oklab, var(--foreground) 28%, transparent),
+      transparent
+    );
+    pointer-events: none;
+  }
+}
+
+/* Section divider that fades in from the centre. */
+@utility rule-fade {
+  height: 1px;
+  background-image: linear-gradient(
+    to right,
+    transparent,
+    color-mix(in oklab, var(--primary) 45%, transparent),
+    transparent
+  );
+}
+
+@utility hero-glow {
+  background-image: radial-gradient(
+    42rem 28rem at var(--spot-x, 50%) var(--spot-y, 20%),
+    color-mix(in oklab, var(--primary) 16%, transparent),
+    transparent 70%
+  );
+  transition: background-position 0.3s ease;
+}
+
+
 @layer base {
   html {
     scroll-behavior: smooth;

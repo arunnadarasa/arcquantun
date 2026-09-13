@@ -72,36 +72,59 @@ function Index() {
 
   return (
     <Shell>
-      <section className="relative overflow-hidden border-b border-border">
+      <section
+        className="relative overflow-hidden border-b border-border"
+        onMouseMove={(e) => {
+          const r = e.currentTarget.getBoundingClientRect();
+          e.currentTarget.style.setProperty("--spot-x", `${e.clientX - r.left}px`);
+          e.currentTarget.style.setProperty("--spot-y", `${e.clientY - r.top}px`);
+        }}
+      >
         <div className="pointer-events-none absolute inset-0 grid-fade opacity-40" />
-        <div className="relative mx-auto max-w-6xl px-4 py-16 md:py-24">
+        <div className="pointer-events-none absolute inset-0 hero-glow" />
+        <div className="relative mx-auto max-w-6xl px-4 py-20 md:py-28">
           <Pill tone="signal">
             <CircleDot className="size-3" /> Arc Testnet · Agentic Economy
           </Pill>
-          <h1 className="mt-5 max-w-3xl text-3xl leading-[1.1] font-semibold md:text-5xl">
-            Agents get paid for the truth, not for the result.
+          <h1 className="mt-6 max-w-4xl text-4xl leading-[1.05] font-semibold md:text-6xl">
+            Agents get paid for the{" "}
+            <span className="text-gradient">truth</span>, not for the result.
           </h1>
-          <p className="mt-5 max-w-2xl text-base leading-relaxed text-muted-foreground">
+          <p className="mt-6 max-w-2xl text-base leading-relaxed text-muted-foreground md:text-lg">
             A Trust Agent holds a USDC budget for an NHS waiting-list pathway and posts a job.
             Independent agents run the classical baseline and the quantum leg. Payment clears only
             when the receipt carries its engine, shot count, seed and verdict, and its hash is
             anchored on Arc. A method that loses still gets paid — and the record says it lost.
           </p>
-          <div className="mt-8 flex flex-wrap gap-3">
+          <div className="mt-9 flex flex-wrap gap-3">
             <a
               href="#board"
-              className="inline-flex items-center gap-2 rounded bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground transition-opacity hover:opacity-90"
+              className="group inline-flex items-center gap-2 rounded-full px-5 py-3 text-sm font-medium text-primary-foreground shadow-[var(--glow-signal)] transition-transform hover:-translate-y-0.5"
+              style={{ backgroundImage: "var(--gradient-signal)" }}
             >
-              Run a pathway job <ArrowRight className="size-4" />
+              Run a pathway job{" "}
+              <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" />
             </a>
             <Link
               to="/architecture"
-              className="inline-flex items-center gap-2 rounded border border-border px-4 py-2.5 text-sm font-medium transition-colors hover:bg-secondary"
+              className="inline-flex items-center gap-2 rounded-full border border-border px-5 py-3 text-sm font-medium transition-colors hover:bg-secondary"
             >
               See the architecture
             </Link>
           </div>
-          <dl className="mt-12 grid grid-cols-2 gap-6 md:grid-cols-4">
+          <div className="mt-10 flex flex-wrap items-center gap-x-6 gap-y-2 text-[0.7rem] uppercase tracking-[0.14em] text-muted-foreground">
+            <span className="inline-flex items-center gap-2">
+              <span className="size-1.5 rounded-full bg-pass" /> Arc Testnet live
+            </span>
+            <span className="inline-flex items-center gap-2">
+              <span className="size-1.5 rounded-full bg-accent" /> Nexus H2-Emulator
+            </span>
+            <span className="inline-flex items-center gap-2">
+              <span className="size-1.5 rounded-full bg-primary" /> ENS · World ID · Ledger tap
+            </span>
+          </div>
+          <div className="mt-10 rule-fade" />
+          <dl className="mt-10 grid grid-cols-2 gap-6 md:grid-cols-4">
             {[
               [7, "pathways posted"],
               [4, "agents with wallets"],
@@ -109,7 +132,7 @@ function Index() {
               [0, "advantage claims"],
             ].map(([v, l]) => (
               <div key={String(l)}>
-                <dt className="num text-2xl font-medium text-primary">
+                <dt className="num text-3xl font-medium text-primary">
                   <CountUp value={Number(v)} />
                 </dt>
                 <dd className="mt-1 text-xs uppercase tracking-[0.12em] text-muted-foreground">
@@ -120,6 +143,7 @@ function Index() {
           </dl>
         </div>
       </section>
+
 
       <section id="board" className="mx-auto max-w-6xl px-4 py-14">
         <h2 className="text-xl font-semibold md:text-2xl">Pathway board</h2>
@@ -166,7 +190,7 @@ function Index() {
             return (
               <Reveal key={p.id} delay={(i % 2) * 80} className="h-full">
               <article
-                className={`glass-card h-full rounded-lg p-5 ${active ? "border-primary" : ""}`}
+                className={`glass-card edge-sheen h-full rounded-xl p-5 ${active ? "border-primary" : ""}`}
               >
                 <div className="flex flex-wrap items-center gap-2">
                   <Pill tone={p.status === "assessed" ? "muted" : "gap"}>{p.status}</Pill>

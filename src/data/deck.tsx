@@ -11,6 +11,9 @@ import { pathways } from "@/data/pathways";
 import { QUANTUM_GAP, GAP_REMAINING, TRACKER_READ_ON } from "@/data/quantum-gap";
 import { SEAL_SCHEME, SEAL_STANDARD } from "@/data/seal-info";
 import { OPERATING_LESSONS } from "@/data/operations";
+import CONTRACT from "@/data/contract.json";
+import ENS from "@/data/ens.json";
+
 
 export interface Slide {
   id: string;
@@ -26,6 +29,7 @@ const usd = (minor: number) => `${(minor / 1e6).toFixed(2)} USDC`;
 const ORDER = `policy check
    -> agent identity           ENS: is this the right payee, for this intent?
    -> human authority          World ID: one unique human released the budget
+   -> device confirmation      Ledger: the release parameters tapped on hardware
    -> classical floor          recorded FIRST, never revised after
    -> dequantization gate      can a classical surrogate reproduce it?
    -> quantum leg              a measurement, or assessed-blocked
@@ -291,20 +295,32 @@ export const deck: Slide[] = [
     id: "arc",
     label: "Arc and Circle",
     notes:
-      "Arc Testnet, USDC as the gas token, Circle developer-controlled wallets, and a ReceiptAnchor contract that gets the hash before any transfer clears.",
+      "Arc Testnet, USDC as the gas token, four Circle developer-controlled wallets, and a ReceiptAnchor contract that gets the hash before any transfer clears. Every settlement and anchor carries a real Arcscan hash.",
     render: (i, n) => (
-      <SlideFrame index={i} total={n} kicker="The rail" title="Arc, USDC and the anchor">
-        <SlideBullets
-          items={[
-            "Arc Testnet, chain 5042002 — USDC is the gas token, six decimals, no paymaster needed.",
-            "Circle developer-controlled wallets: one per agent, no EOA and no funded private key.",
-            "ReceiptAnchor.sol stores keccak of the receipt with its signal, engine and shot count.",
-            "The anchor is written before settlement. An unanchored receipt is not payable.",
-          ]}
-        />
+      <SlideFrame index={i} total={n} kicker="The rail · Arc" title="Anchor first, then the money">
+        <div className="grid grid-cols-3 gap-[32px]">
+          {[
+            ["5042002", "Arc Testnet — USDC is the gas token, six decimals, no paymaster"],
+            ["4 wallets", "Circle developer-controlled: Trust, Baseline, Nexus, Registry — no EOA, no funded private key"],
+            ["Anchor → pay", "ReceiptAnchor stores the receipt hash with signal, engine and shots before any transfer"],
+          ].map(([h, b]) => (
+            <SlideCard key={h}>
+              <p className="num text-[54px] leading-none text-primary">{h}</p>
+              <p className="slide-caption mt-[24px] text-muted-foreground">{b}</p>
+            </SlideCard>
+          ))}
+        </div>
+        <p className="slide-body mt-[44px] max-w-[1500px] text-foreground/90">
+          A method that loses still gets paid, and the record says it lost. An unanchored receipt is
+          not payable at all — every settlement and anchor is checkable on Arcscan.
+        </p>
+        <p className="slide-chrome mt-[28px] text-muted-foreground">
+          ReceiptAnchor {CONTRACT.address}
+        </p>
       </SlideFrame>
     ),
   },
+
   {
     id: "demo",
     label: "Live demo",
@@ -346,10 +362,12 @@ export const deck: Slide[] = [
           <SlideCard>
             <p className="slide-kicker text-gap">Simulated, and labelled as such</p>
             <p className="slide-body mt-[26px] text-foreground/90">
-              Quantum legs are committed offline runs — emulator tier, never a QPU. World ID
-              credentials are deterministic stand-ins while the sandbox entitlement is pending.
+              The MSK pathway now runs live on the Quantinuum Nexus H2-Emulator — emulator tier,
+              never a QPU. Other quantum legs remain committed earlier runs. World ID credentials
+              are deterministic stand-ins while the sandbox entitlement is pending.
             </p>
           </SlideCard>
+
         </div>
         <p className="slide-body mt-[44px] text-muted-foreground">
           Cohorts are synthetic. No patient-level data, no diagnosis, no efficacy or outcome claim.
@@ -413,30 +431,74 @@ export const deck: Slide[] = [
     ),
   },
   {
-    id: "who",
-    label: "Who is paid, on whose authority",
+    id: "ens",
+    label: "ENS — which agent is paid",
     notes:
-      "Three layers, three different questions. Arc proves money moved. ENS on Sepolia proves which agent received it and that its record permitted that intent. World ID proves one unique human released the budget — kept as a nullifier hash and nothing else, hashed into the sealed receipt. World ID Selfie Check is a low-assurance authorisation signal, not clinical identity, and the sandbox entitlement is still pending, so demo credentials are labelled simulated everywhere they appear.",
+      "ENS answers which agent is being paid and whether it was permitted. Each agent holds an ENSv2 Sepolia subname under clinicalquantum.eth with ENSIP-25 records pointing at its Arc actor address and naming the intent it may be paid for. Before any budget is released the payee is resolved through the Universal Resolver and compared to the address on the receipt. The shared PermissionedResolver rejected our writes, so we deployed AgentResolver and wired it through the ENSv2 registry.",
     render: (i, n) => (
       <SlideFrame
         index={i}
         total={n}
-        kicker="Identity"
-        title="A payment rail cannot say who authorised the spend"
+        kicker="Identity · ENS"
+        title="A payment rail cannot say who it paid"
       >
-        <SlideBullets
-          items={[
-            "Arc answers: did money move, and against which anchored receipt hash?",
-            "ENS (Sepolia) answers: is this name the exact Arc address being paid, and does its record permit this leg's intent? A mismatch blocks settlement.",
-            "World ID answers: did one unique human release this budget, bound to this pathway? Only a nullifier hash is kept — no image, name or biometric reaches the app.",
-            "The nullifier is hashed into the receipt digest, so the SLH-DSA seal covers the authorisation, not just the result.",
-            "No human, no settlement. The run still executes and publishes at full size; it simply pays nobody.",
-            "Selfie Check is an abuse-prevention and authorisation signal only — never identity, competence or clinical authority. Sandbox pending, so demo credentials are labelled simulated.",
-          ]}
-        />
+        <div className="grid grid-cols-3 gap-[32px]">
+          {[
+            ["Name", "Four ENSv2 Sepolia subnames under clinicalquantum.eth — one per agent."],
+            [
+              "Record",
+              "ENSIP-25 records carry the Arc actor address and the intent that agent may be paid for.",
+            ],
+            [
+              "Check",
+              "The payee is resolved through the Universal Resolver and compared to the receipt. A mismatch blocks settlement.",
+            ],
+          ].map(([h, b]) => (
+            <SlideCard key={h}>
+              <p className="slide-kicker text-primary">{h}</p>
+              <p className="slide-caption mt-[24px] text-muted-foreground">{b}</p>
+            </SlideCard>
+          ))}
+        </div>
+        <p className="slide-body mt-[44px] max-w-[1500px] text-foreground/90">
+          The shared PermissionedResolver refused our writes, so we deployed our own AgentResolver
+          and wired it through the ENSv2 registry.
+        </p>
+        <p className="slide-chrome mt-[26px] text-muted-foreground">
+          AgentResolver {ENS.contracts.agentResolver} · Sepolia {ENS.chainId}
+        </p>
       </SlideFrame>
     ),
   },
+  {
+    id: "world",
+    label: "World — whose authority",
+    notes:
+      "An agent may not release a budget on nobody's authority. World ID sits between agent identity and spend: one unique human authorises the release for that specific pathway, and only the nullifier hash is kept. That hash folds into the receipt digest and seals with SLH-DSA before anchoring. Authority is bound to one pathway and never rebound; unauthorised runs settle 0.00 USDC. Sandbox entitlement is still pending, so Selfie Check credentials are deterministic stand-ins.",
+    render: (i, n) => (
+      <SlideFrame
+        index={i}
+        total={n}
+        kicker="Authority · World ID"
+        title="No agent releases a budget on nobody's authority"
+      >
+        <SlideBullets
+          items={[
+            "One unique human authorises the release, bound to that one pathway — never rebound to another.",
+            "Only the nullifier hash is kept. No image, no name, no biometric and no wallet reaches the app.",
+            "The nullifier folds into the receipt digest, so the SLH-DSA seal and the Arc anchor cover the authorisation, not just the result.",
+            "No human, no settlement: the run still executes and publishes at full size, and pays 0.00 USDC.",
+          ]}
+        />
+        <p className="slide-chrome mt-[34px] text-muted-foreground">
+          Selfie Check is an abuse-prevention and authorisation signal only — never identity,
+          competence or clinical authority. Sandbox entitlement pending, so demo credentials are
+          labelled simulated.
+        </p>
+      </SlideFrame>
+    ),
+  },
+
   {
     id: "device",
     label: "The device tap",
@@ -471,7 +533,7 @@ export const deck: Slide[] = [
         <SlideBullets
           items={[
             "Live today: Circle developer-controlled wallets settle USDC and write ReceiptAnchor on Arc Testnet, every hash verifiable on Arcscan.",
-            "A live Quantinuum Nexus submission needs a token and a spend guard — the receipt rules do not change.",
+            "The MSK pathway ran live on the Quantinuum Nexus H2-Emulator with its own job id; the receipt rules did not change.",
             "Deployment boundary: attestation and capacity planning. Not a clinical system, not a triage tool.",
             "Receipts are SLH-DSA sealed; the Arc anchor transaction is still ECDSA-signed, and that leg stays an open hazard.",
           ]}
