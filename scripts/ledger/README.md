@@ -1,49 +1,57 @@
-# Ledger signer bridge
+# Ledger signer bridge — Clinical Quantum Exchange
 
-A tiny local process that lets the Clinical Quantum Exchange (an edge-hosted
-app, with no USB) confirm budget releases on your Ledger and use the Key Ring.
-
-## Run it
+A small Node process that drives the Ledger from the browser over loopback.
+The app itself runs in an edge runtime with no USB, so this bridge is the only
+place device code lives. It holds no keys and keeps no state.
 
 ```bash
-npm install
-npm start            # listens on http://127.0.0.1:8943, loopback only
+cd scripts/ledger && npm install && npm start
 ```
 
-Keep the device unlocked with the **Ethereum** app open.
+Endpoints (bound to `127.0.0.1:8943`, origin-allow-listed):
 
-## Endpoints
-
-| Endpoint | What it does |
+| Endpoint | Purpose |
 | --- | --- |
-| `GET /device` | connect, return the address at `LEDGER_SIGNER_PATH` (default `44'/60'/0'/0/0`) |
-| `POST /approve {message}` | show the address on-device, then `personal_sign` the message — you confirm on the device screen |
-| `POST /ring/encrypt {file,key}` / `POST /ring/decrypt` | Ledger Key Ring (LKRP) via `wallet-cli ring`, password from `WALLET_PASS` |
+| `GET /device` | connected Ethereum address + app status |
+| `POST /approve` | `personal_sign` a release payload on the device |
+| `POST /ring/encrypt` | Key Ring (LKRP) encrypt — `wallet-cli ring` |
+| `POST /ring/decrypt` | Key Ring (LKRP) decrypt — `wallet-cli ring` |
 
-Cross-origin requests are allowed only for the app's own origins
-(`LEDGER_BRIDGE_ALLOWED_ORIGINS` adds more); the app's browser code calls it
-directly from your machine, so nothing about the device is network-exposed.
+## Transports
 
-## Enrol the signer in the app
+| Mode | Command | What it is |
+| --- | --- | --- |
+| Physical device (primary) | `npm start` | the real Ledger over USB |
+| Speculos (labelled fallback) | `./speculos.sh` then `LEDGER_TRANSPORT=speculos npm start` | Ledger's device emulator — the genuine Ethereum app binary in software, same APDU flow and signing code path |
 
-1. `curl http://127.0.0.1:8943/device` (or the Device page) and copy the address.
-2. Save it as the `LEDGER_SIGNER_ADDRESS` project secret.
-3. From then on `runPathwayJob` refuses to settle unless the run carries a
-   signature over the exact release parameters that recovers to that address.
+Speculos runs the same app binary and the same `personal_sign` flow as a
+physical Ledger; only the hardware is simulated, so every surface in the app —
+bridge chip, device page, gate panel, run ledger, receipt — labels it
+`Speculos (emulated device)`. The emulator enrols separately via the
+`LEDGER_SIGNER_ADDRESS_EMULATOR` secret and never touches the real device's
+enrolment. Speculos accepts `LEDGER_SPECULOS_SEED` (default: the deterministic
+`test test …` seed) and `LEDGER_SPECULOS_MODEL`.
 
-## Key Ring setup (once)
+The emulated screen is viewable at `http://127.0.0.1:5000` (Speculos API
+port) — useful in a demo to show the exact release parameters the emulated
+device is signing.
 
-```bash
-npm i -g @ledgerhq/wallet-cli
-# password from your OS keychain, never typed inline:
-WALLET_PASS=$(security find-generic-password -a default -s ledger-wallet-cli -w) wallet-cli ring init
-```
+**The Key Ring never substitutes.** `wallet-cli ring` (LKRP, the real trust
+chain protocol) always runs against the physical device for provisioning;
+decryption afterwards needs no device.
 
-Then seal the project's private credentials:
+## Environment
 
-```bash
-wallet-cli ring encrypt -i secrets.txt -o secrets.enc --key cqx
-```
+| Variable | Default | Purpose |
+| --- | --- | --- |
+| `LEDGER_TRANSPORT` | `hid` | `hid` (physical) or `speculos` |
+| `LEDGER_SIGNER_PATH` | `44'/60'/0'/0/0` | derivation path |
+| `LEDGER_SPECULOS_HOST` / `LEDGER_SPECULOS_PORT` | `127.0.0.1` / `9999` | where Speculos listens for APDUs |
+| `LEDGER_BRIDGE_PORT` | `8943` | bridge port |
+| `LEDGER_BRIDGE_ALLOWED_ORIGINS` | — | extra comma-separated origins |
+| `WALLET_PASS` | — | Key Ring password, injected from the OS keychain — never typed |
 
-Decrypt later needs network (trustchain restore) but **no device** — that is
-the point for CI and hosted agents.
+Install note: the HID transport needs a native `usb` build, which requires
+USB headers; an emulator-only machine can install with
+`npm install --ignore-scripts` (the bridge lazy-loads each transport, so a
+Speculos-only environment never touches the HID module).
