@@ -206,12 +206,27 @@ export interface HumanAuthorityRecord {
   simulated: boolean;
 }
 
+/**
+ * The device that approved the release. The Ledger signed the exact release
+ * parameters — pathway, budget, chain, quantum leg — after they were shown on
+ * its screen; the signature is recovered server-side against the enrolled
+ * signer. Carried into the hashed payload so the anchored digest commits to
+ * the approval too.
+ */
+export interface DeviceApprovalRecord {
+  approvedBy: string;
+  signature: string;
+  message: string;
+  issuedAt: string;
+}
+
 /** The exact bytes that get hashed, sealed and anchored. */
 export function receiptPayload(
   pathwayId: string,
   r: ReceiptEnvelope,
   identity?: PayeeIdentity[],
   authority?: HumanAuthorityRecord | null,
+  deviceApproval?: DeviceApprovalRecord | null,
 ): unknown {
   return {
     pathwayId,
@@ -219,6 +234,7 @@ export function receiptPayload(
     commit: r.commit,
     identity: identity ?? null,
     humanAuthority: authority ?? null,
+    deviceApproval: deviceApproval ?? null,
   };
 }
 
