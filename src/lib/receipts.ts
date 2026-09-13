@@ -218,6 +218,8 @@ export interface DeviceApprovalRecord {
   signature: string;
   message: string;
   issuedAt: string;
+  /** "device" = physical Ledger; "emulator" = Speculos, labelled as emulated. */
+  qualifier: "device" | "emulator";
 }
 
 /** The exact bytes that get hashed, sealed and anchored. */
