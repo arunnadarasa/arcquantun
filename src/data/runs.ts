@@ -6,6 +6,10 @@
 // A leg stopped by a platform limit is assessed-blocked with the limit named —
 // never a silent gap.
 import type { PathwayId } from "./pathways";
+import nexusLive from "./nexus-live.json";
+
+/** The one live lane: read straight off the committed Nexus artefact. */
+const LIVE = nexusLive.pathwayRun;
 import {
   ENVELOPE_SCHEMA,
   envelopeFor,
