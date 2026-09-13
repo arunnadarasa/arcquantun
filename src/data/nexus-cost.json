@@ -1,6 +1,6 @@
 {
   "schema": "nexus-cost/1",
-  "generatedAt": "2026-09-13T01:48:22.822615+00:00",
+  "generatedAt": "2026-09-13T01:48:42.807941+00:00",
   "engine": "Offline sizing analysis (pytket gate census + ideal statevector)",
   "backendQualifier": "offline",
   "note": "No job submitted, no shots bought. Gate counts and HQC estimates only; the AUROC column is an ideal statevector score, not a measured result.",
@@ -54,7 +54,7 @@
   "classicalFloor": {
     "method": "Logistic regression with balanced class weights",
     "metric": "AUROC",
-    "value": NaN
+    "value": 0.5
   },
   "candidates": [
     {
@@ -68,7 +68,7 @@
       "perProgramHqc": 12.88,
       "programs": 46,
       "batchHqc": 592.7,
-      "idealAuroc": NaN,
+      "idealAuroc": 0.75,
       "withinTarget2q": true
     },
     {
@@ -82,7 +82,7 @@
       "perProgramHqc": 18.52,
       "programs": 46,
       "batchHqc": 851.77,
-      "idealAuroc": NaN,
+      "idealAuroc": 0.75,
       "withinTarget2q": true
     },
     {
@@ -96,11 +96,11 @@
       "perProgramHqc": 19.23,
       "programs": 46,
       "batchHqc": 884.75,
-      "idealAuroc": NaN,
+      "idealAuroc": 1.0,
       "withinTarget2q": true
     }
   ],
-  "chosen": "angle",
+  "chosen": "hea",
   "prior": {
     "label": "Original msk-physio sizing",
     "nQubits": 9,
