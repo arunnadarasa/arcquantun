@@ -1,6 +1,6 @@
 ---
 name: ledger-agent-stack
-description: Wire a Ledger hardware signer into an agent app for device-confirmed spend and Key Ring-sealed secrets — bridge pattern, wallet-cli ring commands, verification, and the traps (edge runtime, CORS, personal_sign recovery).
+description: Wire a Ledger hardware signer — or a Speculos emulated device when no hardware is attached — into an agent app for device-confirmed spend and Key Ring-sealed secrets. Bridge pattern, wallet-cli ring commands, separate emulator enrolment, screen-driven approval, and the traps (edge runtime, CORS, personal_sign recovery, hw-app-eth CJS interop).
 ---
 
 # Ledger Agent Stack in an agent app
