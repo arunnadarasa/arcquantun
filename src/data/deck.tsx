@@ -361,10 +361,12 @@ export const deck: Slide[] = [
           <SlideCard>
             <p className="slide-kicker text-gap">Simulated, and labelled as such</p>
             <p className="slide-body mt-[26px] text-foreground/90">
-              Quantum legs are committed offline runs — emulator tier, never a QPU. World ID
-              credentials are deterministic stand-ins while the sandbox entitlement is pending.
+              The MSK pathway now runs live on the Quantinuum Nexus H2-Emulator — emulator tier,
+              never a QPU. Other quantum legs remain committed earlier runs. World ID credentials
+              are deterministic stand-ins while the sandbox entitlement is pending.
             </p>
           </SlideCard>
+
         </div>
         <p className="slide-body mt-[44px] text-muted-foreground">
           Cohorts are synthetic. No patient-level data, no diagnosis, no efficacy or outcome claim.
