@@ -137,6 +137,25 @@ function Index() {
           />
         </div>
 
+        <div className="mt-4">
+          {(() => {
+            const p = pathways.find((x) => x.id === (selected ?? pathways[0]!.id)) ?? pathways[0]!;
+            const run = getRun(p.id);
+            return (
+              <DeviceGate
+                pathwayId={p.id}
+                budgetMinor={p.budgetMinor}
+                engine={run?.receipt.engine ?? ""}
+                backendQualifier={run?.receipt.backendQualifier ?? "not-run"}
+                shots={run?.receipt.shots ?? null}
+                seed={run?.receipt.seed ?? null}
+                approval={deviceApproval}
+                onApproved={setDeviceApproval}
+              />
+            );
+          })()}
+        </div>
+
         <div className="mt-8 grid gap-4 md:grid-cols-2">
           {pathways.map((p, i) => {
             const run = getRun(p.id);
