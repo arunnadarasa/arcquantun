@@ -45,10 +45,15 @@ def cohort(rng: np.random.Generator):
     x[:, 0] += 0.9 * y
     x[:, 2] += 0.6 * y
     x[:, 4] -= 0.5 * y
-    idx = rng.permutation(n)
-    x, y = x[idx], y[idx]
     x = (x - x.mean(0)) / (x.std(0) + 1e-9)
-    return x[:N_TRAIN], y[:N_TRAIN], x[N_TRAIN:], y[N_TRAIN:]
+    # Stratified split: a held-out set that lost a class scores NaN, not a result.
+    pos = rng.permutation(np.flatnonzero(y == 1))
+    neg = rng.permutation(np.flatnonzero(y == 0))
+    half = N_TEST // 2
+    te = np.concatenate([pos[:half], neg[:half]])
+    tr = np.concatenate([pos[half:], neg[half:]])
+    te, tr = rng.permutation(te), rng.permutation(tr)
+    return x[tr], y[tr], x[te], y[te]
 
 
 def auroc(y: np.ndarray, s: np.ndarray) -> float:
