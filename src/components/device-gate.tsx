@@ -117,6 +117,7 @@ export function DeviceGate({
   }, [pathwayId, approval, onApproved]);
 
   const online = bridge.data?.connected === true;
+  const emulated = bridge.data?.qualifier === "emulator";
   const required = status?.enrolled === true;
   const approvedForPathway =
     approval !== null && approval.message.includes(`pathway: ${pathwayId}`);
@@ -164,6 +165,11 @@ export function DeviceGate({
       <div className="flex flex-wrap items-center gap-2">
         <Usb className="size-4 text-muted-foreground" aria-hidden />
         <span className="text-sm font-medium">Device confirmation</span>
+        {approvedForPathway && emulated ? (
+          <span className="inline-flex items-center gap-1 rounded border border-gap/40 bg-gap/10 px-2 py-0.5 text-[0.65rem] text-gap">
+            Speculos — emulated device
+          </span>
+        ) : null}
         {approvedForPathway ? (
           <span className="inline-flex items-center gap-1 rounded border border-pass/40 bg-pass/10 px-2 py-0.5 text-[0.65rem] text-pass">
             <ShieldCheck className="size-3" /> signed by{" "}
@@ -181,12 +187,24 @@ export function DeviceGate({
           </span>
         )}
         <span className="num ml-auto text-[0.65rem] text-muted-foreground">
-          bridge {online ? "online" : "offline"} · {bridge.data?.path ?? "127.0.0.1:8943"}
+          bridge {online ? (emulated ? "online · speculos" : "online") : "offline"} ·{" "}
+          {bridge.data?.path ?? "127.0.0.1:8943"}
         </span>
       </div>
       <p className="mt-2 text-xs leading-relaxed text-muted-foreground">
-        The enrolled Ledger signs the exact release parameters — pathway, budget, chain and
-        quantum leg — after they are shown on its screen. No tap, no settlement.
+        {emulated ? (
+          <>
+            Speculos — Ledger's emulator — runs the same Ethereum app binary and the
+            same signing flow as a physical Ledger; every surface labels it as
+            emulated. The Key Ring still belongs to the real device.
+          </>
+        ) : (
+          <>
+            The enrolled Ledger signs the exact release parameters — pathway, budget,
+            chain and quantum leg — after they are shown on its screen. No tap, no
+            settlement.
+          </>
+        )}
       </p>
       <div className="mt-3 flex flex-wrap items-center gap-2">
         <button
