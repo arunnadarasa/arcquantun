@@ -1,6 +1,6 @@
 ---
 name: ledger-agent-stack
-description: Wire a Ledger hardware signer into an agent app for device-confirmed spend and Key Ring-sealed secrets — bridge pattern, wallet-cli ring commands, verification, and the traps (edge runtime, CORS, personal_sign recovery).
+description: Wire a Ledger hardware signer — or a Speculos emulated device when no hardware is attached — into an agent app for device-confirmed spend and Key Ring-sealed secrets. Bridge pattern, wallet-cli ring commands, separate emulator enrolment, screen-driven approval, and the traps (edge runtime, CORS, personal_sign recovery, hw-app-eth CJS interop).
 ---
 
 # Ledger Agent Stack in an agent app
@@ -39,6 +39,50 @@ it directly over loopback. The bridge holds no keys and no state.
    policy → ENS identity → World human → **device** → classical floor → … →
    seal → anchor → settlement.
 
+## Emulated device (Speculos)
+
+Use for demos, CI, and any machine with no Ledger attached. Same bridge, same
+verification path — only the transport changes.
+
+```bash
+python3 -m venv /tmp/speculos-venv && /tmp/speculos-venv/bin/pip install speculos   # v1.22.3
+curl -L -o /tmp/speculos/app.elf \
+  https://github.com/LedgerHQ/app-ethereum/releases/download/v1.15.1/ethereum_nanos2.elf
+ln -s "$(command -v qemu-arm)" ~/bin/qemu-arm-static   # MUST be named qemu-arm-static
+/tmp/speculos-venv/bin/speculos --display headless --seed "test test ... junk" /tmp/speculos/app.elf
+LEDGER_TRANSPORT=speculos node scripts/ledger/bridge.mjs
+```
+
+- Ports: APDU `127.0.0.1:9999` (the bridge talks to this), REST API `5000`.
+- Speculos will not start if `qemu-arm-static` is absent from PATH — a plain
+  `qemu-arm` is not picked up.
+- The default test seed derives `0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266`
+  at `44'/60'/0'/0/0` — a known-good end-to-end recovery check.
+- `GET /device` on the bridge should report `transport: "speculos"`,
+  `qualifier: "emulator"`, `emulated: true`.
+
+## Driving the emulator screen
+
+No human is there to press buttons, so the approval flow must drive the screen.
+
+- Poll the REST screen endpoint, read the current page, and press accordingly.
+  Do not hard-code a fixed press sequence — the review pages vary by app version.
+- `POST /button/{left|right|both}` with body action `press-and-release`
+  (hyphens, not underscores). Only those three targets exist; any other shape
+  returns 405 and reads like a missing endpoint.
+- Automation-rule JSON differs between Speculos versions; screen-driven pressing
+  is the reliable path — don't reverse-engineer the rule schema.
+
+## Enrolment: emulator is not hardware
+
+- `LEDGER_SIGNER_ADDRESS` enrols a physical device;
+  `LEDGER_SIGNER_ADDRESS_EMULATOR` enrols Speculos. Neither ever falls back to
+  the other.
+- Every approval carries a qualifier (`device` | `emulator`) that travels into
+  the receipt and the UI, so an emulated tap can never be read as a hardware tap.
+- With no enrolled address set the gate is **open** — say so plainly in the UI
+  and in any write-up rather than implying it is enforced.
+
 ## Key Ring (LKRP)
 
 ```bash
@@ -70,9 +114,13 @@ wallet-cli ring decrypt -i secrets.enc -o - --key my-key   # no device needed
 - **`recoverMessageAddress` on EIP-191:** signPersonalMessage already applies
   the personal-message prefix; pass the raw string message to viem, not the
   hex.
+- **`AppEth is not a constructor`** (bridge 502): Node's CJS interop nests the
+  class one level. Resolve it as
+  `mod.default?.default ?? (typeof mod.default === "function" ? mod.default : null) ?? mod.AppEth`.
 - **Device refused / locked** surfaces as a transport error — publish the
   failure loudly with the reason; never retry in a loop or fall back to an
-  unapproved settlement.
+  unapproved settlement. On Speculos the equivalent is a review screen that
+  stops advancing: that is a failed approval, not something to retry.
 - **DMK migration:** LedgerJS transports are being migrated to the Device
   Management Kit; for new UI-side work prefer DMK, but the Node bridge above
   is the stable path for headless signing today.
