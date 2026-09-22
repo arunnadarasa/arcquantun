@@ -5,9 +5,8 @@ import { AuroraBackground } from "@/components/aurora-background";
 import { unlockSite } from "@/lib/gate.functions";
 
 export const Route = createFileRoute("/unlock")({
-  validateSearch: (search: Record<string, unknown>) => ({
-    redirect: typeof search["redirect"] === "string" ? (search["redirect"] as string) : undefined,
-  }),
+  validateSearch: (search: Record<string, unknown>): { redirect?: string } =>
+    typeof search["redirect"] === "string" ? { redirect: search["redirect"] } : {},
   head: () => ({
     meta: [
       { title: "Enter — Clinical Quantum Exchange" },
