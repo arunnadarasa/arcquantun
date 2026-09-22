@@ -20,6 +20,7 @@ import { Route as IdentityRouteImport } from './routes/identity'
 import { Route as LedgerRouteImport } from './routes/ledger'
 import { Route as QuantumGapRouteImport } from './routes/quantum-gap'
 import { Route as SizingRouteImport } from './routes/sizing'
+import { Route as UnlockRouteImport } from './routes/unlock'
 import { Route as ApiPublicIdkitRpSignatureRouteImport } from './routes/api/public/idkit/rp-signature'
 import { Route as ApiPublicIdkitVerifyRouteImport } from './routes/api/public/idkit/verify'
 
@@ -78,6 +79,11 @@ const SizingRoute = SizingRouteImport.update({
   path: '/sizing',
   getParentRoute: () => rootRouteImport,
 } as any)
+const UnlockRoute = UnlockRouteImport.update({
+  id: '/unlock',
+  path: '/unlock',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiPublicIdkitRpSignatureRoute =
   ApiPublicIdkitRpSignatureRouteImport.update({
     id: '/api/public/idkit/rp-signature',
@@ -102,6 +108,7 @@ export interface FileRoutesByFullPath {
   '/ledger': typeof LedgerRoute
   '/quantum-gap': typeof QuantumGapRoute
   '/sizing': typeof SizingRoute
+  '/unlock': typeof UnlockRoute
   '/api/public/idkit/rp-signature': typeof ApiPublicIdkitRpSignatureRoute
   '/api/public/idkit/verify': typeof ApiPublicIdkitVerifyRoute
 }
@@ -117,6 +124,7 @@ export interface FileRoutesByTo {
   '/ledger': typeof LedgerRoute
   '/quantum-gap': typeof QuantumGapRoute
   '/sizing': typeof SizingRoute
+  '/unlock': typeof UnlockRoute
   '/api/public/idkit/rp-signature': typeof ApiPublicIdkitRpSignatureRoute
   '/api/public/idkit/verify': typeof ApiPublicIdkitVerifyRoute
 }
@@ -133,6 +141,7 @@ export interface FileRoutesById {
   '/ledger': typeof LedgerRoute
   '/quantum-gap': typeof QuantumGapRoute
   '/sizing': typeof SizingRoute
+  '/unlock': typeof UnlockRoute
   '/api/public/idkit/rp-signature': typeof ApiPublicIdkitRpSignatureRoute
   '/api/public/idkit/verify': typeof ApiPublicIdkitVerifyRoute
 }
@@ -150,6 +159,7 @@ export interface FileRouteTypes {
     | '/ledger'
     | '/quantum-gap'
     | '/sizing'
+    | '/unlock'
     | '/api/public/idkit/rp-signature'
     | '/api/public/idkit/verify'
   fileRoutesByTo: FileRoutesByTo
@@ -165,6 +175,7 @@ export interface FileRouteTypes {
     | '/ledger'
     | '/quantum-gap'
     | '/sizing'
+    | '/unlock'
     | '/api/public/idkit/rp-signature'
     | '/api/public/idkit/verify'
   id:
@@ -180,6 +191,7 @@ export interface FileRouteTypes {
     | '/ledger'
     | '/quantum-gap'
     | '/sizing'
+    | '/unlock'
     | '/api/public/idkit/rp-signature'
     | '/api/public/idkit/verify'
   fileRoutesById: FileRoutesById
@@ -196,6 +208,7 @@ export interface RootRouteChildren {
   LedgerRoute: typeof LedgerRoute
   QuantumGapRoute: typeof QuantumGapRoute
   SizingRoute: typeof SizingRoute
+  UnlockRoute: typeof UnlockRoute
   ApiPublicIdkitRpSignatureRoute: typeof ApiPublicIdkitRpSignatureRoute
   ApiPublicIdkitVerifyRoute: typeof ApiPublicIdkitVerifyRoute
 }
@@ -279,6 +292,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SizingRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/unlock': {
+      id: '/unlock'
+      path: '/unlock'
+      fullPath: '/unlock'
+      preLoaderRoute: typeof UnlockRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/idkit/rp-signature': {
       id: '/api/public/idkit/rp-signature'
       path: '/api/public/idkit/rp-signature'
@@ -308,6 +328,7 @@ const rootRouteChildren: RootRouteChildren = {
   LedgerRoute: LedgerRoute,
   QuantumGapRoute: QuantumGapRoute,
   SizingRoute: SizingRoute,
+  UnlockRoute: UnlockRoute,
   ApiPublicIdkitRpSignatureRoute: ApiPublicIdkitRpSignatureRoute,
   ApiPublicIdkitVerifyRoute: ApiPublicIdkitVerifyRoute,
 }

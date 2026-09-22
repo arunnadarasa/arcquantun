@@ -1,9 +1,28 @@
-import { Link, useRouterState, ClientOnly } from "@tanstack/react-router";
+import { Link, useRouterState, useRouter, ClientOnly } from "@tanstack/react-router";
+import { useServerFn } from "@tanstack/react-start";
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { ChevronDown, Menu, X } from "lucide-react";
 import { AuroraBackground } from "@/components/aurora-background";
 import { BridgeChip } from "@/components/device-gate";
 import { CHAT_FOOTER_CLAUSE } from "@/data/operations";
+import { lockSite } from "@/lib/gate.functions";
+
+function LockButton() {
+  const router = useRouter();
+  const lock = useServerFn(lockSite);
+  return (
+    <button
+      type="button"
+      onClick={async () => {
+        await lock({});
+        await router.navigate({ to: "/unlock", replace: true });
+      }}
+      className="mt-4 rounded-full border border-border px-3 py-1 text-[0.68rem] uppercase tracking-[0.12em] text-muted-foreground transition-colors hover:text-foreground"
+    >
+      Lock this device
+    </button>
+  );
+}
 
 // The route list is the single source of truth. Ten flat links no longer fit a
 // desktop bar, so they are read as three groups: the run itself, the proof
