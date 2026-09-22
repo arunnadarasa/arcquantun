@@ -75,6 +75,14 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
 }
 
 export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()({
+  beforeLoad: async ({ location }) => {
+    const path = location.pathname;
+    if (path === "/unlock" || path.startsWith("/api/public/")) return;
+    const { unlocked } = await getGateState();
+    if (!unlocked) {
+      throw redirect({ to: "/unlock", search: { redirect: location.href } });
+    }
+  },
   head: () => ({
     meta: [
       { charSet: "utf-8" },
